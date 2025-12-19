@@ -25,7 +25,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const links: NavLink[] = [
         { href: "/", label: "Inicio" },
         { href: "/services", label: "Servicios" },
-        { href: "/gallerywidget", label: "Galería" },
+        { href: "/gallery", label: "Galería" },
         { href: "/we", label: "Nosotros" },
     ];
 
