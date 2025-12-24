@@ -4,9 +4,14 @@
       <w>alertas</w>
       <w>botones</w>
       <w>carrusel</w>
+      <w>cillat</w>
       <w>conectas</w>
       <w>contacto</w>
+      <w>detalle</w>
+      <w>detalles</w>
       <w>detecta</w>
+      <w>dinámicas</w>
+      <w>dominio</w>
       <w>escandinava</w>
       <w>fijo</w>
       <w>fondo</w>
@@ -19,13 +24,16 @@
       <w>nombre</w>
       <w>nosotros</w>
       <w>onclik</w>
+      <w>prefijo</w>
       <w>promoción</w>
       <w>puertas</w>
       <w>servicios</w>
       <w>siguiente</w>
+      <w>sirve</w>
       <w>sistema</w>
       <w>soluciones</w>
       <w>titulo</w>
+      <w>variante</w>
     </words>
   </dictionary>
 </component>

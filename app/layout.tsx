@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // ⬅️ AQUÍ
@@ -8,6 +9,7 @@ import "yet-another-react-lightbox/styles.css";
 import "./globals.css";
 import Header from "@/widget/header/Header";
 import Footer from "@/widget/footer/Footer";
+import NextTopLoader from "nextjs-toploader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +21,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
-  title: "CILLAT",
+  title: {
+    default: "CILLAT",
+    template: "%s",
+  },
   description: "Carpintería CILLAT landing",
 };
+
 
 export default function RootLayout({
   children,
@@ -32,6 +39,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NextTopLoader
+            color="#F5C400"   // tu amarillo marca
+            height={3}
+            showSpinner={false}
+        />
         <Header/>
         {children}
         <Footer/>

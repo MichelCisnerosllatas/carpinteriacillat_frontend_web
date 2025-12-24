@@ -6,6 +6,8 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import {useNavbarStore} from "@/shared/store/navbar/NavbarStore";
+import { usePathname } from "next/navigation";
 
 type NavbarProps = {
     navbarSolid?: boolean;
@@ -17,7 +19,13 @@ type NavLink = {
 };
 
 export default function Navbar({ navbarSolid }: NavbarProps) {
+    const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
+    const { style } = useNavbarStore();
+
+
+    const linkClass = navbarSolid ? style.linkSolid : style.linkTransparent;
+    const linkHoverClass = navbarSolid ? style.linkSolidHover : style.linkTransparentHover;
 
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
@@ -34,7 +42,9 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
             id="navbar"
             className={clsx(
                 "nav-transition",
-                navbarSolid ? "bg-red-700 shadow-2xl" : "bg-transparent"
+                navbarSolid ? style.bgSolid : style.bgTransparent,
+                navbarSolid && "shadow-2xl",
+                navbarSolid && style.ring
             )}
             initial={{ y: -40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -44,8 +54,8 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                 <div className="flex items-center justify-between py-2">
                     {/* Logo */}
                     <Link
-                        href="/#inicio"
-                        className="flex items-center gap-3 group cursor-pointer"
+                        href="/"
+                        className={clsx(linkClass, linkHoverClass, "flex items-center gap-3 group cursor-pointer")}                        // className={clsx(style.link, style.linkHover, "flex items-center gap-3 group cursor-pointer")}
                         onClick={closeMobile}
                     >
                         <div className="relative w-10 h-10">
@@ -59,11 +69,10 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                         </div>
 
                         <div>
-                            <h1 className="text-2xl font-extrabold text-white">
-                                CILLAT
-                                <i className="fas fa-check text-green-400 ml-1" />
+                            <h1 className={clsx("text-2xl font-extrabold", linkClass)}>
+                                CILLAT <i className="fas fa-check text-green-400 ml-1" />
                             </h1>
-                            <p className="text-xs text-gray-200 -mt-1">
+                            <p className={clsx("text-xs -mt-1 opacity-90", linkClass)}>
                                 Fabricación de Muebles
                             </p>
                         </div>
@@ -71,20 +80,47 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
 
                     {/* Menu Desktop */}
                     <div className="hidden md:flex items-center gap-8">
-                        {links.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="text-white hover:text-amber-400 font-medium transition-colors"
-                            >
-                                {item.label}
-                            </Link>
-                        ))}
+                        {/*{links.map((item) => (*/}
+                        {/*    <Link*/}
+                        {/*        key={item.href}*/}
+                        {/*        href={item.href}*/}
+                        {/*        className={clsx(linkClass, linkHoverClass, "font-medium transition-colors")}*/}
+                        {/*    >*/}
+                        {/*        {item.label}*/}
+                        {/*    </Link>*/}
+                        {/*))}*/}
+                        {links.map((item) => {
+                            const isSameRoute = pathname === item.href;
+
+                            const base = "font-medium transition-colors";
+                            const active = "text-[#f5c400] underline underline-offset-8";
+                            const normal = clsx(linkClass, linkHoverClass);
+                            const className = clsx(base, isSameRoute ? active : normal);
+
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={className}
+                                    aria-current={isSameRoute ? "page" : undefined}
+                                    onClick={(e) => {
+                                        if (isSameRoute) {
+                                            // ✅ evita navegación Next => NO loader
+                                            e.preventDefault();
+
+                                            // ✅ comportamiento natural deseado: volver arriba
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
+                                        }
+                                    }}
+                                >
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
 
                         <Link
                             href="/#contacto"
-                            className="bg-amber-500 hover:bg-amber-600 text-gray-900 px-6 py-2.5 rounded-full font-semibold transition-all shadow-lg hover:shadow-xl"
-                        >
+                            className={clsx(style.buttonBg, style.buttonText, "px-6 py-2.5 rounded-full font-semibold shadow-lg")}>
                             Contacto
                         </Link>
                     </div>
@@ -106,7 +142,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                 {openMobile && (
                     <motion.div
                         id="mobileMenu"
-                        className="md:hidden fixed inset-0 bg-gray-950/95 z-40"
+                        className={clsx("md:hidden fixed inset-0 z-40", style.mobileBg)}
                         initial={{ y: "-100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "-100%" }}

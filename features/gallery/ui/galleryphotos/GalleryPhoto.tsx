@@ -15,6 +15,7 @@ import "lightgallery/css/lg-thumbnail.css";
 import "lightgallery/css/lg-fullscreen.css";
 import {useEffect, useRef, useState} from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Gallery() {
     const [activeTab, setActiveTab] = useState("todos");
@@ -116,6 +117,11 @@ export default function Gallery() {
         setActiveTab(tab);
     }
 
+    const isExternalUrl = (url: string) => {
+        // http://, https://, //dominio
+        return /^(https?:)?\/\//i.test(url);
+    };
+
     return (
         <section className="p-6">
             {/* TAB STICKY + ANIMADO */}
@@ -188,11 +194,15 @@ export default function Gallery() {
                     className="flex gap-4"
                     columnClassName="flex flex-col gap-4"
                 >
-                    {filteredImages.map((img) => (
-                        <div
-                            key={img.id}
-                            className="bg-white rounded-xl overflow-hidden shadow-md border"
-                        >
+                    {filteredImages.map((img)=> {
+                        const internalTo = `/gallery/${img.id}`;
+                        const isExternal = img.link && isExternalUrl(img.link);
+
+                        return (
+                            <div
+                                key={img.id}
+                                className="bg-white rounded-xl overflow-hidden shadow-md border"
+                            >
                             {/* miniatura que abre el modal */}
                             <a
                                 href={img.url}
@@ -218,16 +228,35 @@ export default function Gallery() {
                                     {img.description}
                                 </p>
 
-                                <a
-                                    href={img.link}
-                                    target="_blank"
-                                    className="text-blue-600 text-sm hover:underline"
-                                >
-                                    Ver más detalles →
-                                </a>
+                                {isExternal ? (
+                                    <a
+                                        href={img.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 text-sm hover:underline"
+                                    >
+                                        Ver más detalles →
+                                    </a>
+                                ) : (
+                                    <Link
+                                        href={internalTo}
+                                        className="text-blue-600 text-sm hover:underline"
+                                    >
+                                        Ver más detalles →
+                                    </Link>
+                                )}
+
+                                {/*<a*/}
+                                {/*    href={img.link}*/}
+                                {/*    target="_blank"*/}
+                                {/*    className="text-blue-600 text-sm hover:underline"*/}
+                                {/*>*/}
+                                {/*    Ver más detalles →*/}
+                                {/*</a>*/}
                             </div>
                         </div>
-                    ))}
+                        )
+                    })}
                 </Masonry>
             </LightGallery>
         </section>
