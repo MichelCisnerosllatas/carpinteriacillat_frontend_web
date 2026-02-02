@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { NAVBAR_ROUTES, type NavbarRouteConfig } from "./navbar.routes";
-import { NAVBAR_STYLES, type NavbarFixedStyle, type NavbarStyleKey } from "./navbar.styles";
+import { NAVBAR_ROUTES, type NavbarRouteConfig } from "../../type/navbar/navbar.routes";
+import { NAVBAR_STYLES, type NavbarFixedStyle, type NavbarStyleKey } from "../../type/navbar/navbar.styles";
 
 type NavbarState = {
     title: string;

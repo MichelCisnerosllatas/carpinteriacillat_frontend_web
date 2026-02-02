@@ -21,7 +21,7 @@ export const NAVBAR_ROUTES: Record<string, NavbarRouteConfig> = {
     },
     "/gallery/": {
         title: "CILLAT | Galería",
-        style: "inner"
+        style: "detalle"
     },
     "/we": {
         title: "CILLAT | Nosotros",

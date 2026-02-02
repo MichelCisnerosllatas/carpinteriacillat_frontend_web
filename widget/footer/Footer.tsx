@@ -11,7 +11,7 @@ export default function Footer() {
                         {/* Col 1 - Marca + redes */}
                         <div className="space-y-4">
                             {/* Logo clickeable al home (#inicio) */}
-                            <Link href="#inicio" className="block w-fit">
+                            <Link href="/" className="block w-fit">
                                 <Image
                                     src="/img/logocillat_sinfondoblanco.png"
                                     alt="CILLAT - Fabricación de Muebles"
@@ -56,7 +56,7 @@ export default function Footer() {
                             <ul className="space-y-2">
                                 <li>
                                     <a
-                                        href="#inicio"
+                                        href="/"
                                         className="text-gray-400 hover:text-amber-400 transition-colors"
                                     >
                                         Inicio

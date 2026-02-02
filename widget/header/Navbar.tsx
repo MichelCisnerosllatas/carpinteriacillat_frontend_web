@@ -1,7 +1,7 @@
 // widget/header/Navbar.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +27,11 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const linkClass = navbarSolid ? style.linkSolid : style.linkTransparent;
     const linkHoverClass = navbarSolid ? style.linkSolidHover : style.linkTransparentHover;
 
+    // o mejor usando tus nuevas variables:
+    const mobileBtnClass = openMobile ? style.mobileMenuBtnOpen : (navbarSolid ? style.linkSolid : style.linkTransparent);
+    const mobileIconColor = openMobile ? style.mobileMenuBtnOpen : style.mobileMenuBtn;
+
+
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
 
@@ -37,6 +42,22 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
         { href: "/we", label: "Nosotros" },
     ];
 
+    useEffect(() => {
+        if (!openMobile) return;
+
+        const html = document.documentElement;
+        const body = document.body;
+
+        html.style.overflow = "hidden";
+        body.style.overflow = "hidden";
+        body.style.touchAction = "none";
+
+        return () => {
+            html.style.overflow = "";
+            body.style.overflow = "";
+            body.style.touchAction = "";
+        };
+    }, [openMobile]);
     return (
         <motion.nav
             id="navbar"
@@ -128,12 +149,29 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                     {/* Menu Mobile Button */}
                     <button
                         id="menuBtn"
-                        className="md:hidden text-white text-2xl z-50 relative"
+                        className={clsx(
+                            "md:hidden text-2xl z-[10000] relative transition-colors",
+                            mobileIconColor,
+                            style.mobileMenuBtnHover
+                        )}
                         onClick={toggleMobile}
                         aria-label={openMobile ? "Cerrar menú" : "Abrir menú"}
                     >
                         <i className={openMobile ? "fas fa-times" : "fas fa-bars"} />
                     </button>
+
+                    {/*<button*/}
+                    {/*    id="menuBtn"*/}
+                    {/*    className={clsx(*/}
+                    {/*        "md:hidden text-2xl relative z-[10000]", // ✅ por encima del overlay*/}
+                    {/*        linkClass // ✅ para que cambie con scroll*/}
+                    {/*    )}*/}
+                    {/*    // className="md:hidden text-white text-2xl z-50 relative"*/}
+                    {/*    onClick={toggleMobile}*/}
+                    {/*    aria-label={openMobile ? "Cerrar menú" : "Abrir menú"}*/}
+                    {/*>*/}
+                    {/*    <i className={openMobile ? "fas fa-times" : "fas fa-bars"} />*/}
+                    {/*</button>*/}
                 </div>
             </div>
 
@@ -142,7 +180,12 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                 {openMobile && (
                     <motion.div
                         id="mobileMenu"
-                        className={clsx("md:hidden fixed inset-0 z-40", style.mobileBg)}
+                        className={clsx(
+                            "md:hidden fixed inset-0 z-[9999] h-[100vh] w-full", // ✅ más alto y usa dvh
+                            "overscroll-contain",                                   // ✅ evita scroll raro iOS
+                            style.mobileBg
+                        )}
+                        // className={clsx("md:hidden fixed inset-0 z-40", style.mobileBg)}
                         initial={{ y: "-100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "-100%" }}
@@ -159,11 +202,24 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                                     >
                                         <Link
                                             href={item.href}
-                                            className="block text-white text-xl font-semibold py-2 border-b border-gray-800"
+                                            className={clsx(
+                                                "block text-xl font-semibold py-2 border-b transition-colors",
+                                                style.mobileLink,
+                                                style.mobileLinkHover,
+                                                style.mobileLinkBorder
+                                            )}
                                             onClick={closeMobile}
                                         >
                                             {item.label}
                                         </Link>
+
+                                        {/*<Link*/}
+                                        {/*    href={item.href}*/}
+                                        {/*    className="block text-white text-xl font-semibold py-2 border-b border-gray-800"*/}
+                                        {/*    onClick={closeMobile}*/}
+                                        {/*>*/}
+                                        {/*    {item.label}*/}
+                                        {/*</Link>*/}
                                     </motion.div>
                                 ))}
 
@@ -174,11 +230,23 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                                 >
                                     <Link
                                         href="/#contacto"
-                                        className="mt-6 block bg-amber-500 text-gray-900 py-3 px-4 rounded-full font-semibold text-center text-lg"
+                                        className={clsx(
+                                            "mt-6 block py-3 px-4 rounded-full font-semibold text-center text-lg transition-colors",
+                                            style.mobileCtaBg,
+                                            style.mobileCtaText
+                                        )}
                                         onClick={closeMobile}
                                     >
                                         Contacto
                                     </Link>
+
+                                    {/*<Link*/}
+                                    {/*    href="/#contacto"*/}
+                                    {/*    className="mt-6 block bg-amber-500 text-gray-900 py-3 px-4 rounded-full font-semibold text-center text-lg"*/}
+                                    {/*    onClick={closeMobile}*/}
+                                    {/*>*/}
+                                    {/*    Contacto*/}
+                                    {/*</Link>*/}
                                 </motion.div>
                             </nav>
                         </div>
