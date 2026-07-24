@@ -6,10 +6,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "yet-another-react-lightbox/styles.css";
+import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "./globals.css";
 import Header from "@/widget/header/Header";
 import Footer from "@/widget/footer/Footer";
 import NextTopLoader from "nextjs-toploader";
+import AppProviders from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,14 +42,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextTopLoader
-            color="#F5C400"   // tu amarillo marca
-            height={3}
-            showSpinner={false}
-        />
-        <Header/>
-        {children}
-        <Footer/>
+        <AppProviders>
+          <NextTopLoader
+              color="#F5C400"   // tu amarillo marca
+              height={3}
+              showSpinner={false}
+          />
+          <Header/>
+          {children}
+          <Footer/>
+        </AppProviders>
       </body>
     </html>
   );
