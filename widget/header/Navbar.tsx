@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {useNavbarStore} from "@/shared/store/navbar/NavbarStore";
+import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
 import { usePathname } from "next/navigation";
 
 type NavbarProps = {
@@ -18,10 +19,18 @@ type NavLink = {
     label: string;
 };
 
+const FALLBACK_LINKS: NavLink[] = [
+    { href: "/", label: "Inicio" },
+    { href: "/services", label: "Servicios" },
+    { href: "/gallery", label: "Galería" },
+    { href: "/we", label: "Nosotros" },
+];
+
 export default function Navbar({ navbarSolid }: NavbarProps) {
     const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
     const { style } = useNavbarStore();
+    const { navigations, fetchNavigations } = useNavigationStore();
 
 
     const linkClass = navbarSolid ? style.linkSolid : style.linkTransparent;
@@ -35,12 +44,13 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
 
-    const links: NavLink[] = [
-        { href: "/", label: "Inicio" },
-        { href: "/services", label: "Servicios" },
-        { href: "/gallery", label: "Galería" },
-        { href: "/we", label: "Nosotros" },
-    ];
+    const links: NavLink[] = navigations.length > 0
+        ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
+        : FALLBACK_LINKS;
+
+    useEffect(() => {
+        fetchNavigations();
+    }, [fetchNavigations]);
 
     useEffect(() => {
         if (!openMobile) return;
