@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
             "i.pinimg.com",
         ],
     },
+    output: 'standalone',
 };
 
 export default nextConfig;

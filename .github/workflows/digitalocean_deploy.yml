@@ -1,0 +1,138 @@
+name: Deploy Web - DigitalOcean
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Prepare standalone
+        run: |
+          rm -rf deploy
+          mkdir -p deploy
+
+          cp -a .next/standalone/. deploy/
+
+          mkdir -p deploy/.next/static
+          cp -a .next/static/. deploy/.next/static/
+
+          if [ -d public ]; then
+            cp -a public deploy/public
+          fi
+
+      - name: Select environment
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            echo "TARGET=${{ vars.DO_TARGET_PROD }}" >> "$GITHUB_ENV"
+            echo "PM2_NAME=carpinteria-web-prod" >> "$GITHUB_ENV"
+            echo "APP_PORT=3201" >> "$GITHUB_ENV"
+            echo "DEPLOY_ENV=PROD" >> "$GITHUB_ENV"
+          else
+            echo "TARGET=${{ vars.DO_TARGET_DEV }}" >> "$GITHUB_ENV"
+            echo "PM2_NAME=carpinteria-web-dev" >> "$GITHUB_ENV"
+            echo "APP_PORT=3202" >> "$GITHUB_ENV"
+            echo "DEPLOY_ENV=DEV" >> "$GITHUB_ENV"
+          fi
+
+      - name: Compress application
+        run: |
+          tar -czf deploy.tar.gz -C deploy .
+
+      - name: Configure SSH
+        env:
+          DO_HOST: ${{ vars.DO_HOST }}
+          DO_PORT: ${{ vars.DO_PORT }}
+          DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DO_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          ssh-keyscan \
+            -p "$DO_PORT" \
+            -H "$DO_HOST" \
+            >> ~/.ssh/known_hosts
+
+      - name: Upload application
+        env:
+          DO_HOST: ${{ vars.DO_HOST }}
+          DO_PORT: ${{ vars.DO_PORT }}
+          DO_USER: ${{ vars.DO_USER }}
+        run: |
+          echo "Deploy: $DEPLOY_ENV"
+          echo "Target: $TARGET"
+
+          scp \
+            -P "$DO_PORT" \
+            deploy.tar.gz \
+            "$DO_USER@$DO_HOST:/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz"
+
+      - name: Deploy application
+        env:
+          DO_HOST: ${{ vars.DO_HOST }}
+          DO_PORT: ${{ vars.DO_PORT }}
+          DO_USER: ${{ vars.DO_USER }}
+        run: |
+          ssh \
+            -p "$DO_PORT" \
+            "$DO_USER@$DO_HOST" "
+              set -e
+
+              rm -rf '${TARGET}.new'
+              mkdir -p '${TARGET}.new'
+
+              tar -xzf \
+                '/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz' \
+                -C '${TARGET}.new'
+
+              rm -f \
+                '/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz'
+
+              rm -rf '${TARGET}.old'
+
+              if [ -d '${TARGET}' ]; then
+                mv '${TARGET}' '${TARGET}.old'
+              fi
+
+              mv '${TARGET}.new' '${TARGET}'
+
+              cd '${TARGET}'
+
+              if pm2 describe '${PM2_NAME}' > /dev/null 2>&1; then
+                PORT='${APP_PORT}' \
+                HOSTNAME=127.0.0.1 \
+                NODE_ENV=production \
+                pm2 restart '${PM2_NAME}' --update-env
+              else
+                PORT='${APP_PORT}' \
+                HOSTNAME=127.0.0.1 \
+                NODE_ENV=production \
+                pm2 start server.js \
+                --name '${PM2_NAME}'
+              fi
+
+              pm2 save
+            "
