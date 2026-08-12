@@ -5,17 +5,17 @@ export default function Section4() {
         {
             title: "Soluciones Hechas a Medida",
             text: "Cada proyecto es único. Nos especializamos en crear piezas que se adaptan a tus necesidades, combinando funcionalidad y diseño.",
-            img: "/img/solologocillat.png",
+            img: "/img/logo.png",
         },
         {
             title: "Calidad que se Ve y se Siente",
             text: "Cada detalle cuenta. Desde el corte hasta el acabado, garantizamos resultados impecables que superan expectativas.",
-            img: "/img/solologocillat.png",
+            img: "/img/logo.png",
         },
         {
             title: "Construyendo Contigo",
             text: "Trabajamos de la mano contigo para materializar tus ideas, creando espacios y muebles que cuentan tu historia.",
-            img: "/img/solologocillat.png",
+            img: "/img/logo.png",
         },
     ];
 

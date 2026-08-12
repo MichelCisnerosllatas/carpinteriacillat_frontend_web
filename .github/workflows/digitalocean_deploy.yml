@@ -1,4 +1,26 @@
+# ============================================================
+# DEPLOY AUTOMÁTICO - WEB CARPINTERÍA CILLAT
+# DigitalOcean + Next.js Standalone + PM2
+#
+# RAMAS:
+#   dev  -> Environment "dev"  -> WEB DEV  -> puerto 3202
+#   main -> Environment "prod" -> WEB PROD -> puerto 3201
+# ============================================================
+
 name: Deploy Web - DigitalOcean
+
+
+# ============================================================
+# CUÁNDO SE EJECUTA EL DEPLOY
+# ============================================================
+#
+# Se ejecuta automáticamente al hacer push a:
+#   - dev
+#   - main
+#
+# workflow_dispatch permite ejecutarlo manualmente
+# desde GitHub Actions sin necesidad de hacer un nuevo commit.
+# ============================================================
 
 on:
   push:
@@ -6,133 +28,516 @@ on:
       - dev
       - main
 
+  workflow_dispatch:
+
+
+# ============================================================
+# PERMISOS DEL WORKFLOW
+# ============================================================
+
 permissions:
   contents: read
 
+
 jobs:
+
+  # ==========================================================
+  # JOB PRINCIPAL DE DEPLOY
+  # ==========================================================
+
   deploy:
+
+    # Máquina temporal que utilizará GitHub Actions
     runs-on: ubuntu-latest
 
+
+    # ========================================================
+    # SELECCIONAR GITHUB ENVIRONMENT
+    # ========================================================
+    #
+    # Si la rama es main:
+    #   utiliza Settings -> Environments -> prod
+    #
+    # Si la rama es dev:
+    #   utiliza Settings -> Environments -> dev
+    #
+    # Esto permite tener las MISMAS variables con valores
+    # diferentes según el entorno.
+    #
+    # Ejemplo:
+    #
+    # dev:
+    # NEXT_PUBLIC_CORE_ENV=development
+    #
+    # prod:
+    # NEXT_PUBLIC_CORE_ENV=production
+    # ========================================================
+
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+
+
     steps:
-      - name: Checkout
+
+      # ======================================================
+      # 1. DESCARGAR EL CÓDIGO
+      # ======================================================
+
+      - name: Descargar código del repositorio
         uses: actions/checkout@v7
 
-      - name: Setup Node
+
+      # ======================================================
+      # 2. CONFIGURAR NODE.JS
+      # ======================================================
+
+      - name: Configurar Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+
+      # ======================================================
+      # 3. INSTALAR DEPENDENCIAS
+      # ======================================================
+
+      - name: Instalar dependencias
         run: npm ci
 
-      - name: Build Next.js
+
+      # ======================================================
+      # 4. CREAR ARCHIVO .env.production
+      # ======================================================
+      #
+      # Las variables vienen del GitHub Environment:
+      #
+      # rama dev  -> Environment dev
+      # rama main -> Environment prod
+      #
+      # No imprimimos los valores en los logs.
+      #
+      # IMPORTANTE:
+      # Todas estas variables deben existir en:
+      #
+      # Settings
+      # -> Environments
+      # -> dev / prod
+      # -> Environment variables
+      # ======================================================
+
+      - name: Preparar variables de entorno
+        env:
+
+          # ----------------------------
+          # BACKEND CORE
+          # ----------------------------
+
+          NEXT_PUBLIC_CORE_ENV: ${{ vars.NEXT_PUBLIC_CORE_ENV }}
+
+          NEXT_PUBLIC_CORE_API_URL_LOCAL: ${{ vars.NEXT_PUBLIC_CORE_API_URL_LOCAL }}
+          NEXT_PUBLIC_CORE_API_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_CORE_API_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_CORE_API_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_CORE_API_URL_PRODUCTION }}
+
+          NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL: ${{ vars.NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL }}
+          NEXT_PUBLIC_CORE_STORAGE_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_CORE_STORAGE_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_CORE_STORAGE_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_CORE_STORAGE_URL_PRODUCTION }}
+
+
+          # ----------------------------
+          # BACKEND BILLING
+          # ----------------------------
+
+          NEXT_PUBLIC_BILLING_ENV: ${{ vars.NEXT_PUBLIC_BILLING_ENV }}
+
+          NEXT_PUBLIC_BILLING_API_URL_LOCAL: ${{ vars.NEXT_PUBLIC_BILLING_API_URL_LOCAL }}
+          NEXT_PUBLIC_BILLING_API_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_BILLING_API_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_BILLING_API_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_BILLING_API_URL_PRODUCTION }}
+
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_LOCAL: ${{ vars.NEXT_PUBLIC_BILLING_WEBHOOKS_URL_LOCAL }}
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_BILLING_WEBHOOKS_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_BILLING_WEBHOOKS_URL_PRODUCTION }}
+
+
+          # ----------------------------
+          # BACKEND MEDIA
+          # ----------------------------
+
+          NEXT_PUBLIC_MEDIA_ENV: ${{ vars.NEXT_PUBLIC_MEDIA_ENV }}
+
+          NEXT_PUBLIC_MEDIA_API_URL_LOCAL: ${{ vars.NEXT_PUBLIC_MEDIA_API_URL_LOCAL }}
+          NEXT_PUBLIC_MEDIA_API_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_MEDIA_API_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_MEDIA_API_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_MEDIA_API_URL_PRODUCTION }}
+
+          NEXT_PUBLIC_MEDIA_CDN_URL_LOCAL: ${{ vars.NEXT_PUBLIC_MEDIA_CDN_URL_LOCAL }}
+          NEXT_PUBLIC_MEDIA_CDN_URL_DEVELOPMENT: ${{ vars.NEXT_PUBLIC_MEDIA_CDN_URL_DEVELOPMENT }}
+          NEXT_PUBLIC_MEDIA_CDN_URL_PRODUCTION: ${{ vars.NEXT_PUBLIC_MEDIA_CDN_URL_PRODUCTION }}
+
+
+          # ----------------------------
+          # CONFIGURACIÓN GENERAL
+          # ----------------------------
+
+          NEXT_PUBLIC_APP_VERSION: ${{ vars.NEXT_PUBLIC_APP_VERSION }}
+          NEXT_PUBLIC_CLIENT: ${{ vars.NEXT_PUBLIC_CLIENT }}
+
+        run: |
+
+          echo "Preparando variables para la rama: $GITHUB_REF_NAME"
+
+          cat > .env.production <<EOF
+          # ==================================================
+          # Archivo generado automáticamente por GitHub Actions
+          # NO editar manualmente en DigitalOcean
+          # ==================================================
+
+          # CORE
+          NEXT_PUBLIC_CORE_ENV=$NEXT_PUBLIC_CORE_ENV
+
+          NEXT_PUBLIC_CORE_API_URL_LOCAL=$NEXT_PUBLIC_CORE_API_URL_LOCAL
+          NEXT_PUBLIC_CORE_API_URL_DEVELOPMENT=$NEXT_PUBLIC_CORE_API_URL_DEVELOPMENT
+          NEXT_PUBLIC_CORE_API_URL_PRODUCTION=$NEXT_PUBLIC_CORE_API_URL_PRODUCTION
+
+          NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL=$NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL
+          NEXT_PUBLIC_CORE_STORAGE_URL_DEVELOPMENT=$NEXT_PUBLIC_CORE_STORAGE_URL_DEVELOPMENT
+          NEXT_PUBLIC_CORE_STORAGE_URL_PRODUCTION=$NEXT_PUBLIC_CORE_STORAGE_URL_PRODUCTION
+
+
+          # BILLING
+          NEXT_PUBLIC_BILLING_ENV=$NEXT_PUBLIC_BILLING_ENV
+
+          NEXT_PUBLIC_BILLING_API_URL_LOCAL=$NEXT_PUBLIC_BILLING_API_URL_LOCAL
+          NEXT_PUBLIC_BILLING_API_URL_DEVELOPMENT=$NEXT_PUBLIC_BILLING_API_URL_DEVELOPMENT
+          NEXT_PUBLIC_BILLING_API_URL_PRODUCTION=$NEXT_PUBLIC_BILLING_API_URL_PRODUCTION
+
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_LOCAL=$NEXT_PUBLIC_BILLING_WEBHOOKS_URL_LOCAL
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_DEVELOPMENT=$NEXT_PUBLIC_BILLING_WEBHOOKS_URL_DEVELOPMENT
+          NEXT_PUBLIC_BILLING_WEBHOOKS_URL_PRODUCTION=$NEXT_PUBLIC_BILLING_WEBHOOKS_URL_PRODUCTION
+
+
+          # MEDIA
+          NEXT_PUBLIC_MEDIA_ENV=$NEXT_PUBLIC_MEDIA_ENV
+
+          NEXT_PUBLIC_MEDIA_API_URL_LOCAL=$NEXT_PUBLIC_MEDIA_API_URL_LOCAL
+          NEXT_PUBLIC_MEDIA_API_URL_DEVELOPMENT=$NEXT_PUBLIC_MEDIA_API_URL_DEVELOPMENT
+          NEXT_PUBLIC_MEDIA_API_URL_PRODUCTION=$NEXT_PUBLIC_MEDIA_API_URL_PRODUCTION
+
+          NEXT_PUBLIC_MEDIA_CDN_URL_LOCAL=$NEXT_PUBLIC_MEDIA_CDN_URL_LOCAL
+          NEXT_PUBLIC_MEDIA_CDN_URL_DEVELOPMENT=$NEXT_PUBLIC_MEDIA_CDN_URL_DEVELOPMENT
+          NEXT_PUBLIC_MEDIA_CDN_URL_PRODUCTION=$NEXT_PUBLIC_MEDIA_CDN_URL_PRODUCTION
+
+
+          # GENERAL
+          NEXT_PUBLIC_APP_VERSION=$NEXT_PUBLIC_APP_VERSION
+          NEXT_PUBLIC_CLIENT=$NEXT_PUBLIC_CLIENT
+          EOF
+
+          echo "Archivo .env.production generado correctamente."
+
+
+      # ======================================================
+      # 5. COMPILAR NEXT.JS
+      # ======================================================
+      #
+      # En este momento .env.production YA EXISTE.
+      #
+      # Next.js utilizará las variables NEXT_PUBLIC_* durante
+      # el build.
+      # ======================================================
+
+      - name: Compilar proyecto Next.js
         run: npm run build
 
-      - name: Prepare standalone
+
+      # ======================================================
+      # 6. PREPARAR NEXT.JS STANDALONE
+      # ======================================================
+      #
+      # next.config debe tener:
+      #
+      # output: 'standalone'
+      #
+      # Copiamos:
+      #   server.js
+      #   dependencias mínimas
+      #   .next/static
+      #   public
+      #   .env.production
+      # ======================================================
+
+      - name: Preparar archivos Standalone
         run: |
+
           rm -rf deploy
+
           mkdir -p deploy
 
+
+          # Copiar servidor standalone
           cp -a .next/standalone/. deploy/
 
+
+          # Copiar archivos estáticos de Next.js
           mkdir -p deploy/.next/static
+
           cp -a .next/static/. deploy/.next/static/
 
+
+          # Copiar carpeta public si existe
           if [ -d public ]; then
             cp -a public deploy/public
           fi
 
-      - name: Select environment
+
+          # Conservar archivo de entorno dentro del deploy
+          cp .env.production deploy/.env.production
+
+
+          echo "Standalone preparado correctamente."
+
+
+      # ======================================================
+      # 7. SELECCIONAR DESTINO DEV O PROD
+      # ======================================================
+      #
+      # Estas variables DO_* son Repository Variables.
+      #
+      # Settings
+      # -> Secrets and variables
+      # -> Actions
+      # -> Variables
+      #
+      # DEV:
+      # /var/www/carpinteriacillat/web-dev
+      #
+      # PROD:
+      # /var/www/carpinteriacillat/web
+      # ======================================================
+
+      - name: Detectar entorno DEV o PROD
         run: |
+
           if [ "$GITHUB_REF_NAME" = "main" ]; then
+
             echo "TARGET=${{ vars.DO_TARGET_PROD }}" >> "$GITHUB_ENV"
+
             echo "PM2_NAME=carpinteria-web-prod" >> "$GITHUB_ENV"
+
             echo "APP_PORT=3201" >> "$GITHUB_ENV"
+
             echo "DEPLOY_ENV=PROD" >> "$GITHUB_ENV"
+
+            echo "Entorno seleccionado: PRODUCCIÓN"
+
           else
+
             echo "TARGET=${{ vars.DO_TARGET_DEV }}" >> "$GITHUB_ENV"
+
             echo "PM2_NAME=carpinteria-web-dev" >> "$GITHUB_ENV"
+
             echo "APP_PORT=3202" >> "$GITHUB_ENV"
+
             echo "DEPLOY_ENV=DEV" >> "$GITHUB_ENV"
+
+            echo "Entorno seleccionado: DESARROLLO"
+
           fi
 
-      - name: Compress application
+
+      # ======================================================
+      # 8. COMPRIMIR APLICACIÓN
+      # ======================================================
+
+      - name: Comprimir aplicación
         run: |
+
           tar -czf deploy.tar.gz -C deploy .
 
-      - name: Configure SSH
+          echo "Aplicación comprimida correctamente."
+
+
+      # ======================================================
+      # 9. CONFIGURAR SSH
+      # ======================================================
+      #
+      # DO_HOST y DO_PORT:
+      # Repository Variables
+      #
+      # DO_SSH_KEY:
+      # Repository Secret
+      # ======================================================
+
+      - name: Configurar conexión SSH con DigitalOcean
         env:
+
           DO_HOST: ${{ vars.DO_HOST }}
+
           DO_PORT: ${{ vars.DO_PORT }}
+
           DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
+
         run: |
+
           mkdir -p ~/.ssh
+
+
+          # Crear archivo temporal con clave privada
           printf '%s\n' "$DO_SSH_KEY" > ~/.ssh/id_ed25519
+
+
+          # SSH exige permisos restrictivos
           chmod 600 ~/.ssh/id_ed25519
 
+
+          # Registrar fingerprint del VPS
           ssh-keyscan \
             -p "$DO_PORT" \
             -H "$DO_HOST" \
             >> ~/.ssh/known_hosts
 
-      - name: Upload application
+
+          echo "Conexión SSH configurada."
+
+
+      # ======================================================
+      # 10. SUBIR ARCHIVOS A DIGITALOCEAN
+      # ======================================================
+
+      - name: Subir aplicación a DigitalOcean
         env:
+
           DO_HOST: ${{ vars.DO_HOST }}
+
           DO_PORT: ${{ vars.DO_PORT }}
+
           DO_USER: ${{ vars.DO_USER }}
+
         run: |
-          echo "Deploy: $DEPLOY_ENV"
-          echo "Target: $TARGET"
+
+          echo "Iniciando subida..."
+          echo "Entorno: $DEPLOY_ENV"
+          echo "Destino: $TARGET"
+
 
           scp \
             -P "$DO_PORT" \
             deploy.tar.gz \
             "$DO_USER@$DO_HOST:/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz"
 
-      - name: Deploy application
+
+          echo "Aplicación subida correctamente."
+
+
+      # ======================================================
+      # 11. PUBLICAR Y REINICIAR PM2
+      # ======================================================
+
+      - name: Publicar aplicación y reiniciar PM2
         env:
+
           DO_HOST: ${{ vars.DO_HOST }}
+
           DO_PORT: ${{ vars.DO_PORT }}
+
           DO_USER: ${{ vars.DO_USER }}
+
         run: |
+
           ssh \
             -p "$DO_PORT" \
             "$DO_USER@$DO_HOST" "
+
               set -e
 
+
+              echo '========================================'
+              echo 'DEPLOY CARPINTERIA WEB'
+              echo '========================================'
+
+              echo 'Entorno: $DEPLOY_ENV'
+              echo 'Destino: $TARGET'
+              echo 'Puerto: $APP_PORT'
+              echo 'Proceso PM2: $PM2_NAME'
+
+
+              # -----------------------------------------------
+              # Preparar carpeta de nueva versión
+              # -----------------------------------------------
+
               rm -rf '${TARGET}.new'
+
               mkdir -p '${TARGET}.new'
+
+
+              # -----------------------------------------------
+              # Descomprimir nueva aplicación
+              # -----------------------------------------------
 
               tar -xzf \
                 '/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz' \
                 -C '${TARGET}.new'
 
+
+              # Eliminar archivo temporal
               rm -f \
                 '/tmp/carpinteria-web-$GITHUB_REF_NAME.tar.gz'
 
+
+              # -----------------------------------------------
+              # Conservar versión anterior
+              # -----------------------------------------------
+
               rm -rf '${TARGET}.old'
 
+
               if [ -d '${TARGET}' ]; then
+
                 mv '${TARGET}' '${TARGET}.old'
+
               fi
+
+
+              # -----------------------------------------------
+              # Activar nueva versión
+              # -----------------------------------------------
 
               mv '${TARGET}.new' '${TARGET}'
 
+
               cd '${TARGET}'
 
+
+              # -----------------------------------------------
+              # Reiniciar o crear proceso PM2
+              # -----------------------------------------------
+
               if pm2 describe '${PM2_NAME}' > /dev/null 2>&1; then
+
+                echo 'Reiniciando proceso existente...'
+
                 PORT='${APP_PORT}' \
                 HOSTNAME=127.0.0.1 \
                 NODE_ENV=production \
                 pm2 restart '${PM2_NAME}' --update-env
+
               else
+
+                echo 'Creando nuevo proceso PM2...'
+
                 PORT='${APP_PORT}' \
                 HOSTNAME=127.0.0.1 \
                 NODE_ENV=production \
                 pm2 start server.js \
-                --name '${PM2_NAME}'
+                  --name '${PM2_NAME}'
+
               fi
 
+
+              # Guardar procesos para restaurarlos al reiniciar VPS
               pm2 save
+
+
+              echo '========================================'
+              echo 'DEPLOY COMPLETADO'
+              echo '========================================'
             "

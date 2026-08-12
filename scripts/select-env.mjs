@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const envLocalPath = resolve(rootDir, ".env.local");
+const envPath = resolve(rootDir, ".env");
 const envExamplePath = resolve(rootDir, ".env.example");
 
 const APP_ENVS = ["local", "development", "production"];
@@ -13,26 +13,26 @@ const APP_ENVS = ["local", "development", "production"];
 // Al agregar un backend nuevo alla, sumarlo aca tambien.
 const BACKENDS = [
   { key: "core", envVar: "NEXT_PUBLIC_CORE_ENV" },
-  // { key: "billing", envVar: "NEXT_PUBLIC_BILLING_ENV" },
+  { key: "billing", envVar: "NEXT_PUBLIC_BILLING_ENV" },
+  { key: "media", envVar: "NEXT_PUBLIC_MEDIA_ENV" },
 ];
 
-function readEnvFile(path) {
-  if (!existsSync(path)) return {};
-  const lines = readFileSync(path, "utf-8").split("\n");
-  const entries = {};
-  for (const line of lines) {
-    const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (match) entries[match[1]] = match[2];
-  }
-  return entries;
-}
+// Actualiza (o agrega) UNA variable en un archivo .env sin tocar el resto:
+// preserva comentarios, secciones y el orden de todo lo demas.
+function setEnvVar(path, fallbackPath, key, value) {
+  const source = existsSync(path) ? path : fallbackPath;
+  const lines = existsSync(source) ? readFileSync(source, "utf-8").split("\n") : [];
 
-function serializeEnvFile(entries) {
-  return (
-    Object.entries(entries)
-      .map(([key, value]) => `${key}=${value}`)
-      .join("\n") + "\n"
-  );
+  const pattern = new RegExp(`^${key}=`);
+  const index = lines.findIndex((line) => pattern.test(line));
+
+  if (index !== -1) {
+    lines[index] = `${key}=${value}`;
+  } else {
+    lines.push(`${key}=${value}`);
+  }
+
+  writeFileSync(path, lines.join("\n"));
 }
 
 const { backendKey } = await prompts({
@@ -43,7 +43,7 @@ const { backendKey } = await prompts({
 });
 
 if (!backendKey) {
-  console.log("Cancelado, no se modifico .env.local");
+  console.log("Cancelado, no se modifico .env");
   process.exit(0);
 }
 
@@ -57,12 +57,9 @@ const { env } = await prompts({
 });
 
 if (!env) {
-  console.log("Cancelado, no se modifico .env.local");
+  console.log("Cancelado, no se modifico .env");
   process.exit(0);
 }
 
-const base = existsSync(envLocalPath) ? readEnvFile(envLocalPath) : readEnvFile(envExamplePath);
-base[backend.envVar] = env;
-
-writeFileSync(envLocalPath, serializeEnvFile(base));
-console.log(`.env.local actualizado -> ${backend.envVar}=${env}`);
+setEnvVar(envPath, envExamplePath, backend.envVar, env);
+console.log(`.env actualizado -> ${backend.envVar}=${env}`);
