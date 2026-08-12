@@ -30,7 +30,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
     const { style } = useNavbarStore();
-    const { navigations, fetchNavigations } = useNavigationStore();
+    const { navigations, fetchNavigations, isLoading, hasLoaded } = useNavigationStore();
 
 
     const linkClass = navbarSolid ? style.linkSolid : style.linkTransparent;
@@ -44,9 +44,16 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
 
+    // Mientras la peticion todavia esta en camino no mostramos el fallback:
+    // se veria como si el texto de los links "cambiara" solo, cuando en
+    // realidad es el fallback siendo remplazado por la data real. El
+    // fallback solo tiene sentido si la peticion ya termino y fallo.
+    const showSkeleton = !hasLoaded && isLoading && navigations.length === 0;
     const links: NavLink[] = navigations.length > 0
         ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
-        : FALLBACK_LINKS;
+        : hasLoaded
+            ? FALLBACK_LINKS
+            : [];
 
     useEffect(() => {
         fetchNavigations();
@@ -91,9 +98,10 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                     >
                         <div className="relative w-10 h-10">
                             <Image
-                                src="/img/solologocillat.png"
+                                src="/img/logo.png"
                                 alt="Logo CILLAT"
                                 fill
+                                sizes="40px"
                                 className="object-contain rounded-lg shadow-lg group-hover:scale-105 transition-transform"
                                 priority
                             />
@@ -120,6 +128,13 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                         {/*        {item.label}*/}
                         {/*    </Link>*/}
                         {/*))}*/}
+                        {showSkeleton && [0, 1, 2, 3].map((i) => (
+                            <span
+                                key={i}
+                                className={clsx(linkClass, "h-4 w-16 rounded-full bg-current opacity-20 animate-pulse")}
+                                aria-hidden="true"
+                            />
+                        ))}
                         {links.map((item) => {
                             const isSameRoute = pathname === item.href;
 

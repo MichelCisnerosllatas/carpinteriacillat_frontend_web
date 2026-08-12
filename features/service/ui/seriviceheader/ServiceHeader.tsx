@@ -27,6 +27,7 @@ export default function ServiceHeader() {
                     src="/img/sistema/fodotriplayosucro.jpg"
                     alt="Header Nosotros"
                     fill
+                    sizes="100vw"
                     priority
                     className="object-cover"
                 />

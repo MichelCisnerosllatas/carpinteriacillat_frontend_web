@@ -26,6 +26,7 @@ export default function WeSection1() {
                     src="/img/sistema/carpinteriacillat.png"
                     alt="Header Nosotros"
                     fill
+                    sizes="100vw"
                     priority
                     className="object-top"
                 />
