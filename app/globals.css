@@ -6,6 +6,15 @@
   --foreground: #171717;
 }
 
+/* Color de marca CILLAT centralizado: genera las utilidades
+   bg-brand-red / text-brand-red / bg-brand-gold / etc. */
+@theme {
+  --color-brand-red: #dc2626;
+  --color-brand-red-dark: #b91c1c;
+  --color-brand-gold: #f5c400;
+  --color-brand-gold-dark: #e7b700;
+}
+
 * {
   font-family: 'Poppins', sans-serif;
 }
@@ -110,4 +119,15 @@
 /* Smooth scroll global – reemplaza el JS de scroll suave */
 html {
   scroll-behavior: smooth;
+}
+
+/* Red de seguridad global contra scroll horizontal accidental.
+   Antes esto se parcheaba sección por sección (ver WeSection2 /
+   WeTeamSection con overflow-x-hidden local); centralizarlo aquí evita
+   que cualquier elemento que se pase del ancho del viewport (imágenes,
+   negative margins, flex sin wrap, etc.) genere scroll lateral. */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
 }

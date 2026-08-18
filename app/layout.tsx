@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CILLAT",
+    default: "Carpintería CILLAT",
     template: "%s",
   },
   description: "Carpintería CILLAT landing",

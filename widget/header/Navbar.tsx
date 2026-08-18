@@ -51,9 +51,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const showSkeleton = !hasLoaded && isLoading && navigations.length === 0;
     const links: NavLink[] = navigations.length > 0
         ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
-        : hasLoaded
-            ? FALLBACK_LINKS
-            : [];
+        : hasLoaded ? FALLBACK_LINKS : [];
 
     useEffect(() => {
         fetchNavigations();
@@ -75,6 +73,9 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
             body.style.touchAction = "";
         };
     }, [openMobile]);
+
+
+    
     return (
         <motion.nav
             id="navbar"

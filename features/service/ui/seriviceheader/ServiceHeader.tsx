@@ -25,7 +25,7 @@ export default function ServiceHeader() {
             >
                 <Image
                     src="/img/sistema/fodotriplayosucro.jpg"
-                    alt="Header Nosotros"
+                    alt="Header Servicios"
                     fill
                     sizes="100vw"
                     priority
@@ -34,7 +34,7 @@ export default function ServiceHeader() {
             </motion.div>
 
             {/* Overlay */}
-            {/*<div className="absolute inset-0 bg-black/500"></div>*/}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/50 to-black/10" />
 
             {/* Texto */}
             <motion.div
@@ -48,8 +48,8 @@ export default function ServiceHeader() {
                 </h1>
 
                 <p className="text-gray-200 mt-4 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
-                    Somos más que una empresa de muebles: somos artesanos,
-                    diseñadores y creadores de espacios que cuentan historias.
+                    Encuentra el servicio de carpintería ideal para tu hogar o
+                    negocio, diseñado y fabricado a tu medida.
                 </p>
             </motion.div>
         </section>
