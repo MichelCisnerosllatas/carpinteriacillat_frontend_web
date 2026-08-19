@@ -1,4 +1,5 @@
 // features/we/ui/wevaluessection/WeValuesSection.tsx
+import Container from "@/shared/ui/container/Container";
 
 const values = [
     { label: "Calidad", icon: "fa-solid fa-medal", accent: "gold" },
@@ -10,7 +11,7 @@ const values = [
 export default function WeValuesSection() {
     return (
         <section className="py-16 bg-white">
-            <div className="container mx-auto px-4 max-w-5xl">
+            <Container>
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="bg-gray-50 rounded-2xl border border-gray-200 p-8">
                         <div className="w-12 h-12 rounded-xl bg-brand-red/10 flex items-center justify-center mb-4">
@@ -60,7 +61,7 @@ export default function WeValuesSection() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

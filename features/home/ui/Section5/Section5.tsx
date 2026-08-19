@@ -2,6 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import Container from "@/shared/ui/container/Container";
 
 export type Testimonial = {
     id: string;
@@ -106,7 +107,7 @@ export default function Section5({
 
     return (
         <section id="testimonios" className="relative py-16 bg-gray-200">
-            <div className="container mx-auto px-4">
+            <Container>
                 {/* Título */}
                 <div className="text-center mb-10">
                     <p className="text-sm uppercase tracking-[0.2em] text-red-600 font-semibold">
@@ -174,7 +175,7 @@ export default function Section5({
                         </SwiperSlide>
                     ))}
                 </Swiper>
-            </div>
+            </Container>
         </section>
     );
 }

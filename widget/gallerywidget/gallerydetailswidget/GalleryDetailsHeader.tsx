@@ -1,6 +1,7 @@
 // widget/gallery/GalleryDetailsHeader.tsx
 import Link from "next/link";
 import { GALLERY_CATEGORIES, type GalleryItem } from "@/features/gallery/data/galleryItems";
+import Container from "@/shared/ui/container/Container";
 
 type GalleryDetailsHeaderProps = {
     item: GalleryItem;
@@ -10,7 +11,7 @@ export default function GalleryDetailsHeader({ item }: GalleryDetailsHeaderProps
     return (
         <section className="pb-4 bg-gray-100">
             {/* pt-28 = deja espacio bajo el header fijo */}
-            <div className="container mx-auto px-4">
+            <Container>
                 <nav
                     aria-label="Breadcrumb"
                     className="text-sm text-gray-500 flex flex-wrap gap-1"
@@ -29,7 +30,7 @@ export default function GalleryDetailsHeader({ item }: GalleryDetailsHeaderProps
                         {item.title}
                     </span>
                 </nav>
-            </div>
+            </Container>
         </section>
     );
 }

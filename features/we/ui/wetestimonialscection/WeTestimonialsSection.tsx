@@ -6,6 +6,7 @@ import { Autoplay, EffectCoverflow } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
+import Container from "@/shared/ui/container/Container";
 
 const testimonials = [
     {
@@ -40,7 +41,7 @@ export default function TestimonialsSection() {
 
     return (
         <section className="w-full py-20 bg-[#f5f5f5]">
-            <div className="max-w-6xl mx-auto px-4">
+            <Container>
                 <h2 className="text-center text-4xl md:text-5xl font-extrabold mb-4">
                   <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
                     Testimonios de Clientes
@@ -142,7 +143,7 @@ export default function TestimonialsSection() {
                         })}
                     </Swiper>
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

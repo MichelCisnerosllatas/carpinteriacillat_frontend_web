@@ -1,6 +1,7 @@
 //feature/service/ui/servicehouse/ServiceHouse.tsx
 import Servicelabeltitle from "@/widget/services/mainzservicewidget/servicelabeltitle";
 import ServiceGridHouseWidget from "@/widget/services/houseservicewidget/ServiceGridHouseWidget";
+import Container from "@/shared/ui/container/Container";
 
 const servicesHouse = [
     {
@@ -61,9 +62,11 @@ const servicesHouse = [
 
 export default function ServiceHouse(){
     return(
-        <section className="py-10 container mx-auto px-2">
-            <Servicelabeltitle title="Carpintería para el Hogar"/>
-            <ServiceGridHouseWidget items={servicesHouse}/>
+        <section className="py-10">
+            <Container>
+                <Servicelabeltitle title="Carpintería para el Hogar"/>
+                <ServiceGridHouseWidget items={servicesHouse}/>
+            </Container>
         </section>
     );
 }

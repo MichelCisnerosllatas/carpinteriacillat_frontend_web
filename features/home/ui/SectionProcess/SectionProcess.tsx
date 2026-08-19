@@ -1,4 +1,5 @@
 // features/home/ui/SectionProcess/SectionProcess.tsx
+import Container from "@/shared/ui/container/Container";
 
 type Step = {
     number: string;
@@ -37,7 +38,7 @@ const steps: Step[] = [
 export default function SectionProcess() {
     return (
         <section id="proceso" className="py-16 bg-white">
-            <div className="container mx-auto px-4">
+            <Container>
                 <div className="text-center mb-10">
                     <p className="text-sm uppercase tracking-[0.2em] text-brand-red font-semibold">
                         Nuestro Proceso
@@ -74,7 +75,7 @@ export default function SectionProcess() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

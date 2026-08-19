@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Lightbox from "yet-another-react-lightbox";
+import Container from "@/shared/ui/container/Container";
 
 export type GalleryItem = {
     id: string;
@@ -80,7 +81,7 @@ export default function Section3({
 
     return (
         <section id="galeria" className="relative py-16 bg-gray-100">
-            <div className="container mx-auto px-4">
+            <Container>
                 {/* Títulos animados */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -137,7 +138,7 @@ export default function Section3({
                         </motion.button>
                     ))}
                 </div>
-            </div>
+            </Container>
 
             {/* Lightbox */}
             <Lightbox

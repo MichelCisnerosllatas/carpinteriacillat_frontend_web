@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GALLERY_CATEGORIES, type GalleryItem } from "@/features/gallery/data/galleryItems";
+import Container from "@/shared/ui/container/Container";
 
 type GalleryDetailSection1Props = {
     item: GalleryItem;
@@ -8,7 +9,7 @@ type GalleryDetailSection1Props = {
 
 export default function GalleryDetailSection1({ item }: GalleryDetailSection1Props){
     return(
-        <section className="container mx-auto">
+        <Container as="section">
             <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8 grid md:grid-cols-2 gap-8">
                 {/* IZQUIERDA: imagen principal del mueble */}
                 <div className="bg-gray-100 rounded-2xl relative min-h-[260px] overflow-hidden">
@@ -128,6 +129,6 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                     </div>
                 </div>
             </div>
-        </section>
+        </Container>
     );
 }

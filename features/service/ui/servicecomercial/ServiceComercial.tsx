@@ -1,5 +1,6 @@
 import Servicelabeltitle from "@/widget/services/mainzservicewidget/servicelabeltitle";
 import ServicesGrid from "@/widget/services/mainzservicewidget/ServicesGrid";
+import Container from "@/shared/ui/container/Container";
 
 const services = [
     {
@@ -38,9 +39,11 @@ const services = [
 
 export default function ServiceComercial(){
     return(
-        <section className="py-10 container mx-auto px-2">
-            <Servicelabeltitle title="Carpintería Comercial" barColor="bg-brand-red"/>
-            <ServicesGrid items={services} />
+        <section className="py-10">
+            <Container>
+                <Servicelabeltitle title="Carpintería Comercial" barColor="bg-brand-red"/>
+                <ServicesGrid items={services} />
+            </Container>
         </section>
     );
 }

@@ -11,6 +11,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "yet-another-react-lightbox/styles.css";
 import Image from "next/image";
+import Container from "@/shared/ui/container/Container";
 
 const gallery = [
     {
@@ -41,7 +42,7 @@ export default function WeSection2() {
     return (
         // overflow-x-hidden para asegurarnos de que nada genere scroll horizontal
         <section className="relative py-16 bg-gray-100 overflow-x-hidden">
-            <div className="max-w-7xl mx-auto px-4">
+            <Container>
                 {/* Contenido principal (carrusel + texto) */}
                 <div className="flex flex-col md:flex-row gap-10 items-center">
                     {/* Columna CARRUSEL (primero en móvil, segundo en desktop) */}
@@ -114,7 +115,7 @@ export default function WeSection2() {
                         </p>
                     </motion.div>
                 </div>
-            </div>
+            </Container>
 
             {/* Lightbox */}
             <Lightbox

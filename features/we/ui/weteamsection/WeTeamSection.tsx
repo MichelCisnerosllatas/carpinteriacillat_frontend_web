@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Container from "@/shared/ui/container/Container";
 
 const disciplines = [
     { label: "Carpintería", icon: "fa-solid fa-hammer" },
@@ -13,7 +14,7 @@ const disciplines = [
 export default function WeTeamSection() {
     return (
         <section className="relative py-16 bg-gray-100 overflow-x-hidden">
-            <div className="max-w-7xl mx-auto px-4">
+            <Container>
                 <div className="flex flex-col md:flex-row gap-10 items-center">
                     {/* Columna IMAGEN */}
                     <motion.div
@@ -77,7 +78,7 @@ export default function WeTeamSection() {
                         </div>
                     </motion.div>
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

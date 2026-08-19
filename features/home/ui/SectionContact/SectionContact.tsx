@@ -3,6 +3,7 @@
 
 import { useState, FormEvent } from "react";
 import { motion } from "framer-motion";
+import Container from "@/shared/ui/container/Container";
 
 export type ContactInfo = {
     phone: string;
@@ -80,7 +81,7 @@ export default function SectionContact({
 
     return (
         <section id="contacto" className="relative py-16 bg-gray-100">
-            <div className="container mx-auto px-4">
+            <Container>
                 {/* TÍTULO animado */}
                 <motion.div
                     className="text-center mb-10"
@@ -318,7 +319,7 @@ export default function SectionContact({
                         </div>
                     </motion.div>
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

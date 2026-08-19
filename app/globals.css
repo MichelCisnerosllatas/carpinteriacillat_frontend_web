@@ -116,6 +116,42 @@
   }
 }
 
+/* Estilo de marca para las flechas/paginación de Swiper.
+   Por defecto Swiper pinta flechas azules (--swiper-theme-color) pegadas
+   a 10px del borde del propio carrusel, lo que hace que en carruseles
+   sin gutter (ej. WeSection2) queden encima del contenido. Esto las
+   lleva a los colores de marca y las reduce; el carrusel de Servicios
+   (home) además usa botones propios posicionados fuera de las cards,
+   ver features/home/ui/section2/Section2.tsx. */
+.swiper {
+  --swiper-navigation-color: var(--color-brand-red);
+  --swiper-navigation-size: 18px;
+  --swiper-pagination-color: var(--color-brand-red);
+  --swiper-pagination-bullet-inactive-color: #d1d5db;
+  --swiper-pagination-bullet-inactive-opacity: 1;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  width: 36px;
+  height: 36px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background-color: var(--color-brand-red);
+  color: #ffffff;
+}
+
+.swiper-button-prev.swiper-button-disabled,
+.swiper-button-next.swiper-button-disabled {
+  opacity: 0.35;
+}
+
 /* Smooth scroll global – reemplaza el JS de scroll suave */
 html {
   scroll-behavior: smooth;

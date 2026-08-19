@@ -1,6 +1,7 @@
 import Servicelabeltitle from "@/widget/services/mainzservicewidget/servicelabeltitle";
 import EspecialzadosServiceGridWidget
     from "@/widget/services/especialzadosservicewidget/EspecialzadosServiceGridWidget";
+import Container from "@/shared/ui/container/Container";
 
 const services = [
     {
@@ -31,9 +32,11 @@ const services = [
 
 export default function ServiceEspecializados(){
     return(
-        <section className="py-10 container mx-auto px-2">
-            <Servicelabeltitle title="Servicios Especializados" barColor="bg-brand-gold"/>
-            <EspecialzadosServiceGridWidget items={services}/>
+        <section className="py-10">
+            <Container>
+                <Servicelabeltitle title="Servicios Especializados" barColor="bg-brand-gold"/>
+                <EspecialzadosServiceGridWidget items={services}/>
+            </Container>
         </section>
     );
 }

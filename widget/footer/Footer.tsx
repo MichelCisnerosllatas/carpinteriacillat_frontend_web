@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
+import Container from "@/shared/ui/container/Container";
 
 type FooterLink = {
     href: string;
@@ -33,7 +34,7 @@ export default function Footer() {
     return (
         <>
             <footer className="bg-gray-900 text-white py-12">
-                <div className="container mx-auto px-4">
+                <Container>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         {/* Col 1 - Marca + redes */}
                         <div className="space-y-4">
@@ -178,7 +179,7 @@ export default function Footer() {
                             <i className="fas fa-heart text-red-600" /> en Perú
                         </p>
                     </div>
-                </div>
+                </Container>
             </footer>
 
             {/* Botón WhatsApp flotante */}

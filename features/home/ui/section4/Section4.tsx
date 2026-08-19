@@ -1,3 +1,5 @@
+import Container from "@/shared/ui/container/Container";
+
 export default function Section4() {
     const data = [
         {
@@ -19,7 +21,7 @@ export default function Section4() {
 
     return (
         <section className="py-16 bg-gray-100">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-2">
+            <Container className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
                 {data.map((item, idx) => (
                     <div
@@ -36,7 +38,7 @@ export default function Section4() {
                     </div>
                 ))}
 
-            </div>
+            </Container>
         </section>
     );
 }

@@ -39,14 +39,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // suppressHydrationWarning solo evita el aviso de mismatch causado por
+  // extensiones de navegador (ej. Dark Reader) que inyectan atributos en
+  // <html> antes de que React hidrate. No oculta errores reales de
+  // hidratación del propio contenido.
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProviders>
           <NextTopLoader
-              color="#F5C400"   // tu amarillo marca
-              height={3}
-              showSpinner={false}
+            color="#F5C400"   // tu amarillo marca
+            height={3}
+            showSpinner={false}
           />
           <Header/>
           {children}

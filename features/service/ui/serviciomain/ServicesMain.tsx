@@ -1,6 +1,7 @@
 //feature/service/ui/serviciomain/ServicesMain.tsx
 import Servicelabeltitle from "@/widget/services/mainzservicewidget/servicelabeltitle";
 import ServicesGrid from "@/widget/services/mainzservicewidget/ServicesGrid";
+import Container from "@/shared/ui/container/Container";
 
 const services = [
     {
@@ -39,9 +40,11 @@ const services = [
 
 export  default function ServicesMain(){
     return(
-        <section className="py-10  container mx-auto px-2">
-            <Servicelabeltitle title="Servicios Principales"/>
-            <ServicesGrid items={services} />
+        <section className="py-10">
+            <Container>
+                <Servicelabeltitle title="Servicios Principales"/>
+                <ServicesGrid items={services} />
+            </Container>
         </section>
     );
 }

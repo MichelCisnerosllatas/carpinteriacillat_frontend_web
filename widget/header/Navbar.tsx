@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {useNavbarStore} from "@/shared/store/navbar/NavbarStore";
 import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
 import { usePathname } from "next/navigation";
+import Container from "@/shared/ui/container/Container";
 
 type NavbarProps = {
     navbarSolid?: boolean;
@@ -89,7 +90,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
         >
-            <div className="container mx-auto px-2">
+            <Container>
                 <div className="flex items-center justify-between py-2">
                     {/* Logo */}
                     <Link
@@ -199,7 +200,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                     {/*    <i className={openMobile ? "fas fa-times" : "fas fa-bars"} />*/}
                     {/*</button>*/}
                 </div>
-            </div>
+            </Container>
 
             {/* Overlay Mobile Full Screen animado */}
             <AnimatePresence>
