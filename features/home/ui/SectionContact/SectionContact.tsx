@@ -26,12 +26,8 @@ const defaultInfo: ContactInfo = {
     schedule: "Lunes a Sábado, 8:00 AM - 6:00 PM",
 };
 
-const defaultMap =
-    "https://www.google.com/maps?q=-3.777157,-73.305000&z=16&output=embed"
-export default function SectionContact({
-                                           info,
-                                           mapEmbedUrl,
-                                       }: SectionContactProps) {
+const defaultMap = "https://www.google.com/maps?q=-3.777157,-73.305000&z=16&output=embed"
+export default function SectionContact({info, mapEmbedUrl}: SectionContactProps) {
     const contact = { ...defaultInfo, ...info };
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
