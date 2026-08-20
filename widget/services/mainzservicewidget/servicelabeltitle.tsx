@@ -5,7 +5,7 @@ type ServicieLabelTitleProps = {
 }
 export default function Servicelabeltitle({
   title,
-  barColor = "bg-yellow-500",
+  barColor = "bg-brand-gold",
   textColor = "text-gray-900",
 }: ServicieLabelTitleProps){
     return (

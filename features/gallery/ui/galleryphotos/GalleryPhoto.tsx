@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Masonry from "react-masonry-css";
 
 // LightGallery
 import LightGallery from "lightgallery/react";
@@ -16,84 +15,21 @@ import "lightgallery/css/lg-fullscreen.css";
 import {useEffect, useRef, useState} from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { galleryItems, GALLERY_CATEGORIES } from "@/features/gallery/data/galleryItems";
+
+// "Todos" + una entrada por cada categoría registrada en GALLERY_CATEGORIES.
+// Agregar una categoría nueva en galleryItems.ts hace aparecer su tab acá solo.
+const tabs = [
+    { value: "todos", label: "Todos" },
+    ...Object.entries(GALLERY_CATEGORIES).map(([value, label]) => ({ value, label })),
+];
 
 export default function Gallery() {
     const [activeTab, setActiveTab] = useState("todos");
     const [isTabStuck, setIsTabStuck] = useState(false);
     const tabRef = useRef<HTMLDivElement | null>(null);
 
-    const images = [
-        {
-            id: 1,
-            category: "camas",
-            title: "Mueble esquinero",
-            url: "https://i.pinimg.com/736x/f6/b9/ba/f6b9ba30e09373e5ba7e8ee446cc8e20.jpg",
-            description: "Un mueble esquinero moderno ideal.",
-            link: "https://google.com",
-        },
-        {
-            id: 2,
-            category: "puertas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/1200x/6b/a9/a2/6ba9a22957d3dd777f5b2e8ce52067ee.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 3,
-            category: "camas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/1200x/9b/80/e7/9b80e79cd4ff7649eeea907bcc0e77c2.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 4,
-            category: "puertas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/1200x/af/2f/c0/af2fc075725c71f1ed16a02b4e6e3e5d.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 5,
-            category: "camas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/474x/a3/76/7e/a3767ea0e5f186b43d85bb0b0212d037.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 6,
-            category: "puertas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/1200x/3c/b4/dd/3cb4ddb86fba902bc5ff2d0f7c3b1ae5.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 7,
-            category: "camas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/736x/cb/a8/07/cba807d401e9c023f6a38852f6217db4.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-        {
-            id: 8,
-            category: "puertas",
-            title: "Mueble sala",
-            url: "https://i.pinimg.com/736x/17/a9/23/17a923eb8cb201309517d25cfee8d827.jpg",
-            description: "Diseño minimalista elegante.",
-            link: "#",
-        },
-    ];
-    const breakpoints = {
-        default: 4,
-        1024: 3,
-        768: 2,
-        500: 1,
-    };
+    const images = galleryItems;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -117,11 +53,6 @@ export default function Gallery() {
         setActiveTab(tab);
     }
 
-    const isExternalUrl = (url: string) => {
-        // http://, https://, //dominio
-        return /^(https?:)?\/\//i.test(url);
-    };
-
     return (
         <section className="p-6">
             {/* TAB STICKY + ANIMADO */}
@@ -140,43 +71,22 @@ export default function Gallery() {
                 }}
                 transition={{ type: "spring", stiffness: 260, damping: 24 }}
             >
-                <div className="flex border-b border-gray-200 bg-white/90 backdrop-blur-md rounded-b-2xl px-3 pt-2">
-                    <button
-                        onClick={() => onclikTab("todos")}
-                        className={`
-                            py-2 px-4 border-b-2 focus:outline-none transition-colors
-                            ${activeTab === "todos"
-                            ? "border-blue-500 text-blue-500"
-                            : "border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500"
-                        }
-                        `}
-                    >
-                        Todos
-                    </button>
-                    <button
-                        onClick={() => onclikTab("camas")}
-                        className={`
-                            py-2 px-4 border-b-2 focus:outline-none transition-colors
-                            ${activeTab === "camas"
-                            ? "border-blue-500 text-blue-500"
-                            : "border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500"
-                        }
-                        `}
-                    >
-                        Camas
-                    </button>
-                    <button
-                        onClick={() => onclikTab("puertas")}
-                        className={`
-                            py-2 px-4 border-b-2 focus:outline-none transition-colors
-                            ${activeTab === "puertas"
-                            ? "border-blue-500 text-blue-500"
-                            : "border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500"
-                        }
-                        `}
-                    >
-                        Puertas
-                    </button>
+                <div className="flex flex-wrap justify-center border-b border-gray-200 bg-white/90 backdrop-blur-md rounded-b-2xl px-3 pt-2">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => onclikTab(tab.value)}
+                            className={`
+                                py-2 px-4 border-b-2 focus:outline-none transition-colors whitespace-nowrap
+                                ${activeTab === tab.value
+                                ? "border-brand-red text-brand-red"
+                                : "border-transparent text-gray-600 hover:text-brand-red hover:border-brand-red"
+                            }
+                            `}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </motion.div>
 
@@ -186,40 +96,33 @@ export default function Gallery() {
                 selector=".lg-item"
                 plugins={[lgThumbnail, lgZoom, lgFullscreen]}
                 speed={300}
-                licenseKey="0000-0000-000-0000"
             >
 
-                <Masonry
-                    breakpointCols={breakpoints}
-                    className="flex gap-4"
-                    columnClassName="flex flex-col gap-4"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredImages.map((img)=> {
-                        const internalTo = `/gallery/${img.id}`;
-                        const isExternal = img.link && isExternalUrl(img.link);
-
                         return (
                             <div
                                 key={img.id}
-                                className="bg-white rounded-xl overflow-hidden shadow-md border"
+                                className="bg-white rounded-xl overflow-hidden shadow-md border flex flex-col"
                             >
-                            {/* miniatura que abre el modal */}
+                            {/* miniatura que abre el modal: recuadro de proporción fija
+                                (4:3) para que todas las cards midan lo mismo y se
+                                alineen en filas, sin importar el tamaño real de la foto */}
                             <a
                                 href={img.url}
                                 data-src={img.url}
-                                className="lg-item block"
+                                className="lg-item block relative w-full aspect-[4/3] overflow-hidden"
                             >
                                 <Image
                                     src={img.url}
                                     alt={img.title}
-                                    width={500}
-                                    height={500}
-                                    unoptimized
-                                    className="w-full h-auto object-cover"
+                                    fill
+                                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                                    className="object-cover"
                                 />
                             </a>
 
-                            <div className="p-3 space-y-2">
+                            <div className="p-3 space-y-2 flex-1 flex flex-col">
                                 <h3 className="font-semibold text-gray-800 text-lg">
                                     {img.title}
                                 </h3>
@@ -228,36 +131,17 @@ export default function Gallery() {
                                     {img.description}
                                 </p>
 
-                                {isExternal ? (
-                                    <a
-                                        href={img.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 text-sm hover:underline"
-                                    >
-                                        Ver más detalles →
-                                    </a>
-                                ) : (
-                                    <Link
-                                        href={internalTo}
-                                        className="text-blue-600 text-sm hover:underline"
-                                    >
-                                        Ver más detalles →
-                                    </Link>
-                                )}
-
-                                {/*<a*/}
-                                {/*    href={img.link}*/}
-                                {/*    target="_blank"*/}
-                                {/*    className="text-blue-600 text-sm hover:underline"*/}
-                                {/*>*/}
-                                {/*    Ver más detalles →*/}
-                                {/*</a>*/}
+                                <Link
+                                    href={`/gallery/${img.id}`}
+                                    className="text-blue-600 text-sm hover:underline mt-auto"
+                                >
+                                    Ver más detalles →
+                                </Link>
                             </div>
                         </div>
                         )
                     })}
-                </Masonry>
+                </div>
             </LightGallery>
         </section>
     );

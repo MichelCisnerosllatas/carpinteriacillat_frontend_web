@@ -32,28 +32,28 @@ export type NavbarFixedStyle = {
 export const NAVBAR_STYLES = {
     base: {
         bgTransparent: "bg-transparent",
-        bgSolid: "bg-red-700 backdrop-blur-md",
+        bgSolid: "bg-brand-red backdrop-blur-md",
 
         // ✅ aquí defines el color de links según scroll
         linkTransparent: "text-white",
-        linkTransparentHover: "hover:text-[#f5c400]",
+        linkTransparentHover: "hover:text-brand-gold",
         linkSolid: "text-white",
-        linkSolidHover: "hover:text-[#f5c400]",
+        linkSolidHover: "hover:text-brand-gold",
 
-        buttonBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        buttonBg: "bg-brand-gold hover:bg-brand-gold-dark",
         buttonText: "text-black",
 
         ring: "ring-1 ring-black/10",
         mobileBg: "bg-gray-900",
         mobileLink: "text-white",
-        mobileLinkHover: "hover:text-[#f5c400]",
+        mobileLinkHover: "hover:text-brand-gold",
         mobileLinkBorder: "border-gray-800",
-        mobileCtaBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        mobileCtaBg: "bg-brand-gold hover:bg-brand-gold-dark",
         mobileCtaText: "text-black",
 
         mobileMenuBtn: "text-white",
-        mobileMenuBtnOpen: "text-[#f5c400]", // X amarilla marca
-        mobileMenuBtnHover: "hover:text-[#f5c400]",
+        mobileMenuBtnOpen: "text-brand-gold", // X amarilla marca
+        mobileMenuBtnHover: "hover:text-brand-gold",
     },
 
     detalle: {
@@ -61,24 +61,24 @@ export const NAVBAR_STYLES = {
         bgSolid: "bg-white/95 backdrop-blur-md",
 
         linkTransparent: "text-black",
-        linkTransparentHover: "hover:text-[#f5c400]",
+        linkTransparentHover: "hover:text-brand-gold",
         linkSolid: "text-black",
-        linkSolidHover: "hover:text-[#f5c400]",
+        linkSolidHover: "hover:text-brand-gold",
 
-        buttonBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        buttonBg: "bg-brand-gold hover:bg-brand-gold-dark",
         buttonText: "text-black",
 
         ring: "ring-1 ring-black/10",
         mobileBg: "bg-gray-900",
         mobileLink: "text-white",
-        mobileLinkHover: "hover:text-[#f5c400]",
+        mobileLinkHover: "hover:text-brand-gold",
         mobileLinkBorder: "border-gray-800",
-        mobileCtaBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        mobileCtaBg: "bg-brand-gold hover:bg-brand-gold-dark",
         mobileCtaText: "text-black",
 
         mobileMenuBtn: "text-black",
-        mobileMenuBtnOpen: "text-[#f5c400]",
-        mobileMenuBtnHover: "hover:text-[#f5c400]",
+        mobileMenuBtnOpen: "text-brand-gold",
+        mobileMenuBtnHover: "hover:text-brand-gold",
     },
 
     inner: {
@@ -86,24 +86,24 @@ export const NAVBAR_STYLES = {
         bgSolid: "bg-white/95 backdrop-blur-md",
 
         linkTransparent: "text-black",
-        linkTransparentHover: "hover:text-[#f5c400]",
+        linkTransparentHover: "hover:text-brand-gold",
         linkSolid: "text-black",
-        linkSolidHover: "hover:text-[#f5c400]",
+        linkSolidHover: "hover:text-brand-gold",
 
-        buttonBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        buttonBg: "bg-brand-gold hover:bg-brand-gold-dark",
         buttonText: "text-black",
 
         ring: "ring-1 ring-black/10",
         mobileBg: "bg-gray-900",
         mobileLink: "text-white",
-        mobileLinkHover: "hover:text-[#f5c400]",
+        mobileLinkHover: "hover:text-brand-gold",
         mobileLinkBorder: "border-gray-800",
-        mobileCtaBg: "bg-[#f5c400] hover:bg-[#e7b700]",
+        mobileCtaBg: "bg-brand-gold hover:bg-brand-gold-dark",
         mobileCtaText: "text-black",
 
         mobileMenuBtn: "text-black",
-        mobileMenuBtnOpen: "text-[#f5c400]",
-        mobileMenuBtnHover: "hover:text-[#f5c400]",
+        mobileMenuBtnOpen: "text-brand-gold",
+        mobileMenuBtnHover: "hover:text-brand-gold",
     },
 } as const;
 

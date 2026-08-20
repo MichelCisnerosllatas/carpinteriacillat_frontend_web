@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {useNavbarStore} from "@/shared/store/navbar/NavbarStore";
 import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
 import { usePathname } from "next/navigation";
+import Container from "@/shared/ui/container/Container";
 
 type NavbarProps = {
     navbarSolid?: boolean;
@@ -51,9 +52,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const showSkeleton = !hasLoaded && isLoading && navigations.length === 0;
     const links: NavLink[] = navigations.length > 0
         ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
-        : hasLoaded
-            ? FALLBACK_LINKS
-            : [];
+        : hasLoaded ? FALLBACK_LINKS : [];
 
     useEffect(() => {
         fetchNavigations();
@@ -75,6 +74,9 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
             body.style.touchAction = "";
         };
     }, [openMobile]);
+
+
+    
     return (
         <motion.nav
             id="navbar"
@@ -88,7 +90,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
         >
-            <div className="container mx-auto px-2">
+            <Container>
                 <div className="flex items-center justify-between py-2">
                     {/* Logo */}
                     <Link
@@ -198,7 +200,7 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
                     {/*    <i className={openMobile ? "fas fa-times" : "fas fa-bars"} />*/}
                     {/*</button>*/}
                 </div>
-            </div>
+            </Container>
 
             {/* Overlay Mobile Full Screen animado */}
             <AnimatePresence>

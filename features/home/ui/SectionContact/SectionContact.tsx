@@ -3,6 +3,7 @@
 
 import { useState, FormEvent } from "react";
 import { motion } from "framer-motion";
+import Container from "@/shared/ui/container/Container";
 
 export type ContactInfo = {
     phone: string;
@@ -25,12 +26,8 @@ const defaultInfo: ContactInfo = {
     schedule: "Lunes a Sábado, 8:00 AM - 6:00 PM",
 };
 
-const defaultMap =
-    "https://www.google.com/maps?q=-3.777157,-73.305000&z=16&output=embed"
-export default function SectionContact({
-                                           info,
-                                           mapEmbedUrl,
-                                       }: SectionContactProps) {
+const defaultMap = "https://www.google.com/maps?q=-3.777157,-73.305000&z=16&output=embed"
+export default function SectionContact({info, mapEmbedUrl}: SectionContactProps) {
     const contact = { ...defaultInfo, ...info };
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
@@ -80,7 +77,7 @@ export default function SectionContact({
 
     return (
         <section id="contacto" className="relative py-16 bg-gray-100">
-            <div className="container mx-auto px-4">
+            <Container>
                 {/* TÍTULO animado */}
                 <motion.div
                     className="text-center mb-10"
@@ -318,7 +315,7 @@ export default function SectionContact({
                         </div>
                     </motion.div>
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

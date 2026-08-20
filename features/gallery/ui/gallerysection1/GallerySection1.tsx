@@ -24,8 +24,8 @@ export default function GallerySection1(){
                 className="absolute inset-0"
             >
                 <Image
-                    src="/img/sistema/fodotriplayosucro.jpg"
-                    alt="Header Nosotros"
+                    src="/img/sistema/carpinteriacillat2.jpg"
+                    alt="Header Galería"
                     fill
                     sizes="100vw"
                     priority
@@ -34,7 +34,7 @@ export default function GallerySection1(){
             </motion.div>
 
             {/* Overlay */}
-            {/*<div className="absolute inset-0 bg-black/500"></div>*/}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/50 to-black/10" />
 
             {/* Texto */}
             <motion.div
@@ -48,8 +48,8 @@ export default function GallerySection1(){
                 </h1>
 
                 <p className="text-gray-200 mt-4 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
-                    Somos más que una empresa de muebles: somos artesanos,
-                    diseñadores y creadores de espacios que cuentan historias.
+                    Explora una muestra de nuestros proyectos: cada pieza
+                    refleja el cuidado y la calidad de nuestro trabajo.
                 </p>
             </motion.div>
         </section>

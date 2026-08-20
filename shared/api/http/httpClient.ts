@@ -33,13 +33,19 @@ function withQuery(url: string, params?: QueryParams): string {
 async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, params, ...rest } = options;
 
+  // multipart/form-data (ej. subida de imagenes): no se serializa a JSON y
+  // no se fuerza el Content-Type, el navegador debe fijar el boundary solo.
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+
   const response = await fetch(withQuery(url, params), {
     ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    headers: isFormData
+      ? { ...headers }
+      : {
+          "Content-Type": "application/json",
+          ...headers,
+        },
+    body: isFormData ? (body as FormData) : body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {

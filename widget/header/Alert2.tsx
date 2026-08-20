@@ -1,4 +1,6 @@
 // widget/header/Alert2.tsx
+import Container from "@/shared/ui/container/Container";
+
 type Alert2Props = {
     onClose?: () => void;
 };
@@ -7,9 +9,9 @@ export default function Alert2({ onClose }: Alert2Props) {
     return (
         <div
             id="temporaryAlert"
-            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 py-2.5 px-4 text-center transition-all duration-300"
+            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 py-2.5 text-center transition-all duration-300"
         >
-            <div className="container mx-auto flex items-center justify-center gap-2">
+            <Container className="flex items-center justify-center gap-2">
                 <i className="fas fa-info-circle" />
                 <span className="text-sm font-medium">
           Atención: Nuevos horarios de atención - Lunes a Sábado 8:00 AM - 6:00
@@ -23,7 +25,7 @@ export default function Alert2({ onClose }: Alert2Props) {
                 >
                     <i className="fas fa-times text-sm" />
                 </button>
-            </div>
+            </Container>
         </div>
     );
 }

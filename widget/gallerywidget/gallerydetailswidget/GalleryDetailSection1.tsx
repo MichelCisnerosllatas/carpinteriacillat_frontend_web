@@ -1,21 +1,25 @@
-export default function GalleryDetailSection1(){
-    return(
-        <section className="container mx-auto">
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8 grid md:grid-cols-2 gap-8">
-                {/* IZQUIERDA: espacio para carrusel de imágenes */}
-                <div className="bg-gray-100 rounded-2xl flex items-center justify-center relative min-h-[260px]">
-                    <span className="text-gray-400 text-sm flex items-center gap-2">
-                        <i className="fas fa-camera" />
-                        Vista Principal del Mueble
-                    </span>
+import Image from "next/image";
+import Link from "next/link";
+import { GALLERY_CATEGORIES, type GalleryItem } from "@/features/gallery/data/galleryItems";
+import Container from "@/shared/ui/container/Container";
 
-                    {/* Botones anterior / siguiente (luego los conectas a tu carrusel real) */}
-                    <button className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-gray-700 text-white flex items-center justify-center shadow-md">
-                        <i className="fas fa-chevron-left text-xs" />
-                    </button>
-                    <button className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-gray-700 text-white flex items-center justify-center shadow-md">
-                        <i className="fas fa-chevron-right text-xs" />
-                    </button>
+type GalleryDetailSection1Props = {
+    item: GalleryItem;
+};
+
+export default function GalleryDetailSection1({ item }: GalleryDetailSection1Props){
+    return(
+        <Container as="section">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-8 grid md:grid-cols-2 gap-8">
+                {/* IZQUIERDA: imagen principal del mueble */}
+                <div className="bg-gray-100 rounded-2xl relative min-h-[260px] overflow-hidden">
+                    <Image
+                        src={item.url}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                    />
 
                     {/* Badge “Más vendido” */}
                     <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-md flex items-center gap-1">
@@ -37,11 +41,11 @@ export default function GalleryDetailSection1(){
                     </div>
 
                     <div className="text-xs tracking-[0.2em] uppercase text-gray-500">
-                        Mesas de centro
+                        {GALLERY_CATEGORIES[item.category] ?? item.category}
                     </div>
 
                     <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-                        Mesa de Centro Escandinava
+                        {item.title}
                     </h1>
 
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -50,15 +54,12 @@ export default function GalleryDetailSection1(){
                                 <i key={i} className="fas fa-star text-xs" />
                             ))}
                         </div>
-                        <span className="font-semibold text-gray-800">4.8</span>
-                        <span className="text-gray-500">(23 opiniones)</span>
+                        <span className="font-semibold text-gray-800">{item.rating}</span>
+                        <span className="text-gray-500">({item.reviews} opiniones)</span>
                     </div>
 
                     <p className="text-gray-700 text-sm md:text-base leading-relaxed">
-                        Elegante mesa de centro de diseño escandinavo, perfecta para darle
-                        un toque moderno y cálido a tu sala. Fabricada con madera de
-                        primera calidad, esta pieza combina funcionalidad y estética,
-                        ofreciendo un espacio ideal para tu hogar.
+                        {item.description}
                     </p>
 
                     {/* Features tipo "cards" pequeños */}
@@ -112,16 +113,22 @@ export default function GalleryDetailSection1(){
 
                     {/* CTA */}
                     <div className="flex flex-wrap items-center gap-4 pt-2">
-                        <button className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-6 py-3 rounded-full flex items-center gap-2 shadow-md">
+                        <Link
+                            href="/#contacto"
+                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-6 py-3 rounded-full flex items-center gap-2 shadow-md"
+                        >
                             <i className="fas fa-phone-alt" />
                             Cotizar este modelo
-                        </button>
-                        <button className="text-sm font-semibold text-orange-600 hover:text-orange-700">
-                            Ver más modelos de mesas
-                        </button>
+                        </Link>
+                        <Link
+                            href="/gallery"
+                            className="text-sm font-semibold text-orange-600 hover:text-orange-700"
+                        >
+                            Ver más modelos
+                        </Link>
                     </div>
                 </div>
             </div>
-        </section>
+        </Container>
     );
 }

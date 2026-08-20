@@ -1,12 +1,40 @@
 // widget/footer/Footer.tsx
+"use client";
+
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
+import Container from "@/shared/ui/container/Container";
+
+type FooterLink = {
+    href: string;
+    label: string;
+};
+
+const FALLBACK_QUICK_LINKS: FooterLink[] = [
+    { href: "/", label: "Inicio" },
+    { href: "#servicios", label: "Servicios" },
+    { href: "#galeria", label: "Galería" },
+    { href: "#nosotros", label: "Nosotros" },
+    { href: "#contacto", label: "Contacto" },
+];
 
 export default function Footer() {
+    const { navigations, fetchNavigations } = useNavigationStore();
+
+    const quickLinks: FooterLink[] = navigations.length > 0
+        ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
+        : FALLBACK_QUICK_LINKS;
+
+    useEffect(() => {
+        fetchNavigations();
+    }, [fetchNavigations]);
+
     return (
         <>
             <footer className="bg-gray-900 text-white py-12">
-                <div className="container mx-auto px-4">
+                <Container>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         {/* Col 1 - Marca + redes */}
                         <div className="space-y-4">
@@ -54,46 +82,16 @@ export default function Footer() {
                         <div>
                             <h4 className="text-lg font-bold mb-4">Enlaces Rápidos</h4>
                             <ul className="space-y-2">
-                                <li>
-                                    <a
-                                        href="/"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Inicio
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Servicios
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#galeria"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Galería
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#nosotros"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Nosotros
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#contacto"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Contacto
-                                    </a>
-                                </li>
+                                {quickLinks.map((item) => (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={item.href}
+                                            className="text-gray-400 hover:text-amber-400 transition-colors"
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
@@ -181,7 +179,7 @@ export default function Footer() {
                             <i className="fas fa-heart text-red-600" /> en Perú
                         </p>
                     </div>
-                </div>
+                </Container>
             </footer>
 
             {/* Botón WhatsApp flotante */}

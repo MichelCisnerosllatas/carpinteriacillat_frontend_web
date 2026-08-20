@@ -6,6 +6,15 @@
   --foreground: #171717;
 }
 
+/* Color de marca CILLAT centralizado: genera las utilidades
+   bg-brand-red / text-brand-red / bg-brand-gold / etc. */
+@theme {
+  --color-brand-red: #dc2626;
+  --color-brand-red-dark: #b91c1c;
+  --color-brand-gold: #f5c400;
+  --color-brand-gold-dark: #e7b700;
+}
+
 * {
   font-family: 'Poppins', sans-serif;
 }
@@ -107,7 +116,54 @@
   }
 }
 
+/* Estilo de marca para las flechas/paginación de Swiper.
+   Por defecto Swiper pinta flechas azules (--swiper-theme-color) pegadas
+   a 10px del borde del propio carrusel, lo que hace que en carruseles
+   sin gutter (ej. WeSection2) queden encima del contenido. Esto las
+   lleva a los colores de marca y las reduce; el carrusel de Servicios
+   (home) además usa botones propios posicionados fuera de las cards,
+   ver features/home/ui/section2/Section2.tsx. */
+.swiper {
+  --swiper-navigation-color: var(--color-brand-red);
+  --swiper-navigation-size: 18px;
+  --swiper-pagination-color: var(--color-brand-red);
+  --swiper-pagination-bullet-inactive-color: #d1d5db;
+  --swiper-pagination-bullet-inactive-opacity: 1;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  width: 36px;
+  height: 36px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background-color: var(--color-brand-red);
+  color: #ffffff;
+}
+
+.swiper-button-prev.swiper-button-disabled,
+.swiper-button-next.swiper-button-disabled {
+  opacity: 0.35;
+}
+
 /* Smooth scroll global – reemplaza el JS de scroll suave */
 html {
   scroll-behavior: smooth;
+}
+
+/* Red de seguridad global contra scroll horizontal accidental.
+   Antes esto se parcheaba sección por sección (ver WeSection2 /
+   WeTeamSection con overflow-x-hidden local); centralizarlo aquí evita
+   que cualquier elemento que se pase del ancho del viewport (imágenes,
+   negative margins, flex sin wrap, etc.) genere scroll lateral. */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
 }

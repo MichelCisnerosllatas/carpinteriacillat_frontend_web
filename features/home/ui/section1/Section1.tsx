@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Container from "@/shared/ui/container/Container";
 
 type Slide = {
     src: string;
@@ -102,7 +103,7 @@ export default function Section1() {
     };
 
     return (
-        <section id="inicio" className="relative py-20 overflow-hidden flex items-center min-h-screen px-2 sm:px-0">
+        <section id="inicio" className="relative py-20 overflow-hidden flex items-center min-h-screen">
             {/* Carrusel de fondo */}
             <div className="absolute inset-0 z-0">
                 {slides.map((slide, index) => (
@@ -123,7 +124,7 @@ export default function Section1() {
             </div>
 
             {/* Contenido Hero */}
-            <div className="container mx-auto relative z-10 pt-24 md:pt-32 md:pl-4">
+            <Container className="relative z-10 pt-24 md:pt-32 w-full">
                 <div className="max-w-3xl">
                     <h2 className="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
                         Creamos <span className="text-amber-400">Espacios</span>
@@ -174,7 +175,7 @@ export default function Section1() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Container>
 
             {/* Indicadores del carrusel */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-10">
