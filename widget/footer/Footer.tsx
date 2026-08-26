@@ -5,29 +5,42 @@ import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
+import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/navigation_service/lib/navigation.fallback";
+import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
 import Container from "@/shared/ui/container/Container";
 
-type FooterLink = {
-    href: string;
-    label: string;
+type FooterProps = {
+    // Navegacion ya resuelta por el servidor (ver app/layout.tsx), pasada
+    // desde app/layout.tsx. Mismo mecanismo que usa Header/Navbar.
+    initialNavigations: NavigationApiItem[] | null;
 };
 
-const FALLBACK_QUICK_LINKS: FooterLink[] = [
-    { href: "/", label: "Inicio" },
-    { href: "#servicios", label: "Servicios" },
-    { href: "#galeria", label: "Galería" },
-    { href: "#nosotros", label: "Nosotros" },
-    { href: "#contacto", label: "Contacto" },
-];
+// "Contacto" no es parte de la navegacion que devuelve la API (en el
+// header es un boton aparte, no un link mas). Acá el footer SI lo agrega
+// como un link mas, asi que se define aparte de NAVIGATION_FALLBACK_LINKS.
+// El href es "/#contacto" (con barra al inicio) y no solo "#contacto":
+// la seccion de contacto solo existe en la pagina de inicio ("/"), asi que
+// si el usuario esta en otra pagina (ej. "/services"), "/#contacto" primero
+// lo lleva al inicio y despues salta a esa seccion. Con solo "#contacto"
+// el link no hace nada si no estas ya en el inicio.
+const FOOTER_CONTACT_LINK: NavLink = { href: "/#contacto", label: "Contacto" };
 
-export default function Footer() {
-    const { navigations, fetchNavigations } = useNavigationStore();
+export default function Footer({ initialNavigations }: FooterProps) {
+    const { navigations, fetchNavigations, hasLoaded } = useNavigationStore();
 
-    const quickLinks: FooterLink[] = navigations.length > 0
-        ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
-        : FALLBACK_QUICK_LINKS;
+    // Misma logica de prioridad que usa Navbar.tsx: primero el store (fetch
+    // del navegador), despues lo que ya trajo el servidor, y recien al
+    // final el fallback fijo — y solo una vez que ya se termino de intentar
+    // (hasLoaded). Antes el footer mostraba el fallback de entrada, sin
+    // esperar nada, por eso se notaba distinto al header.
+    const resolvedNavigations = navigations.length > 0 ? navigations : (initialNavigations ?? []);
+    const quickLinks: NavLink[] = resolvedNavigations.length > 0
+        ? [...resolvedNavigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name })), FOOTER_CONTACT_LINK]
+        : hasLoaded ? [...NAVIGATION_FALLBACK_LINKS, FOOTER_CONTACT_LINK] : [];
 
     useEffect(() => {
+        // Respaldo/actualizacion en segundo plano (ver comentario igual en
+        // Navbar.tsx) — el primer render ya no depende de esto.
         fetchNavigations();
     }, [fetchNavigations]);
 

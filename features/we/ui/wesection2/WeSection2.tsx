@@ -1,6 +1,6 @@
+// features/we/ui/wesection2/WeSection2.tsx
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
@@ -10,34 +10,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "yet-another-react-lightbox/styles.css";
-import Image from "next/image";
 import Container from "@/shared/ui/container/Container";
-
-const gallery = [
-    {
-        src: "/img/sistema/fotogrupalcillat.jpg",
-        title: "Equipo CILLAT",
-    },
-    {
-        src: "/img/sistema/carpinteriacillat4.jpg",
-        title: "Proyecto en taller",
-    },
-    {
-        src: "/img/sistema/carpinteriacillat3.png",
-        title: "Instalación en cliente",
-    },
-];
+import { useLightboxState } from "@/shared/lib/useLightboxState";
+import { defaultAboutGalleryItems } from "@/widget/we/aboutgallery/model/mock";
+import AboutGallerySlide from "@/widget/we/aboutgallery/ui/AboutGallerySlide";
 
 export default function WeSection2() {
-    const [lightboxOpen, setLightboxOpen] = useState(false);
-    const [lightboxIndex, setLightboxIndex] = useState(0);
-
-
-
-    const handleOpenLightbox = (index: number) => {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-    };
+    const lightbox = useLightboxState();
 
     return (
         // overflow-x-hidden para asegurarnos de que nada genere scroll horizontal
@@ -63,21 +42,9 @@ export default function WeSection2() {
                                 slidesPerView={1}
                                 className="w-full h-full"
                             >
-                                {gallery.map((item, index) => (
+                                {defaultAboutGalleryItems.map((item, index) => (
                                     <SwiperSlide key={index}>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleOpenLightbox(index)}
-                                            className="block w-full focus:outline-none"
-                                        >
-                                            <Image
-                                                src={item.src}
-                                                alt={item.title}
-                                                width={800}
-                                                height={600}
-                                                className="w-full h-72 md:h-80 object-cover"
-                                            />
-                                        </button>
+                                        <AboutGallerySlide item={item} onOpen={() => lightbox.open(index)} />
                                     </SwiperSlide>
                                 ))}
                             </Swiper>
@@ -119,10 +86,10 @@ export default function WeSection2() {
 
             {/* Lightbox */}
             <Lightbox
-                open={lightboxOpen}
-                close={() => setLightboxOpen(false)}
-                index={lightboxIndex}
-                slides={gallery.map((g) => ({ src: g.src }))}
+                open={lightbox.isOpen}
+                close={lightbox.close}
+                index={lightbox.index}
+                slides={defaultAboutGalleryItems.map((g) => ({ src: g.src }))}
             />
         </section>
     );

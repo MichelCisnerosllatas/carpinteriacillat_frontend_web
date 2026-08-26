@@ -6,28 +6,26 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import {useNavbarStore} from "@/shared/store/navbar/NavbarStore";
+import {useNavbarStore} from "@/shared/store/navbar/useNavbarStore";
 import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
+import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/navigation_service/lib/navigation.fallback";
+import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
 import { usePathname } from "next/navigation";
 import Container from "@/shared/ui/container/Container";
 
 type NavbarProps = {
     navbarSolid?: boolean;
+    // Navegacion ya resuelta por el servidor (ver app/layout.tsx), pasada
+    // desde Header.tsx. La usamos para el primer render en vez de esperar
+    // el fetch del navegador (ver "resolvedNavigations" mas abajo).
+    initialNavigations: NavigationApiItem[] | null;
 };
 
-type NavLink = {
-    href: string;
-    label: string;
-};
+function toNavLinks(items: NavigationApiItem[]): NavLink[] {
+    return items.map((item) => ({ href: item.navigation_url, label: item.navigation_name }));
+}
 
-const FALLBACK_LINKS: NavLink[] = [
-    { href: "/", label: "Inicio" },
-    { href: "/services", label: "Servicios" },
-    { href: "/gallery", label: "Galería" },
-    { href: "/we", label: "Nosotros" },
-];
-
-export default function Navbar({ navbarSolid }: NavbarProps) {
+export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps) {
     const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
     const { style } = useNavbarStore();
@@ -45,16 +43,28 @@ export default function Navbar({ navbarSolid }: NavbarProps) {
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
 
-    // Mientras la peticion todavia esta en camino no mostramos el fallback:
-    // se veria como si el texto de los links "cambiara" solo, cuando en
-    // realidad es el fallback siendo remplazado por la data real. El
-    // fallback solo tiene sentido si la peticion ya termino y fallo.
-    const showSkeleton = !hasLoaded && isLoading && navigations.length === 0;
-    const links: NavLink[] = navigations.length > 0
-        ? navigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name }))
-        : hasLoaded ? FALLBACK_LINKS : [];
+    // De donde salen los links, en orden de prioridad:
+    //   1) "navigations" del store: se llena cuando el fetch del NAVEGADOR
+    //      (mas abajo, fetchNavigations) termina bien.
+    //   2) "initialNavigations": lo que ya trajo el SERVIDOR antes de
+    //      mandar el HTML (ver app/layout.tsx). Como ya viene con el HTML
+    //      inicial, esto es lo que hace que el usuario NUNCA vea un hueco
+    //      vacio ni un skeleton en la carga normal — ya esta resuelto
+    //      antes de que la pagina se pinte.
+    //   3) Si ninguno de los dos tiene datos Y ya se termino de intentar
+    //      (hasLoaded === true), recien ahi usamos el fallback fijo.
+    //   4) Si nada de lo anterior aplica todavia (poco probable, solo
+    //      pasaria si el servidor tambien fallo y el fetch del navegador
+    //      sigue en camino), no se muestra nada y aparece el skeleton.
+    const resolvedNavigations = navigations.length > 0 ? navigations : (initialNavigations ?? []);
+    const showSkeleton = resolvedNavigations.length === 0 && isLoading;
+    const links: NavLink[] = resolvedNavigations.length > 0
+        ? toNavLinks(resolvedNavigations)
+        : hasLoaded ? NAVIGATION_FALLBACK_LINKS : [];
 
     useEffect(() => {
+        // Este fetch queda como respaldo/actualizacion en segundo plano:
+        // el primer render ya no depende de el (ver resolvedNavigations).
         fetchNavigations();
     }, [fetchNavigations]);
 

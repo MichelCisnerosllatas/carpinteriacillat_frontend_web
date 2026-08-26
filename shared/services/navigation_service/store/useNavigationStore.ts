@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { navigationsService } from '../services/navigations.service'
 import type { NavigationApiItem } from '../model/navigationget.dto'
+import { pickActiveNavigations } from '../lib/pickActiveNavigations'
 import { HttpError } from '@/shared/api/http/httpClient'
 import { notify } from '@/shared/lib/notify'
 
@@ -16,6 +17,14 @@ type NavigationState = {
   fetchNavigations: () => Promise<void>
 }
 
+// OJO: este store hace el fetch DESDE EL NAVEGADOR (fetch en el cliente).
+// Desde que app/layout.tsx tambien pide la navegacion en el SERVIDOR antes
+// de mandar el HTML (ver "initialNavigations" que reciben Header y
+// Footer), este fetch de aca ya no es el que decide que se ve primero en
+// pantalla — eso ahora lo resuelve initialNavigations. Este fetch queda
+// como respaldo/actualizacion en segundo plano: por si el fetch del
+// servidor fallo, o para tener el dato mas fresco disponible en el store
+// para cualquier otro componente que lo necesite mas adelante.
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   navigations: [],
   isLoading: false,
@@ -31,13 +40,7 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
 
     try {
       const response = await navigationsService.get({ state: 1, per_page: 50 })
-      // No confiamos ciegamente en que el backend filtro por "state" (el
-      // query param puede ser ignorado o cambiar de comportamiento): se
-      // valida de nuevo en el cliente para que SOLO se muestren los links
-      // activos (navigation_state === 1), y se ordenan por navigation_order.
-      const active = response.data.filter((item) => item.navigation_state === 1)
-      const sorted = [...active].sort((a, b) => a.navigation_order - b.navigation_order)
-      set({ navigations: sorted, isLoading: false, hasLoaded: true })
+      set({ navigations: pickActiveNavigations(response.data), isLoading: false, hasLoaded: true })
     } catch (err) {
       const message = err instanceof HttpError ? err.message : 'No se pudo cargar la navegacion'
       set({ error: message, isLoading: false, hasLoaded: true })

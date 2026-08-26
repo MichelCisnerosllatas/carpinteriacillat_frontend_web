@@ -181,6 +181,22 @@ jobs:
           NEXT_PUBLIC_APP_VERSION: ${{ vars.NEXT_PUBLIC_APP_VERSION }}
           NEXT_PUBLIC_CLIENT: ${{ vars.NEXT_PUBLIC_CLIENT }}
 
+
+          # ----------------------------
+          # REVALIDACION POR DEMANDA (app/api/revalidate-navigation)
+          # ----------------------------
+          #
+          # Funciona como una "contraseña" que protege esa URL. Se eligio
+          # a proposito guardarla como Environment VARIABLE (no Secret):
+          # queda visible en texto plano para quien tenga acceso a la
+          # configuracion del repo en GitHub (a diferencia de un Secret,
+          # que GitHub encripta y nunca vuelve a mostrar).
+          #
+          # Se agrega en:
+          # Settings -> Environments -> dev / prod -> Environment variables
+
+          REVALIDATE_SECRET: ${{ vars.REVALIDATE_SECRET }}
+
         run: |
 
           echo "Preparando variables para la rama: $GITHUB_REF_NAME"
@@ -230,6 +246,11 @@ jobs:
           # GENERAL
           NEXT_PUBLIC_APP_VERSION=$NEXT_PUBLIC_APP_VERSION
           NEXT_PUBLIC_CLIENT=$NEXT_PUBLIC_CLIENT
+
+
+          # REVALIDACION POR DEMANDA (sin prefijo NEXT_PUBLIC_ a proposito:
+          # esta NO tiene que llegar al navegador, solo la usa el servidor)
+          REVALIDATE_SECRET=$REVALIDATE_SECRET
           EOF
 
           echo "Archivo .env.production generado correctamente."

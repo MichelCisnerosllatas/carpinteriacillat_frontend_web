@@ -4,6 +4,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Alto del header fijo (Alert1 + Alert2 + Navbar). Se recalcula en JS
+     (widget/header/Header.tsx) con ResizeObserver apenas monta, porque en
+     mobile el texto de los banners puede partirse en varias líneas y el
+     header mide más que en desktop. Este valor es solo el fallback antes
+     de que ese cálculo corra (o si JS está deshabilitado). */
+  --app-header-height: 230px;
 }
 
 /* Color de marca CILLAT centralizado: genera las utilidades
