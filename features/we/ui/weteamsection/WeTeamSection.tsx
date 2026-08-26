@@ -1,15 +1,11 @@
+// features/we/ui/weteamsection/WeTeamSection.tsx
 "use client";
 
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Container from "@/shared/ui/container/Container";
-
-const disciplines = [
-    { label: "Carpintería", icon: "fa-solid fa-hammer" },
-    { label: "Ebanistería", icon: "fa-solid fa-ruler-combined" },
-    { label: "Acabados", icon: "fa-solid fa-paint-roller" },
-    { label: "Instalación", icon: "fa-solid fa-screwdriver-wrench" },
-];
+import { defaultDisciplines } from "@/widget/we/team/model/mock";
+import DisciplineBadge from "@/widget/we/team/ui/DisciplineBadge";
 
 export default function WeTeamSection() {
     return (
@@ -62,18 +58,8 @@ export default function WeTeamSection() {
                         </p>
 
                         <div className="grid grid-cols-2 gap-3">
-                            {disciplines.map((d) => (
-                                <div
-                                    key={d.label}
-                                    className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 px-4 py-3"
-                                >
-                                    <div className="w-9 h-9 rounded-lg bg-brand-red/10 flex items-center justify-center shrink-0">
-                                        <i className={`${d.icon} text-brand-red text-sm`} />
-                                    </div>
-                                    <span className="text-sm font-semibold text-gray-800">
-                                        {d.label}
-                                    </span>
-                                </div>
+                            {defaultDisciplines.map((discipline) => (
+                                <DisciplineBadge key={discipline.label} discipline={discipline} />
                             ))}
                         </div>
                     </motion.div>

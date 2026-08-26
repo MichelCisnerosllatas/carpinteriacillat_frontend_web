@@ -1,5 +1,5 @@
 // shared/ui/container/Container.tsx
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import clsx from "clsx";
 
 type ContainerProps = {
@@ -8,6 +8,7 @@ type ContainerProps = {
     /** Elemento HTML a renderizar (por defecto "div"). Útil cuando el
      *  propio <section> debe ser el contenedor, ej: as="section". */
     as?: ElementType;
+    style?: CSSProperties;
 };
 
 /**
@@ -25,9 +26,9 @@ type ContainerProps = {
  * flex, text-center, etc.) se pasan por `className` y se combinan con
  * las de acá.
  */
-export default function Container({ children, className, as: Tag = "div" }: ContainerProps) {
+export default function Container({ children, className, as: Tag = "div", style }: ContainerProps) {
     return (
-        <Tag className={clsx("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)}>
+        <Tag className={clsx("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)} style={style}>
             {children}
         </Tag>
     );

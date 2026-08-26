@@ -1,83 +1,21 @@
-// widget/main/section3/Section3.tsx
+// home/ui/section3/Section3.tsx
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Lightbox from "yet-another-react-lightbox";
 import Container from "@/shared/ui/container/Container";
-
-export type GalleryItem = {
-    id: string;
-    title: string;
-    category: string;
-    imageUrl: string;
-};
-
-export type Section3Props = {
-    title?: string;
-    subtitle?: string;
-    items?: GalleryItem[]; // aquí luego enchufas lo que venga del backend
-};
-
-const defaultItems: GalleryItem[] = [
-    {
-        id: "1",
-        title: "Cocina Integral en Melamine",
-        category: "Cocinas",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat1.jpg",
-    },
-    {
-        id: "2",
-        title: "Closet Empotrado Minimalista",
-        category: "Dormitorios",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat4.jpg",
-    },
-    {
-        id: "3",
-        title: "Oficina Ejecutiva Moderna",
-        category: "Oficinas",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat2.jpg",
-    },
-    {
-        id: "4",
-        title: "Centro de Entretenimiento",
-        category: "Sala",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat3.jpg",
-    },
-    {
-        id: "5",
-        title: "Mueble de Lavatorio",
-        category: "Baños",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat5.jpg",
-    },
-    {
-        id: "6",
-        title: "Mostrador Comercial",
-        category: "Comercial",
-        imageUrl:
-            "https://demo.carpinteriacillat.com/storage/imgsistema/imgmuestra/fotocillat6.jpg",
-    },
-];
+import { useLightboxState } from "@/shared/lib/useLightboxState";
+import type { Section3Props } from "@/widget/galleryhome/model/types";
+import { defaultGalleryPreviewItems } from "@/widget/galleryhome/model/mock";
+import GalleryPreviewCard from "@/widget/galleryhome/ui/GalleryPreviewCard";
 
 export default function Section3({
-                                     title,
-                                     subtitle,
-                                     items,
-                                 }: Section3Props) {
-    const data = items && items.length > 0 ? items : defaultItems;
-
-    const [lightboxOpen, setLightboxOpen] = useState(false);
-    const [lightboxIndex, setLightboxIndex] = useState(0);
-
-    const openLightbox = (index: number) => {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-    };
+    title,
+    subtitle,
+    items,
+}: Section3Props) {
+    const data = items && items.length > 0 ? items : defaultGalleryPreviewItems;
+    const lightbox = useLightboxState();
 
     return (
         <section id="galeria" className="relative py-16 bg-gray-100">
@@ -105,48 +43,22 @@ export default function Section3({
                 {/* Grid de galería */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {data.map((item, index) => (
-                        <motion.button
+                        <GalleryPreviewCard
                             key={item.id}
-                            type="button"
-                            onClick={() => openLightbox(index)}
-                            className="gallery-item rounded-2xl overflow-hidden shadow-lg bg-gray-900 text-left"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.2 }}
-                            transition={{ duration: 0.4, delay: index * 0.05 }}
-                        >
-                            <img
-                                src={item.imageUrl}
-                                alt={item.title}
-                                className="w-full h-64 object-cover"
-                            />
-
-                            <div className="gallery-overlay">
-                                <div className="text-center px-4">
-                                    <span className="inline-block text-xs font-semibold tracking-widest uppercase bg-gray-900/80 text-amber-300 px-3 py-1 rounded-full mb-2">
-                                        {item.category}
-                                    </span>
-                                    <h3 className="text-xl font-bold text-white mb-2">
-                                        {item.title}
-                                    </h3>
-                                    <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 bg-white px-4 py-2 rounded-full">
-                    <i className="fas fa-search" />
-                    Ver en grande
-                  </span>
-                                </div>
-                            </div>
-                        </motion.button>
+                            item={item}
+                            index={index}
+                            onOpen={lightbox.open}
+                        />
                     ))}
                 </div>
             </Container>
 
             {/* Lightbox */}
             <Lightbox
-                open={lightboxOpen}
-                close={() => setLightboxOpen(false)}
-                index={lightboxIndex}
+                open={lightbox.isOpen}
+                close={lightbox.close}
+                index={lightbox.index}
                 slides={data.map((item) => ({ src: item.imageUrl }))}
-                // puedes agregar más opciones si quieres
             />
         </section>
     );

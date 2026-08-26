@@ -11,7 +11,11 @@ export class HttpError extends Error {
 
 type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
-type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown; params?: QueryParams };
+// Exportado para que un *.service.ts puntual pueda, si lo necesita, pasar
+// opciones extra de fetch (ej. { next: { revalidate: 300 } } de Next.js,
+// para paginas estaticas que quieren refrescar sus datos cada tanto sin
+// esperar un redeploy completo).
+export type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown; params?: QueryParams };
 
 function withQuery(url: string, params?: QueryParams): string {
   if (!params) return url;

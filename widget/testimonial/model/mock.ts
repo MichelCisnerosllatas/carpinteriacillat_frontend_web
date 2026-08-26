@@ -1,0 +1,52 @@
+import type { Testimonial } from "./types";
+
+export const defaultTestimonials: Testimonial[] = [
+    {
+        id: "1",
+        name: "María López",
+        role: "Ama de casa",
+        city: "Iquitos",
+        message: "Muy cumplidos con los tiempos y el diseño quedó tal como lo imaginamos. Nuestra cocina ahora es el corazón de la casa.",
+        rating: 5,
+    },
+    {
+        id: "2",
+        name: "Carlos Ramírez",
+        role: "Gerente de tienda",
+        city: "Iquitos",
+        message: "Instalaron el mobiliario de nuestra tienda en tiempo récord. Se nota la calidad en los acabados.",
+        rating: 5,
+    },
+    {
+        id: "3",
+        name: "Ana Fernández",
+        role: "Profesional independiente",
+        city: "Punchana",
+        message: "Mandé a hacer mi closet y escritorio de trabajo. Aprovecharon al máximo cada espacio, quedó espectacular.",
+        rating: 4,
+    },
+    {
+        id: "4",
+        name: "Luis Gutiérrez",
+        role: "Administrador de restaurante",
+        city: "San Juan Bautista",
+        message: "Renovamos todo el mobiliario del local. Los clientes nos felicitan por el nuevo ambiente.",
+        rating: 5,
+    },
+    {
+        id: "5",
+        name: "Rocío Herrera",
+        role: "Arquitecta",
+        city: "Iquitos",
+        message: "Excelente aliado para proyectos integrales. Respetan los planos, los detalles y proponen buenas soluciones.",
+        rating: 5,
+    },
+    {
+        id: "6",
+        name: "Jorge Saldaña",
+        role: "Empresario",
+        city: "Bellavista",
+        message: "Hicieron los muebles de oficina de nuestra empresa. Muy buen balance entre diseño y funcionalidad.",
+        rating: 4,
+    },
+];

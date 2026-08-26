@@ -1,42 +1,22 @@
+// features/we/ui/wehostorysection/WeHistorySection.tsx
 "use client";
 
-import {useRef, useState} from "react";
+import { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import Lightbox from "yet-another-react-lightbox";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
-import Image from "next/image";
 import Container from "@/shared/ui/container/Container";
-
-const stories = [
-    {
-        title: "Inicio del Proyecto",
-        desc: "Todo empezó con una idea y mucha pasión.",
-        img: "/img/sistema/carpinteriacillat2.jpg",
-    },
-    {
-        title: "Primer Cliente Feliz",
-        desc: "Nuestro primer trabajo marcó la diferencia.",
-        img: "/img/sistema/carpinteriacillat1.png",
-    },
-    {
-        title: "Crecimiento",
-        desc: "Expansión en servicios y calidad.",
-        img: "/img/sistema/carpinteriacillat3.png",
-    },
-];
+import { useLightboxState } from "@/shared/lib/useLightboxState";
+import { defaultHistoryStories } from "@/widget/we/history/model/mock";
+import HistorySlide from "@/widget/we/history/ui/HistorySlide";
 
 export default function WeHistorySection() {
-    const swiperRef = useRef<any>(null);
-    const [lightboxOpen, setLightboxOpen] = useState(false);
-    const [lightboxIndex, setLightboxIndex] = useState(0);
-
-    const handleOpenLightbox = (index: number) => {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-    };
+    const swiperRef = useRef<SwiperType | null>(null);
+    const lightbox = useLightboxState();
 
     return (
         <section className="w-full py-20 bg-gray-50">
@@ -64,38 +44,13 @@ export default function WeHistorySection() {
                         }}
                         className="w-full h-[360px] md:h-[520px]"
                     >
-                        {stories.map((s, index) => (
+                        {defaultHistoryStories.map((story, index) => (
                             <SwiperSlide key={index}>
-                                <div className="relative w-full h-full"
-                                    onClick={() => handleOpenLightbox(index)}
-                                >
-                                    {/* Imagen de fondo */}
-                                    <Image
-                                        src={s.img}
-                                        alt={s.title}
-                                        width={200}
-                                        height={200}
-                                        className="absolute inset-0 w-full h-full object-cover opacity-80"
-                                    />
-
-                                    {/* Degradado para lectura */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70" />
-
-                                    {/* Contenido */}
-                                    <div className="relative z-10 h-full flex items-center">
-                                        <div className="px-6 md:px-12 max-w-xl">
-                                              <span className="inline-flex items-center px-3 py-1 mb-4 rounded-full text-xs font-semibold bg-yellow-400 text-red-900">
-                                                Etapa {index + 1}
-                                              </span>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                                                {s.title}
-                                            </h3>
-                                            <p className="text-gray-100 text-sm md:text-base leading-relaxed">
-                                                {s.desc}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <HistorySlide
+                                    story={story}
+                                    stepNumber={index + 1}
+                                    onOpen={() => lightbox.open(index)}
+                                />
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -124,10 +79,10 @@ export default function WeHistorySection() {
             </Container>
 
             <Lightbox
-                open={lightboxOpen}
-                close={() => setLightboxOpen(false)}
-                index={lightboxIndex}
-                slides={stories.map((g) => ({ src: g.img }))}
+                open={lightbox.isOpen}
+                close={lightbox.close}
+                index={lightbox.index}
+                slides={defaultHistoryStories.map((g) => ({ src: g.img }))}
             />
         </section>
     );

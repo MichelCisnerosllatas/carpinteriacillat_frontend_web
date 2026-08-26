@@ -1,4 +1,4 @@
-import { httpClient } from '@/shared/api/http/httpClient'
+import { httpClient, type RequestOptions } from '@/shared/api/http/httpClient'
 import { coreUrl } from '@/shared/api/core/core.url'
 import { NAVIGATIONS_ENDPOINTS } from './navigations.endpoint'
 import type { NavigationListRequestDto, NavigationListResponseDto } from '../model/navigationget.dto'
@@ -6,8 +6,12 @@ import type { NavigationPostRequestDto, NavigationPostResponseDto } from '../mod
 import type { NavigationPutRequestDto, NavigationPutResponseDto } from '../model/navigationput.dto'
 
 export const navigationsService = {
-  get: (params?: NavigationListRequestDto): Promise<NavigationListResponseDto> => {
-    return httpClient.get<NavigationListResponseDto>(coreUrl(NAVIGATIONS_ENDPOINTS.v1.get), { params })
+  // "fetchOptions" es opcional y solo lo usa quien llame a este get() desde
+  // un Server Component (ver app/layout.tsx), para poder pasarle a Next.js
+  // cosas como { next: { revalidate: 300 } }. El fetch normal desde el
+  // navegador (useNavigationStore) no lo necesita y lo deja undefined.
+  get: (params?: NavigationListRequestDto, fetchOptions?: RequestOptions): Promise<NavigationListResponseDto> => {
+    return httpClient.get<NavigationListResponseDto>(coreUrl(NAVIGATIONS_ENDPOINTS.v1.get), { ...fetchOptions, params })
   },
 
   post: (param: NavigationPostRequestDto): Promise<NavigationPostResponseDto> => {

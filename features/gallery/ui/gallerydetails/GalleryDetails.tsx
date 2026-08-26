@@ -7,8 +7,11 @@ type GalleryDetailsProps = {
 };
 
 export default function GalleryDetails({ item }: GalleryDetailsProps){
+    // padding-top dinámico: antes era un pt-40 fijo que no alcanzaba a
+    // despejar el header en mobile (los banners promocionales del header
+    // pueden partirse en varias líneas ahí y hacerlo más alto), ver Header.tsx
     return (
-        <main className="pt-40 bg-gray-100">
+        <main className="bg-gray-100" style={{ paddingTop: "calc(var(--app-header-height, 10rem) + 1rem)" }}>
             <GalleryDetailsHeader item={item} />
 
             <GalleryDetailSection1 item={item} />
