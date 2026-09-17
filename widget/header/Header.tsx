@@ -7,12 +7,12 @@ import Alert1 from "@/widget/header/Alert1";
 import Alert2 from "@/widget/header/Alert2";
 import Navbar from "@/widget/header/Navbar";
 import { useNavbarStore } from "@/shared/store/navbar/useNavbarStore";
-import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type HeaderProps = {
-    // Lo que app/layout.tsx (Server Component) ya trajo del backend antes
-    // de renderizar. null = la peticion en el servidor fallo.
-    initialNavigations: NavigationApiItem[] | null;
+    // Lo que app/layout.tsx (Server Component) ya trajo de GET /v1/public/site
+    // antes de renderizar. null = la peticion en el servidor fallo.
+    initialNavigations: SiteNavigationDto[] | null;
 };
 
 export default function Header({ initialNavigations }: HeaderProps) {

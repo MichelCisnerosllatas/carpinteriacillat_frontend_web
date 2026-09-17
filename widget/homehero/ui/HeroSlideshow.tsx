@@ -41,7 +41,7 @@ export default function HeroSlideshow({
                         <img
                             src={slide.src}
                             alt={slide.alt}
-                            className="w-full h-full object-fill"
+                            className={`w-full h-full ${slide.fit ?? "object-cover"}`}
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/70 to-transparent" />
                     </div>

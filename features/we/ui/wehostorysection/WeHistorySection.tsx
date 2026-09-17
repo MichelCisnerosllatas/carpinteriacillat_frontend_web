@@ -13,22 +13,44 @@ import Container from "@/shared/ui/container/Container";
 import { useLightboxState } from "@/shared/lib/useLightboxState";
 import { defaultHistoryStories } from "@/widget/we/history/model/mock";
 import HistorySlide from "@/widget/we/history/ui/HistorySlide";
+import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
-export default function WeHistorySection() {
+type Props = {
+    // section_type === "history_carousel". Mapeo: story.img <- image.url,
+    // story.title <- image.title, story.desc <- image.description (ver
+    // FRONTEND_NEXTJS_SITE_V3.md #27).
+    section: SiteSectionDto;
+};
+
+export default function WeHistorySection({ section }: Props) {
     const swiperRef = useRef<SwiperType | null>(null);
     const lightbox = useLightboxState();
+
+    const apiStories = normalizeImages(section.images).map((image) => ({
+        title: image.title ?? "",
+        desc: image.description ?? "",
+        img: image.url,
+        fit: resolveImageFit(image.fix),
+        link: image.link ?? undefined,
+        linkLabel: image.link_label ?? undefined,
+    }));
+
+    // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+    const stories = apiStories.length > 0 ? apiStories : defaultHistoryStories;
 
     return (
         <section className="w-full py-20 bg-gray-50">
             <Container>
                 <h2 className="text-center text-4xl md:text-5xl font-extrabold mb-4">
-                  <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
-                    Nuestra Historia
-                  </span>
+                    <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
+                        {section.section_title ?? "Nuestra Historia"}
+                    </span>
                 </h2>
                 <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">
-                    Un recorrido de esfuerzo, dedicación y proyectos que han marcado
-                    nuestra trayectoria.
+                    {section.section_description ??
+                        "Un recorrido de esfuerzo, dedicación y proyectos que han marcado nuestra trayectoria."}
                 </p>
 
                 {/* Contenedor del carrusel (hero) */}
@@ -44,7 +66,7 @@ export default function WeHistorySection() {
                         }}
                         className="w-full h-[360px] md:h-[520px]"
                     >
-                        {defaultHistoryStories.map((story, index) => (
+                        {stories.map((story, index) => (
                             <SwiperSlide key={index}>
                                 <HistorySlide
                                     story={story}
@@ -82,7 +104,7 @@ export default function WeHistorySection() {
                 open={lightbox.isOpen}
                 close={lightbox.close}
                 index={lightbox.index}
-                slides={defaultHistoryStories.map((g) => ({ src: g.img }))}
+                slides={stories.map((g) => ({ src: g.img }))}
             />
         </section>
     );

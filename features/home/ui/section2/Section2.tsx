@@ -8,10 +8,33 @@ import type { Swiper as SwiperClass } from "swiper";
 import Container from "@/shared/ui/container/Container";
 import ServiceCarouselCard from "@/widget/servicecarousel/ui/ServiceCarouselCard";
 import { defaultServiceCarouselItems } from "@/widget/servicecarousel/model/mock";
+import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
-export default function Section2() {
+type Props = {
+    // section_type === "service_carousel". Se usa tanto en Home
+    // ("Nuestros Servicios") como en Services ("Carpintería Comercial") —
+    // en ambos casos son items sueltos (item_type "service") con
+    // description, exactamente la misma forma de dato y la misma UI
+    // (carrusel swiper). El grid de categorias con sub-lista
+    // ("Carpintería para el Hogar") tiene su PROPIO section_type
+    // ("category_grid", ver ServiceCategoryGrid) — ya no vive aca.
+    section: SiteSectionDto;
+};
+
+export default function Section2({ section }: Props) {
     const prevRef = useRef<HTMLButtonElement>(null);
     const nextRef = useRef<HTMLButtonElement>(null);
+
+    const apiItems = normalizeItems(section.items).map((item) => ({
+        iconClass: item.icon ?? "",
+        titulo: item.title ?? "",
+        descripcion: item.description ?? "",
+        tag: item.label ?? "",
+    }));
+
+    // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+    const servicios = apiItems.length > 0 ? apiItems : defaultServiceCarouselItems;
 
     return (
         <section id="servicios" className="relative py-16 bg-gray-200">
@@ -19,14 +42,14 @@ export default function Section2() {
                 {/* Título */}
                 <div className="text-center mb-10">
                     <p className="text-sm uppercase tracking-[0.2em] text-red-600 font-semibold">
-                        Nuestros Servicios
+                        {section.section_subtitle ?? "Nuestros Servicios"}
                     </p>
                     <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">
-                        Soluciones en Muebles a Tu Medida
+                        {section.section_title ?? "Soluciones en Muebles a Tu Medida"}
                     </h2>
                     <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-                        Diseñamos, fabricamos e instalamos muebles personalizados para
-                        hogares, oficinas y proyectos comerciales.
+                        {section.section_description ??
+                            "Diseñamos, fabricamos e instalamos muebles personalizados para hogares, oficinas y proyectos comerciales."}
                     </p>
                 </div>
 
@@ -52,8 +75,8 @@ export default function Section2() {
                         }}
                         className="pb-10"
                     >
-                        {defaultServiceCarouselItems.map((servicio) => (
-                            <SwiperSlide key={servicio.titulo}>
+                        {servicios.map((servicio, index) => (
+                            <SwiperSlide key={servicio.titulo || index}>
                                 <ServiceCarouselCard item={servicio} />
                             </SwiperSlide>
                         ))}

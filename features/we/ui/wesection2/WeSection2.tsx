@@ -14,9 +14,47 @@ import Container from "@/shared/ui/container/Container";
 import { useLightboxState } from "@/shared/lib/useLightboxState";
 import { defaultAboutGalleryItems } from "@/widget/we/aboutgallery/model/mock";
 import AboutGallerySlide from "@/widget/we/aboutgallery/ui/AboutGallerySlide";
+import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
-export default function WeSection2() {
+type Props = {
+    // section_type === "text_media" (confirmado contra /v1/public/site
+    // real). Imagenes del carrusel <- section.images. El backend manda
+    // AMBOS parrafos juntos en section_content, separados por una linea en
+    // blanco (section_description viene null) — se separan aca.
+    section: SiteSectionDto;
+};
+
+const DEFAULT_PARAGRAPHS = [
+    "Con más de 15 años de experiencia, hemos transformado ideas en realidad con diseño personalizado y materiales premium.",
+    "Cada pieza que creamos nace de la pasión por el detalle y el compromiso de ofrecer un resultado que supere expectativas.",
+];
+
+export default function WeSection2({ section }: Props) {
     const lightbox = useLightboxState();
+
+    const apiImages = normalizeImages(section.images).map((image) => ({
+        src: image.url,
+        title: image.title ?? image.alt ?? "",
+        fit: resolveImageFit(image.fix),
+        description: image.description ?? undefined,
+        link: image.link ?? undefined,
+        linkLabel: image.link_label ?? undefined,
+    }));
+
+    // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+    const images = apiImages.length > 0 ? apiImages : defaultAboutGalleryItems;
+
+    const rawText = section.section_content ?? section.section_description;
+    const paragraphs = rawText
+        ? rawText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+        : [];
+
+    const title = section.section_title ?? "Sobre Nosotros";
+    const eyebrow = section.section_subtitle ?? "Carpintería CILLAT";
+    const paragraph1 = paragraphs[0] ?? DEFAULT_PARAGRAPHS[0];
+    const paragraph2 = paragraphs[1] ?? DEFAULT_PARAGRAPHS[1];
 
     return (
         // overflow-x-hidden para asegurarnos de que nada genere scroll horizontal
@@ -42,7 +80,7 @@ export default function WeSection2() {
                                 slidesPerView={1}
                                 className="w-full h-full"
                             >
-                                {defaultAboutGalleryItems.map((item, index) => (
+                                {images.map((item, index) => (
                                     <SwiperSlide key={index}>
                                         <AboutGallerySlide item={item} onOpen={() => lightbox.open(index)} />
                                     </SwiperSlide>
@@ -60,25 +98,19 @@ export default function WeSection2() {
                         className="order-2 md:order-1 w-full"
                     >
                         <span className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-red-500">
-                            Carpintería CILLAT
+                            {eyebrow}
                         </span>
 
                         <h3 className="text-3xl md:text-4xl font-bold text-black leading-tight mt-2 mb-4">
-                            Sobre{" "}
-                            <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
-                                Nosotros
-                            </span>
+                            {title}
                         </h3>
 
                         <p className="text-gray-700 text-base leading-relaxed mb-3">
-                            Con más de 15 años de experiencia, hemos transformado ideas en
-                            realidad con diseño personalizado y
-                            materiales premium.
+                            {paragraph1}
                         </p>
 
                         <p className="text-gray-700 text-base leading-relaxed">
-                            Cada pieza que creamos nace de la pasión por el detalle y el
-                            compromiso de ofrecer un resultado que supere expectativas.
+                            {paragraph2}
                         </p>
                     </motion.div>
                 </div>
@@ -89,7 +121,7 @@ export default function WeSection2() {
                 open={lightbox.isOpen}
                 close={lightbox.close}
                 index={lightbox.index}
-                slides={defaultAboutGalleryItems.map((g) => ({ src: g.src }))}
+                slides={images.map((g) => ({ src: g.src }))}
             />
         </section>
     );

@@ -1,22 +1,39 @@
-//widget/main/Main.tsx
-import Section1 from "@/features/home/ui/section1/Section1";
-import Section2 from "@/features/home/ui/section2/Section2";
-import Section3 from "@/features/home/ui/section3/Section3";
-import Section4 from "@/features/home/ui/section4/Section4";
-import SectionTestimonial from "@/features/home/ui/SectionTestimonial/SectionTestimonial";
-import SectionContact from "@/features/home/ui/SectionContact/SectionContact";
-import SectionProcess from "@/features/home/ui/SectionProcess/SectionProcess";
+// features/home/ui/MainHome.tsx
+//
+// Ya no arma el Home a mano (Section1, Section4, SectionProcess...) en un
+// orden fijo escrito aca: recibe la navegacion "/" que ya trajo
+// app/page.tsx (desde getSite(), el mismo JSON que uso app/layout.tsx para
+// Header/Footer) y pinta sus secciones en el orden que ya llego
+// (section_order), delegando en SectionRenderer que componente usar para
+// cada section_type.
 
-export default function MainHome(){
-    return(
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import { normalizeSections } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import SectionRenderer from "@/shared/components/section_renderer/SectionRenderer";
+
+type Props = {
+    // null = /v1/public/site fallo (ver app/page.tsx) o esta navegacion no
+    // existe/esta desactivada. No hay fallback hardcodeado para todo el
+    // Home: si esto viene null, se prefiere no mostrar nada a mostrar un
+    // Home "de mentira" con contenido inventado.
+    navigation: SiteNavigationDto | null;
+};
+
+export default function MainHome({ navigation }: Props) {
+    if (!navigation) {
+        return null;
+    }
+
+    const sections = normalizeSections(navigation.sections);
+    console.info("Inicio ======================");
+    console.info(JSON.stringify(sections));
+
+
+    return (
         <main>
-            <Section1/>
-            <Section4/>
-            <SectionProcess/>
-            <Section2 />
-            <Section3/>
-            <SectionTestimonial/>
-            <SectionContact/>
+            {sections.map((section) => (
+                <SectionRenderer key={section.id_section} section={section} />
+            ))}
         </main>
     );
 }

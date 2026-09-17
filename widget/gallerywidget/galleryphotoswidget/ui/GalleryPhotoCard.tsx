@@ -22,7 +22,7 @@ export default function GalleryPhotoCard({ item }: GalleryPhotoCardProps) {
                     alt={item.title}
                     fill
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover"
+                    className={item.fit ?? "object-cover"}
                 />
             </a>
 
@@ -41,6 +41,19 @@ export default function GalleryPhotoCard({ item }: GalleryPhotoCardProps) {
                 >
                     Ver más detalles →
                 </Link>
+
+                {/* Navegacion opcional de la imagen (image.link/link_label) —
+                    distinto del link de detalle interno de arriba. */}
+                {item.link && (
+                    <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-600 text-sm hover:underline"
+                    >
+                        {item.linkLabel ?? "Ver enlace"}
+                    </a>
+                )}
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { GALLERY_CATEGORIES, type GalleryItem } from "@/features/gallery/data/galleryItems";
+import type { GalleryItem } from "@/features/gallery/data/galleryItems";
 import Container from "@/shared/ui/container/Container";
 
 type GalleryDetailSection1Props = {
@@ -18,7 +18,7 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                         alt={item.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
+                        className={item.fit ?? "object-cover"}
                     />
 
                     {/* Badge “Más vendido” */}
@@ -41,22 +41,12 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                     </div>
 
                     <div className="text-xs tracking-[0.2em] uppercase text-gray-500">
-                        {GALLERY_CATEGORIES[item.category] ?? item.category}
+                        {item.category}
                     </div>
 
                     <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
                         {item.title}
                     </h1>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <div className="flex items-center text-amber-400">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <i key={i} className="fas fa-star text-xs" />
-                            ))}
-                        </div>
-                        <span className="font-semibold text-gray-800">{item.rating}</span>
-                        <span className="text-gray-500">({item.reviews} opiniones)</span>
-                    </div>
 
                     <p className="text-gray-700 text-sm md:text-base leading-relaxed">
                         {item.description}
@@ -126,6 +116,18 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                         >
                             Ver más modelos
                         </Link>
+
+                        {/* Navegacion opcional de la imagen (image.link/link_label). */}
+                        {item.link && (
+                            <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                            >
+                                {item.linkLabel ?? "Ver más"}
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>

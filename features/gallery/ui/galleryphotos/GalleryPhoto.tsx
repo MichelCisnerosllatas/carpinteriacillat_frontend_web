@@ -12,27 +12,38 @@ import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import "lightgallery/css/lg-fullscreen.css";
-import { galleryItems, GALLERY_CATEGORIES } from "@/features/gallery/data/galleryItems";
 import { useStickyTabs } from "@/widget/gallerywidget/galleryphotoswidget/lib/useStickyTabs";
 import GalleryTabs from "@/widget/gallerywidget/galleryphotoswidget/ui/GalleryTabs";
 import GalleryPhotoCard from "@/widget/gallerywidget/galleryphotoswidget/ui/GalleryPhotoCard";
+import { getGalleryItems } from "@/features/gallery/lib/getGalleryItems";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
-// "Todos" + una entrada por cada categoría registrada en GALLERY_CATEGORIES.
-// Agregar una categoría nueva en galleryItems.ts hace aparecer su tab acá solo.
-const tabs = [
-    { value: "todos", label: "Todos" },
-    ...Object.entries(GALLERY_CATEGORIES).map(([value, label]) => ({ value, label })),
-];
+type Props = {
+    // section_type === "gallery_grid".
+    section: SiteSectionDto;
+};
 
 const HEADER_OFFSET = 60; // px, ajusta a lo que mejor se vea
 
-export default function GalleryPhoto() {
+export default function GalleryPhoto({ section }: Props) {
     const [activeTab, setActiveTab] = useState("todos");
     const { tabRef, isStuck } = useStickyTabs();
 
+    const items = getGalleryItems(section);
+
+    // Las categorias ya no vienen de un mapa fijo (GALLERY_CATEGORIES):
+    // se derivan de las categorias que realmente traen las imagenes
+    // (image.label). Si el backend agrega una categoria nueva, su tab
+    // aparece solo, sin tocar este componente.
+    const categories = Array.from(new Set(items.map((item) => item.category))).filter(Boolean);
+    const tabs = [
+        { value: "todos", label: "Todos" },
+        ...categories.map((category) => ({ value: category, label: category })),
+    ];
+
     const filteredImages = activeTab === "todos"
-        ? galleryItems
-        : galleryItems.filter((img) => img.category === activeTab);
+        ? items
+        : items.filter((img) => img.category === activeTab);
 
     return (
         <section className="p-6">

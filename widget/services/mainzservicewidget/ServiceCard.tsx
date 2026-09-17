@@ -27,7 +27,9 @@ export default function ServiceCard({
             </div>
 
             <h3 className="mt-5 text-[16px] font-bold text-slate-900">{title}</h3>
-            <p className="mt-2  text-sm text-slate-600">{description}</p>
+            {/* Algunas secciones (ej. "Servicios Especializados") no traen
+                description — se omite el parrafo en vez de dejarlo vacio. */}
+            {description && <p className="mt-2 text-sm text-slate-600">{description}</p>}
         </div>
     );
 }

@@ -13,9 +13,10 @@ import Header from "@/widget/header/Header";
 import Footer from "@/widget/footer/Footer";
 import NextTopLoader from "nextjs-toploader";
 import AppProviders from "./providers";
-import { navigationsService } from "@/shared/services/navigation_service/services/navigations.service";
-import { pickActiveNavigations } from "@/shared/services/navigation_service/lib/pickActiveNavigations";
-import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
+import { getSite } from "@/shared/services/site_service/lib/getSite";
+import { normalizeNavigations } from "@/shared/services/site_service/lib/normalizeNavigations";
+import { findFloatingWhatsapp, type FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,41 +38,40 @@ export const metadata: Metadata = {
 };
 
 
-// Trae la navegacion ANTES de renderizar nada, corriendo en el servidor de
-// Next (no en el navegador del usuario). Por eso este archivo puede usar
-// "await" directo sin useEffect ni loading: layout.tsx es un Server
-// Component (no tiene "use client" arriba), asi que Next lo espera a que
-// termine y recien ahi arma el HTML que le manda al navegador.
+// Trae TODO el sitio (navegacion + secciones + botones + items + imagenes)
+// ANTES de renderizar nada, corriendo en el servidor de Next (no en el
+// navegador del usuario). Por eso este archivo puede usar "await" directo
+// sin useEffect ni loading: layout.tsx es un Server Component (no tiene
+// "use client" arriba), asi que Next lo espera a que termine y recien ahi
+// arma el HTML que le manda al navegador.
 //
-// Devuelve:
+// getSite() ya hace la unica peticion HTTP real (GET /v1/public/site,
+// cacheada con la etiqueta "site" — ver shared/services/site_service/lib/
+// getSite.ts). Aca solo se "reparte" ese mismo JSON: Header/Footer
+// necesitan site.navigations, y Footer ademas necesita el boton flotante
+// de WhatsApp (ver findFloatingWhatsapp.ts).
+//
+// navigations:
 //   - un array (puede venir vacío si de verdad no hay links configurados)
 //     cuando la peticion salio bien.
-//   - null cuando la peticion FALLO (sin internet, backend caido, etc.).
-//     Se distingue de "array vacío" a proposito: Header y Footer necesitan
-//     saber si "no hay datos porque fallo" para poder mostrar su fallback.
-//
-// CACHE: en vez de volver a pedir esto cada tanto tiempo (lo que hacia
-// antes con "revalidate: 300"), ahora se guarda con la etiqueta
-// "navigation" y se queda cacheado INDEFINIDAMENTE — cero peticiones de
-// fondo — hasta que alguien la invalide a propósito llamando a
-// app/api/revalidate-navigation/route.ts (eso es lo que hay que hacer
-// despues de editar un link en el backend/admin, para que se refresque al
-// instante en vez de esperar el proximo deploy).
-async function getInitialNavigations(): Promise<NavigationApiItem[] | null> {
-  try {
-    const response = await navigationsService.get(
-      { state: 1, per_page: 50 },
-      { next: { tags: ["navigation"] } }
-    );
-    return pickActiveNavigations(response.data);
-  } catch (err) {
-    // Sin este log, si esto vuelve a fallar no hay forma de saber por que
-    // (el catch se "tragaba" el error en silencio). Aparece en la consola
-    // de donde corre "npm run dev" / el servidor de produccion, NO en la
-    // consola del navegador (esto corre en el servidor).
-    console.error("[layout] No se pudo traer la navegacion en el servidor:", err);
-    return null;
-  }
+//   - null cuando la peticion FALLO (sin internet, backend caido, etc.) o
+//     el sitio no vino. Se distingue de "array vacío" a proposito: Header
+//     y Footer necesitan saber si "no hay datos porque fallo" para poder
+//     mostrar su fallback.
+async function getLayoutData(): Promise<{
+  navigations: SiteNavigationDto[] | null;
+  whatsappButton: FloatingWhatsappButton | null;
+}> {
+  const site = await getSite();
+  console.info("Layout ======================");
+    console.info(JSON.stringify(site));
+
+  if (!site) return { navigations: null, whatsappButton: null };
+
+  return {
+    navigations: normalizeNavigations(site.navigations),
+    whatsappButton: findFloatingWhatsapp(site),
+  };
 }
 
 // Server Component: es "async function" (no puede tener "use client"),
@@ -82,7 +82,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialNavigations = await getInitialNavigations();
+  const { navigations: initialNavigations, whatsappButton } = await getLayoutData();
 
   // suppressHydrationWarning solo evita el aviso de mismatch causado por
   // extensiones de navegador (ej. Dark Reader) que inyectan atributos en
@@ -103,7 +103,7 @@ export default async function RootLayout({
               desde aca. */}
           <Header initialNavigations={initialNavigations} />
           {children}
-          <Footer initialNavigations={initialNavigations} />
+          <Footer initialNavigations={initialNavigations} whatsappButton={whatsappButton} />
         </AppProviders>
       </body>
     </html>

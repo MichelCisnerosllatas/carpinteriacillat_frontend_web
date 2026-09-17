@@ -1,18 +1,28 @@
 // features/we/ui/MainWe.tsx
-import WeSection1 from "@/features/we/ui/wesection1/WeSection1";
-import WeSection2 from "@/features/we/ui/wesection2/WeSection2";
-import WeValuesSection from "@/features/we/ui/wevaluessection/WeValuesSection";
-import WeTeamSection from "@/features/we/ui/weteamsection/WeTeamSection";
-import WeHistorySection from "@/features/we/ui/wehostorysection/WeHistorySection";
+//
+// Mismo patron que features/home/ui/MainHome.tsx.
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import { normalizeSections } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import SectionRenderer from "@/shared/components/section_renderer/SectionRenderer";
 
-export default function MainWe() {
+type Props = {
+    navigation: SiteNavigationDto | null;
+};
+
+export default function MainWe({ navigation }: Props) {
+    if (!navigation) {
+        return null;
+    }
+
+    const sections = normalizeSections(navigation.sections);
+    console.info("we ======================");
+    console.info(JSON.stringify(sections));
+
     return (
         <main>
-            <WeSection1/>
-            <WeSection2/>
-            <WeValuesSection/>
-            <WeTeamSection/>
-            <WeHistorySection/>
+            {sections.map((section) => (
+                <SectionRenderer key={section.id_section} section={section} />
+            ))}
         </main>
     );
 }

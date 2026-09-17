@@ -1,68 +1,62 @@
 // features/gallery/data/galleryItems.ts
-// Data local de la Galería (sin API todavía). Compartida entre el grid
-// (GalleryPhoto), sus tabs de filtro y la página de detalle (/gallery/[id]).
 //
-// GALLERY_CATEGORIES es la única fuente de verdad para las categorías:
-// para agregar una categoría nueva (ej. "cocinas") solo hay que sumarle
-// una entrada aquí y sus items en galleryItems — el tab de filtro y el
-// breadcrumb del detalle aparecen solos, sin tocar ningún componente.
+// Antes esta era la unica fuente de datos de la Galeria (array fijo +
+// GALLERY_CATEGORIES como mapa de slug -> nombre visible). Ahora la fuente
+// real es section.images de la seccion "gallery_grid" (ver
+// features/gallery/lib/getGalleryItems.ts) — "category" ya viene como
+// texto legible directo en image.label, no hace falta un mapa aparte.
 //
-// Nota: hoy solo hay fotos reales de la carpintería para 3 categorías
-// (puertas/ventanas, comedor, estanterías). Faltan fotos reales de
-// cocinas, closets, oficina, baños y proyectos comerciales — cuando la
-// carpintería las tenga, se agregan acá y listo.
+// Este archivo queda como:
+//   1) el tipo GalleryItem que sigue usando toda la UI de galeria.
+//   2) FALLBACK_GALLERY_ITEMS: datos de respaldo temporal mientras el
+//      backend no tenga imagenes cargadas en esa seccion (ver
+//      FRONTEND_NEXTJS_SITE_V3.md #41).
+//
+// NOTA: "rating"/"reviews" ya no existen — no hay ningun campo en
+// SiteSectionImageDto que los represente, y no se debe inventar un dato
+// que el backend no manda.
 
 export type GalleryItem = {
-    id: number;
+    id: string;
     category: string;
     title: string;
     url: string;
     description: string;
-    rating: number;
-    reviews: number;
+    // Clase Tailwind ya resuelta (ver resolveImageFit.ts). Opcional porque
+    // el fallback local no trae "fix" del backend.
+    fit?: string;
+    // Navegacion opcional de la imagen (image.link/image.link_label).
+    link?: string;
+    linkLabel?: string;
 };
 
-export const GALLERY_CATEGORIES: Record<string, string> = {
-    puertas: "Puertas y Ventanas",
-    comedor: "Comedor",
-    estanterias: "Estanterías",
-};
-
-export const galleryItems: GalleryItem[] = [
+export const FALLBACK_GALLERY_ITEMS: GalleryItem[] = [
     {
-        id: 1,
-        category: "puertas",
+        id: "1",
+        category: "Puertas y Ventanas",
         title: "Ventana corrediza a medida",
         url: "/img/sistema/carpinteriacillat1.png",
         description: "Ventana de madera fabricada e instalada a medida, con acabado natural.",
-        rating: 4.8,
-        reviews: 23,
     },
     {
-        id: 2,
-        category: "comedor",
+        id: "2",
+        category: "Comedor",
         title: "Aparador de comedor con vitrina",
         url: "/img/sistema/carpinteriacillat3.png",
         description: "Aparador y vitrina en madera, con espacio de almacenaje y exhibición.",
-        rating: 4.9,
-        reviews: 18,
     },
     {
-        id: 3,
-        category: "estanterias",
+        id: "3",
+        category: "Estanterías",
         title: "Estantería modular",
         url: "/img/sistema/carpinteriacillat2.jpg",
         description: "Estantería de madera a medida, ideal para sala o depósito.",
-        rating: 4.7,
-        reviews: 12,
     },
     {
-        id: 4,
-        category: "estanterias",
+        id: "4",
+        category: "Estanterías",
         title: "Estantería en proceso de fabricación",
         url: "/img/sistema/carpinteriacillat4.jpg",
         description: "Así se ve el armado artesanal de nuestras estanterías antes del acabado final.",
-        rating: 4.8,
-        reviews: 9,
     },
 ];

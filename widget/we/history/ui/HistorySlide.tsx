@@ -16,7 +16,7 @@ export default function HistorySlide({ story, stepNumber, onOpen }: HistorySlide
                 alt={story.title}
                 width={200}
                 height={200}
-                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                className={`absolute inset-0 w-full h-full opacity-80 ${story.fit ?? "object-cover"}`}
             />
 
             {/* Degradado para lectura */}
@@ -34,6 +34,20 @@ export default function HistorySlide({ story, stepNumber, onOpen }: HistorySlide
                     <p className="text-gray-100 text-sm md:text-base leading-relaxed">
                         {story.desc}
                     </p>
+                    {/* Navegacion opcional de la imagen (image.link/link_label) —
+                        stopPropagation para que el click no dispare tambien
+                        onOpen() (el div completo abre el lightbox). */}
+                    {story.link && (
+                        <a
+                            href={story.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-yellow-300 underline underline-offset-2 hover:text-yellow-200"
+                        >
+                            {story.linkLabel ?? "Ver más"}
+                        </a>
+                    )}
                 </div>
             </div>
         </div>

@@ -6,9 +6,3 @@ export type Testimonial = {
     city?: string;
     rating?: number;
 };
-
-export type SectionTestimonialProps = {
-    title?: string;
-    subtitle?: string;
-    items?: Testimonial[];
-};

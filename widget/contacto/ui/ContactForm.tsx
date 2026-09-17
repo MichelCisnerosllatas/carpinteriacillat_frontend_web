@@ -3,17 +3,51 @@
 
 import { FormEvent, useState } from "react";
 import { buildMailtoUrl } from "../lib/buildMailtoUrl";
+import { contactButtonVariantClass } from "../lib/contactButtonVariant";
 import { projectTypeOptions } from "../model/constants";
+import type { SiteSectionButtonDto } from "@/shared/services/site_service/model/siteget.dto";
+
+// TODO(contacto-real): el backend retiro POST /v1/public/contact-messages
+// (ver FRONTEND_NEXTJS_SITE_V3.md #31-34) — hoy no existe forma publica de
+// guardar el mensaje en Laravel, por eso este formulario sigue mandando
+// por mailto: como unico flujo real. Ya existe el service listo para
+// cuando el backend lo restaure:
+//
+//   import { contactMessagesService } from "@/shared/services/contactmessages_service/services/contactmessages.service";
+//
+//   await contactMessagesService.post({
+//     name: data.name,
+//     email: data.email,
+//     phone: data.phone,
+//     project_type: data.projectType as ContactMessageProjectType, // ya alineado, ver model/constants.ts
+//     message: data.message,
+//   });
+//
+// Cuando ese endpoint vuelva a existir: reemplazar el bloque de
+// buildMailtoUrl/window.location.href de handleSubmit por esta llamada
+// (con su try/catch y manejo de 429/errores via el "notify" del proyecto),
+// y esta prop ya no necesitaria "recipientEmail" (ver #36).
 
 type ContactFormProps = {
     recipientEmail: string;
+    // El botón "Enviar mensaje" es un section_button real (`action_key: "contact-form-submit"`,
+    // ver SectionContact.tsx) — administrable desde el intranet (label/icono/variante/estado),
+    // pero su submit sigue siendo lógica propia de este componente, no depende de `url`.
+    // `null` = el registro todavia no existe en el backend (defensivo, cae al texto por
+    // defecto de siempre); `state: false` = el admin lo ocultó a propósito.
+    submitButton?: SiteSectionButtonDto | null;
 };
 
 export default function ContactForm({
     recipientEmail,
+    submitButton,
 }: ContactFormProps) {
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
+
+    const submitLabel = submitButton?.label || "Enviar mensaje";
+    const submitIcon = submitButton?.icon || "fas fa-paper-plane";
+    const showSubmitButton = submitButton?.state !== false;
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -358,45 +392,47 @@ export default function ContactForm({
                     sm:justify-between
                 "
             >
-                {/* BOTÓN ENVIAR */}
-                <button
-                    type="submit"
-                    disabled={sending}
-                    className="
-                        inline-flex
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-full
-                        bg-red-600
-                        px-5
-                        py-2.5
-                        text-sm
-                        font-semibold
-                        text-white
-                        shadow-sm
-                        transition-all
-                        duration-300
-                        hover:bg-red-700
-                        hover:shadow-md
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                    "
-                >
-                    {sending ? (
-                        <>
-                            <i className="fas fa-circle-notch animate-spin text-xs" />
+                {/* BOTÓN ENVIAR — administrable desde el intranet (label/icono/variante/
+                    estado) via el section_button "contact-form-submit"; oculto solo si el
+                    admin lo desactivó a propósito (ver `showSubmitButton` arriba). */}
+                {showSubmitButton && (
+                    <button
+                        type="submit"
+                        disabled={sending}
+                        className={`
+                            inline-flex
+                            items-center
+                            justify-center
+                            gap-2
+                            rounded-full
+                            px-5
+                            py-2.5
+                            text-sm
+                            font-semibold
+                            shadow-sm
+                            transition-all
+                            duration-300
+                            hover:shadow-md
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            ${contactButtonVariantClass(submitButton?.variant)}
+                        `}
+                    >
+                        {sending ? (
+                            <>
+                                <i className="fas fa-circle-notch animate-spin text-xs" />
 
-                            Enviando...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fas fa-paper-plane text-xs" />
+                                Enviando...
+                            </>
+                        ) : (
+                            <>
+                                <i className={`${submitIcon} text-xs`} />
 
-                            Enviar mensaje
-                        </>
-                    )}
-                </button>
+                                {submitLabel}
+                            </>
+                        )}
+                    </button>
+                )}
 
 
                 {/* MENSAJE DE ÉXITO */}

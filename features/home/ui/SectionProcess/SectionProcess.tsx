@@ -1,5 +1,7 @@
 // features/home/ui/SectionProcess/SectionProcess.tsx
 import Container from "@/shared/ui/container/Container";
+import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Step = {
     number: string;
@@ -8,7 +10,9 @@ type Step = {
     icon: string;
 };
 
-const steps: Step[] = [
+// Fallback temporal: se muestra solo si la seccion "process" todavia no
+// tiene items cargados en el backend (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+const FALLBACK_STEPS: Step[] = [
     {
         number: "01",
         title: "Consulta y Medidas",
@@ -35,27 +39,43 @@ const steps: Step[] = [
     },
 ];
 
-export default function SectionProcess() {
+type Props = {
+    // section_type === "process". Mapeo: number <- item.label, title <-
+    // item.title, description <- item.description, icon <- item.icon
+    // (ver FRONTEND_NEXTJS_SITE_V3.md #23).
+    section: SiteSectionDto;
+};
+
+export default function SectionProcess({ section }: Props) {
+    const apiSteps = normalizeItems(section.items).map((item) => ({
+        number: item.label ?? "",
+        title: item.title ?? "",
+        description: item.description ?? "",
+        icon: item.icon ?? "",
+    }));
+
+    const steps = apiSteps.length > 0 ? apiSteps : FALLBACK_STEPS;
+
     return (
         <section id="proceso" className="py-16 bg-white">
             <Container>
                 <div className="text-center mb-10">
                     <p className="text-sm uppercase tracking-[0.2em] text-brand-red font-semibold">
-                        Nuestro Proceso
+                        {section.section_subtitle ?? "Nuestro Proceso"}
                     </p>
                     <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">
-                        Cómo Trabajamos
+                        {section.section_title ?? "Cómo Trabajamos"}
                     </h2>
                     <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-                        De la idea al mueble terminado, en cuatro pasos claros y
-                        acompañados en todo momento.
+                        {section.section_description ??
+                            "De la idea al mueble terminado, en cuatro pasos claros y acompañados en todo momento."}
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {steps.map((step) => (
+                    {steps.map((step, index) => (
                         <div
-                            key={step.number}
+                            key={`${step.number}-${index}`}
                             className="relative bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all"
                         >
                             <span className="absolute top-4 right-5 text-3xl font-extrabold text-gray-100">

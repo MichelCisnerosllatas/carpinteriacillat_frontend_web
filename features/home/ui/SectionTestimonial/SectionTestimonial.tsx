@@ -9,19 +9,37 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import Container from "@/shared/ui/container/Container";
-import { SectionTestimonialProps } from "@/widget/testimonial/model/types";
 import { defaultTestimonials } from "@/widget/testimonial/model/mock";
 import TestimonialArrow from "@/widget/testimonial/ui/TestimonialArrow";
 import TestimonialCard from "@/widget/testimonial/ui/TestimonialCard";
+import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
+type Props = {
+    // section_type === "testimonial_carousel". Items con item_type ===
+    // "testimonial". Mapeo: name <- item.title, role <- item.subtitle,
+    // message <- item.description, city <- item.label, rating <-
+    // item.rating.
+    section: SiteSectionDto;
+};
 
-export default function SectionTestimonial({
-    title,
-    subtitle,
-    items,
-}: SectionTestimonialProps) {
+export default function SectionTestimonial({ section }: Props) {
     const swiperRef = useRef<SwiperType | null>(null);
-    const data = items && items.length > 0 ? items : defaultTestimonials;
+
+    const apiItems = normalizeItems(section.items)
+        .filter((item) => item.item_type === "testimonial")
+        .map((item) => ({
+            id: String(item.id_section_item),
+            name: item.title ?? "",
+            role: item.subtitle ?? "",
+            message: item.description ?? "",
+            city: item.label ?? undefined,
+            rating: item.rating ?? undefined,
+        }));
+
+    // Fallback temporal mientras el backend no tenga cargados los
+    // testimonios de esta seccion (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+    const data = apiItems.length > 0 ? apiItems : defaultTestimonials;
 
     return (
         <section
@@ -33,18 +51,16 @@ export default function SectionTestimonial({
                 {/* ENCABEZADO */}
                 <div className="mx-auto mb-10 max-w-5xl text-center md:mb-12 lg:mb-14">
                     <p className="text-xs font-bold uppercase tracking-[0.28em] text-red-600 md:text-sm">
-                        {subtitle ?? "Lo que dicen nuestros clientes"}
+                        {section.section_subtitle ?? "Lo que dicen nuestros clientes"}
                     </p>
 
                     <h2 className="mx-auto mt-3 max-w-5xl text-3xl font-extrabold leading-[1.12] tracking-tight text-slate-950 md:text-4xl lg:text-[44px]">
-                        {title ?? "Historias de confianza y buenos resultados"}
+                        {section.section_title ?? "Historias de confianza y buenos resultados"}
                     </h2>
 
                     <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-500 md:text-base md:leading-7">
-                        Cada proyecto termina con un cliente
-                        satisfecho. Estas son algunas opiniones
-                        de personas y empresas que confiaron en
-                        CILLAT.
+                        {section.section_description ??
+                            "Cada proyecto termina con un cliente satisfecho. Estas son algunas opiniones de personas y empresas que confiaron en CILLAT."}
                     </p>
                 </div>
 

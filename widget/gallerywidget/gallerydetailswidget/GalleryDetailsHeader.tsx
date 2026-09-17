@@ -1,6 +1,6 @@
 // widget/gallery/GalleryDetailsHeader.tsx
 import Link from "next/link";
-import { GALLERY_CATEGORIES, type GalleryItem } from "@/features/gallery/data/galleryItems";
+import type { GalleryItem } from "@/features/gallery/data/galleryItems";
 import Container from "@/shared/ui/container/Container";
 
 type GalleryDetailsHeaderProps = {
@@ -24,7 +24,7 @@ export default function GalleryDetailsHeader({ item }: GalleryDetailsHeaderProps
                         Galería
                     </Link>
                     <span>/</span>
-                    <span>{GALLERY_CATEGORIES[item.category] ?? item.category}</span>
+                    <span>{item.category}</span>
                     <span>/</span>
                     <span className="text-gray-700 font-medium">
                         {item.title}
