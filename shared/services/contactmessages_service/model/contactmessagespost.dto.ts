@@ -19,7 +19,7 @@ export type ContactMessagePostRequestDto = {
 
 export type ContactMessageApiItem = {
   id: number
-  created_at: string
+  // created_at: string
 }
 
 export type ContactMessagePostResponseDto = {

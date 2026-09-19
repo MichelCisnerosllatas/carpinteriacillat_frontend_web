@@ -1,5 +1,6 @@
 "use client";
 import { useRef } from "react";
+import Link from "next/link";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -12,30 +13,34 @@ import Container from "@/shared/ui/container/Container";
 import { defaultTestimonials } from "@/widget/testimonial/model/mock";
 import TestimonialArrow from "@/widget/testimonial/ui/TestimonialArrow";
 import TestimonialCard from "@/widget/testimonial/ui/TestimonialCard";
-import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import { getTestimonySettings } from "@/widget/testimonial/lib/getTestimonySettings";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import type { Testimonial } from "@/widget/testimonial/model/types";
 
 type Props = {
-    // section_type === "testimonial_carousel". Items con item_type ===
-    // "testimonial". Mapeo: name <- item.title, role <- item.subtitle,
-    // message <- item.description, city <- item.label, rating <-
-    // item.rating.
+    // section_type === "testimonial_carousel". Testimonios en su propia tabla
+    // (`testimony_web`, backend), ya NO dentro de `section.items` — ver
+    // TestimonyWebSeeder.php / create_testimony_web_tables migration.
     section: SiteSectionDto;
 };
 
 export default function SectionTestimonial({ section }: Props) {
     const swiperRef = useRef<SwiperType | null>(null);
 
-    const apiItems = normalizeItems(section.items)
-        .filter((item) => item.item_type === "testimonial")
-        .map((item) => ({
-            id: String(item.id_section_item),
-            name: item.title ?? "",
-            role: item.subtitle ?? "",
-            message: item.description ?? "",
-            city: item.label ?? undefined,
-            rating: item.rating ?? undefined,
-        }));
+    const apiItems: Testimonial[] = section.testimonies.map((t) => ({
+        id: String(t.id_testimony_web),
+        name: t.name,
+        role: t.role ?? "",
+        message: t.message,
+        city: t.city ?? undefined,
+        rating: t.rating ?? undefined,
+        email: t.email ?? undefined,
+        photoUrl: t.photo_url,
+        isDelivered: t.is_delivered,
+        isVerified: t.is_verified,
+    }));
+
+    const settings = getTestimonySettings(section.testimony_settings);
 
     // Fallback temporal mientras el backend no tenga cargados los
     // testimonios de esta seccion (ver FRONTEND_NEXTJS_SITE_V3.md #41).
@@ -113,7 +118,7 @@ export default function SectionTestimonial({ section }: Props) {
                     >
                         {data.map((item) => (
                             <SwiperSlide key={item.id} className="!h-auto">
-                                <TestimonialCard item={item}/>
+                                <TestimonialCard item={item} settings={settings}/>
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -126,6 +131,18 @@ export default function SectionTestimonial({ section }: Props) {
                         }
                         className="absolute right-1 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-md transition-all duration-300 hover:scale-105 hover:border-red-600 hover:bg-red-600 hover:text-white lg:flex"
                     />
+                </div>
+
+                {/* CTA — envía a /testimonials, página propia con su wizard
+                    form -> vista previa -> éxito (ver TestimonySubmitForm.tsx). */}
+                <div className="mt-10 text-center">
+                    <Link
+                        href="/testimonials"
+                        className="inline-flex items-center gap-2 rounded-full border border-red-600 px-5 py-2.5 text-sm font-semibold text-red-600 transition-all duration-300 hover:bg-red-600 hover:text-white"
+                    >
+                        <i className="fas fa-pen" />
+                        Deja tu testimonio
+                    </Link>
                 </div>
             </Container>
         </section>

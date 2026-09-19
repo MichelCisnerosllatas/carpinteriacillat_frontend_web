@@ -8,6 +8,9 @@ import type { ContactMessagePostRequestDto, ContactMessagePostResponseDto } from
 // respuesta 429 llega como HttpError con status 429.
 export const contactMessagesService = {
   post: (param: ContactMessagePostRequestDto): Promise<ContactMessagePostResponseDto> => {
-    return httpClient.post<ContactMessagePostResponseDto>(coreUrl(CONTACT_MESSAGES_ENDPOINTS.v1.post), param)
+    return httpClient.post<ContactMessagePostResponseDto>(
+      coreUrl(CONTACT_MESSAGES_ENDPOINTS.v1.post), 
+      param
+    );
   },
 }

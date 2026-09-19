@@ -8,6 +8,8 @@ export const defaultTestimonials: Testimonial[] = [
         city: "Iquitos",
         message: "Muy cumplidos con los tiempos y el diseño quedó tal como lo imaginamos. Nuestra cocina ahora es el corazón de la casa.",
         rating: 5,
+        isDelivered: true,
+        isVerified: true,
     },
     {
         id: "2",
@@ -16,6 +18,8 @@ export const defaultTestimonials: Testimonial[] = [
         city: "Iquitos",
         message: "Instalaron el mobiliario de nuestra tienda en tiempo récord. Se nota la calidad en los acabados.",
         rating: 5,
+        isDelivered: true,
+        isVerified: true,
     },
     {
         id: "3",
@@ -24,6 +28,8 @@ export const defaultTestimonials: Testimonial[] = [
         city: "Punchana",
         message: "Mandé a hacer mi closet y escritorio de trabajo. Aprovecharon al máximo cada espacio, quedó espectacular.",
         rating: 4,
+        isDelivered: true,
+        isVerified: true,
     },
     {
         id: "4",
@@ -32,6 +38,8 @@ export const defaultTestimonials: Testimonial[] = [
         city: "San Juan Bautista",
         message: "Renovamos todo el mobiliario del local. Los clientes nos felicitan por el nuevo ambiente.",
         rating: 5,
+        isDelivered: true,
+        isVerified: true,
     },
     {
         id: "5",
@@ -40,6 +48,8 @@ export const defaultTestimonials: Testimonial[] = [
         city: "Iquitos",
         message: "Excelente aliado para proyectos integrales. Respetan los planos, los detalles y proponen buenas soluciones.",
         rating: 5,
+        isDelivered: true,
+        isVerified: true,
     },
     {
         id: "6",
@@ -48,5 +58,7 @@ export const defaultTestimonials: Testimonial[] = [
         city: "Bellavista",
         message: "Hicieron los muebles de oficina de nuestra empresa. Muy buen balance entre diseño y funcionalidad.",
         rating: 4,
+        isDelivered: true,
+        isVerified: true,
     },
 ];

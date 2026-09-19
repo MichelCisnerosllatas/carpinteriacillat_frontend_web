@@ -1,23 +1,39 @@
-import type { Testimonial } from "../model/types";
+import type { Testimonial, TestimonySettings } from "../model/types";
 import { getInitials } from "../lib/getInitials";
 
 import TestimonialStars from "./TestimonialStars";
 
 type TestimonialCardProps = {
     item: Testimonial;
+    settings: TestimonySettings;
 };
 
 export default function TestimonialCard({
     item,
+    settings,
 }: TestimonialCardProps) {
+    const showPhoto = settings.showPhoto && Boolean(item.photoUrl);
+    const showDelivered = settings.showDelivered && item.isDelivered;
+    const showVerified = settings.showVerified && item.isVerified;
+    const showFooter = showDelivered || showVerified;
+
     return (
         <article className="group flex h-full min-h-[290px] flex-col rounded-2xl border border-slate-700/40 bg-gray-100 p-6 shadow-[0_8px_25px_rgba(15,23,42,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_35px_rgba(15,23,42,0.16)]">
 
             {/* CLIENTE */}
             <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/10 text-base font-bold text-amber-400">
-                    {getInitials(item.name)}
-                </div>
+                {showPhoto ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- avatar dentro de un carrusel infinito (Swiper loop clona slides); next/image no soporta bien nodos clonados.
+                    <img
+                        src={item.photoUrl ?? undefined}
+                        alt={item.name}
+                        className="h-14 w-14 shrink-0 rounded-full border border-amber-400/70 object-cover"
+                    />
+                ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/10 text-base font-bold text-amber-400">
+                        {getInitials(item.name)}
+                    </div>
+                )}
 
                 <div className="min-w-0">
                     <h3 className="truncate text-base font-bold leading-tight">
@@ -25,22 +41,24 @@ export default function TestimonialCard({
                     </h3>
 
                     <p className="mt-1 text-[13px] leading-5 text-slate-400">
-                        {item.role}
-
-                        {item.city && (
+                        {settings.showCity && item.city && (
                             <>
-                                <span className="mx-1 text-slate-600">
-                                    ·
-                                </span>
-
                                 {item.city}
                             </>
                         )}
                     </p>
 
-                    <TestimonialStars
-                        rating={item.rating}
-                    />
+                    {settings.showEmail && item.email && (
+                        <p className="truncate text-[12px] leading-5 text-slate-500">
+                            {item.email}
+                        </p>
+                    )}
+
+                    {settings.showRating && (
+                        <TestimonialStars
+                            rating={item.rating}
+                        />
+                    )}
 
                 </div>
 
@@ -56,22 +74,27 @@ export default function TestimonialCard({
             </div>
 
             {/* FOOTER */}
-            <div className="flex items-center justify-between gap-4 border-t border-slate-700 pt-4 text-xs">
-                <div className="flex min-w-0 items-center gap-2 text-slate-400">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                        ✓
-                    </span>
+            {showFooter && (
+                <div className="flex items-center justify-between gap-4 border-t border-slate-700 pt-4 text-xs">
+                    {showDelivered && (
+                        <div className="flex min-w-0 items-center gap-2 text-slate-400">
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                                ✓
+                            </span>
 
-                    <span className="truncate">
-                        Proyecto entregado
-                    </span>
+                            <span className="truncate">
+                                Proyecto entregado
+                            </span>
+                        </div>
+                    )}
+
+                    {showVerified && (
+                        <span className="shrink-0 whitespace-nowrap text-[11px] italic text-slate-500">
+                            Cliente verificado
+                        </span>
+                    )}
                 </div>
-
-                <span className="shrink-0 whitespace-nowrap text-[11px] italic text-slate-500">
-                    Cliente verificado
-                </span>
-
-            </div>
+            )}
         </article>
     );
 }

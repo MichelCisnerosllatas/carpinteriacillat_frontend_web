@@ -17,6 +17,7 @@ import { getSite } from "@/shared/services/site_service/lib/getSite";
 import { normalizeNavigations } from "@/shared/services/site_service/lib/normalizeNavigations";
 import { findFloatingWhatsapp, type FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
 import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import { GoogleOneTap } from "@/widget/buttonproveedor/GoogleOneTap";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,8 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <GoogleOneTap />
+        
         <AppProviders>
           <NextTopLoader
             color="#F5C400"   // tu amarillo marca

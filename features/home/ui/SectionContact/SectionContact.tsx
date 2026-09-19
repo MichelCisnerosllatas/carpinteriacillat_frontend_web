@@ -22,7 +22,7 @@ type Props = {
     section: SiteSectionDto;
 };
 
-export default function SectionContact({ section }: Props) {
+export default function SectionContact({ section }: Props) {    
     const phone = getContactItem(section, "phone");
     const email = getContactItem(section, "email");
     const branch = getContactItem(section, "branch");

@@ -1,11 +1,15 @@
 //widget/contacto/ui/ContactForm.tsx
 "use client";
 
-import { FormEvent, useState } from "react";
-import { buildMailtoUrl } from "../lib/buildMailtoUrl";
+import { useEffect, useState, FormEvent} from "react";
 import { contactButtonVariantClass } from "../lib/contactButtonVariant";
 import { projectTypeOptions } from "../model/constants";
 import type { SiteSectionButtonDto } from "@/shared/services/site_service/model/siteget.dto";
+import { useContactMessageStore } from "@/shared/services/contactmessages_service/store/useContactMessageStore";
+import { ContactMessageProjectType } from "@/shared/services/contactmessages_service/model/contactmessagespost.dto";
+import { useGoogleAuthStore } from "@/shared/services/auth/store/google-auth.store";
+import { SelectedEmailFieldGoogle } from "@/widget/buttonproveedor/SelectedEmailFieldGoogle";
+import { loginWithGoogle } from "@/shared/lib/firebase/google/login-with-google";
 
 // TODO(contacto-real): el backend retiro POST /v1/public/contact-messages
 // (ver FRONTEND_NEXTJS_SITE_V3.md #31-34) — hoy no existe forma publica de
@@ -49,50 +53,36 @@ export default function ContactForm({
     const submitIcon = submitButton?.icon || "fas fa-paper-plane";
     const showSubmitButton = submitButton?.state !== false;
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const {submitContactMessage, isSubmitting} = useContactMessageStore();
+    const user = useGoogleAuthStore((state) => state.user)
+    const [name, setName] = useState('');
 
-        const form = event.currentTarget;
-        const formData = new FormData(form);
+    useEffect(() => {
+        setName(user?.name ?? '')
+    }, [user?.uid])
 
-        const data = {
-            name: String(
-                formData.get("name") ?? ""
-            ),
-            email: String(
-                formData.get("email") ?? ""
-            ),
-            phone: String(
-                formData.get("phone") ?? ""
-            ),
-            projectType: String(
-                formData.get("projectType") ?? ""
-            ),
-            message: String(
-                formData.get("message") ?? ""
-            ),
-        };
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
 
-        const mailtoUrl = buildMailtoUrl({
-            to: recipientEmail,
-            data,
-        });
+        const form = event.currentTarget
+        const formData = new FormData(form)
 
-        setSending(true);
+        const success = await submitContactMessage({
+            name: String(formData.get('name') ?? ''),
+            email: String(formData.get('email') ?? ''),
+            phone: String(formData.get('phone') ?? ''),
+            projectType: String(formData.get('projectType') ?? '') as ContactMessageProjectType,
+            message: String(formData.get('message') ?? ''),
+        })
+        if (!success) return
+
+        form.reset()
+        setSent(true)
 
         setTimeout(() => {
-            setSending(false);
-            setSent(true);
-
-            window.location.href = mailtoUrl;
-
-            form.reset();
-
-            setTimeout(() => {
-                setSent(false);
-            }, 3500);
-        }, 800);
-    };
+            setSent(false)
+        }, 3500)
+    }
 
     return (
         <form
@@ -132,93 +122,80 @@ export default function ContactForm({
                 {/* NOMBRE */}
                 <div>
                     <label
-                        htmlFor="contact-name"
-                        className="
-                            mb-1.5
-                            block
-                            text-xs
-                            font-semibold
-                            text-gray-700
-                        "
+                    htmlFor="contact-name"
+                    className="
+                        mb-1.5
+                        block
+                        text-xs
+                        font-semibold
+                        text-gray-700
+                    "
                     >
-                        Nombre completo
-                        <span className="ml-1 text-red-600">
-                            *
-                        </span>
+                    Nombre completo
+                    <span className="ml-1 text-red-600">*</span>
                     </label>
 
                     <input
-                        id="contact-name"
-                        type="text"
-                        name="name"
-                        required
-                        autoComplete="name"
-                        placeholder="Ej. Juan Pérez"
-                        className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-gray-50
-                            px-3.5
-                            py-2.5
-                            text-sm
-                            text-gray-900
-                            outline-none
-                            transition-all
-                            placeholder:text-gray-400
-                            focus:border-red-500
-                            focus:bg-white
-                            focus:ring-2
-                            focus:ring-red-500/20
-                        "
+                    id="contact-name"
+                    type="text"
+                    name="name"
+                    required
+                    autoComplete="name"
+                    placeholder="Ej. Juan Pérez"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    className="
+                        w-full
+                        rounded-xl
+                        border
+                        border-gray-300
+                        bg-white
+                        px-3.5
+                        py-2.5
+                        text-sm
+                        text-gray-900
+                        outline-none
+                        transition-all
+                        placeholder:text-gray-400
+                        focus:border-red-500
+                        focus:bg-white
+                        focus:ring-2
+                        focus:ring-red-500/20
+                    "
                     />
                 </div>
 
 
-                {/* CORREO */}
+                {/* CORREO / CUENTA GOOGLE */}
                 <div>
                     <label
-                        htmlFor="contact-email"
                         className="
-                            mb-1.5
-                            block
-                            text-xs
-                            font-semibold
-                            text-gray-700
+                        mb-1.5
+                        block
+                        text-xs
+                        font-semibold
+                        text-gray-700
                         "
                     >
                         Correo electrónico
-                        <span className="ml-1 text-red-600">
-                            *
-                        </span>
+                        <span className="ml-1 text-red-600">*</span>
                     </label>
 
                     <input
-                        id="contact-email"
-                        type="email"
+                        type="hidden"
                         name="email"
+                        value={user?.email ?? ''}
+                    />
+
+                    <SelectedEmailFieldGoogle
+                        name="email"
+                        value={user?.email ?? ''}
+                        imageUrl={user?.photoUrl}
+                        onClick={loginWithGoogle}
                         required
-                        autoComplete="email"
-                        placeholder="ejemplo@correo.com"
-                        className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-gray-50
-                            px-3.5
-                            py-2.5
-                            text-sm
-                            text-gray-900
-                            outline-none
-                            transition-all
-                            placeholder:text-gray-400
-                            focus:border-red-500
-                            focus:bg-white
-                            focus:ring-2
-                            focus:ring-red-500/20
-                        "
+                        // onClick={() => {
+                        //     console.log('Cambiar cuenta')
+                        // }}
                     />
                 </div>
 
@@ -226,42 +203,42 @@ export default function ContactForm({
                 {/* TELÉFONO */}
                 <div>
                     <label
-                        htmlFor="contact-phone"
-                        className="
-                            mb-1.5
-                            block
-                            text-xs
-                            font-semibold
-                            text-gray-700
-                        "
+                    htmlFor="contact-phone"
+                    className="
+                        mb-1.5
+                        block
+                        text-xs
+                        font-semibold
+                        text-gray-700
+                    "
                     >
-                        Teléfono / WhatsApp
+                    Teléfono / WhatsApp
                     </label>
 
                     <input
-                        id="contact-phone"
-                        type="tel"
-                        name="phone"
-                        autoComplete="tel"
-                        placeholder="+51 999 999 999"
-                        className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-gray-50
-                            px-3.5
-                            py-2.5
-                            text-sm
-                            text-gray-900
-                            outline-none
-                            transition-all
-                            placeholder:text-gray-400
-                            focus:border-red-500
-                            focus:bg-white
-                            focus:ring-2
-                            focus:ring-red-500/20
-                        "
+                    id="contact-phone"
+                    type="tel"
+                    name="phone"
+                    autoComplete="tel"
+                    placeholder="+51 999 999 999"
+                    className="
+                        w-full
+                        rounded-xl
+                        border
+                        border-gray-300
+                        bg-white
+                        px-3.5
+                        py-2.5
+                        text-sm
+                        text-gray-900
+                        outline-none
+                        transition-all
+                        placeholder:text-gray-400
+                        focus:border-red-500
+                        focus:bg-white
+                        focus:ring-2
+                        focus:ring-red-500/20
+                    "
                     />
                 </div>
 
@@ -269,58 +246,55 @@ export default function ContactForm({
                 {/* TIPO DE PROYECTO */}
                 <div>
                     <label
-                        htmlFor="contact-project-type"
-                        className="
-                            mb-1.5
-                            block
-                            text-xs
-                            font-semibold
-                            text-gray-700
-                        "
+                    htmlFor="contact-project-type"
+                    className="
+                        mb-1.5
+                        block
+                        text-xs
+                        font-semibold
+                        text-gray-700
+                    "
                     >
-                        Tipo de proyecto
+                    Tipo de proyecto
                     </label>
 
                     <select
-                        id="contact-project-type"
-                        name="projectType"
-                        defaultValue=""
-                        className="
-                            w-full
-                            cursor-pointer
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-gray-50
-                            px-3.5
-                            py-2.5
-                            text-sm
-                            text-gray-900
-                            outline-none
-                            transition-all
-                            focus:border-red-500
-                            focus:bg-white
-                            focus:ring-2
-                            focus:ring-red-500/20
-                        "
+                    id="contact-project-type"
+                    name="projectType"
+                    defaultValue=""
+                    className="
+                        w-full
+                        cursor-pointer
+                        rounded-xl
+                        border
+                        border-gray-300
+                        bg-white
+                        px-3.5
+                        py-2.5
+                        text-sm
+                        text-gray-900
+                        outline-none
+                        transition-all
+                        focus:border-red-500
+                        focus:bg-white
+                        focus:ring-2
+                        focus:ring-red-500/20
+                    "
                     >
-                        <option value="">
-                            Selecciona una opción
-                        </option>
+                    <option value="">
+                        Selecciona una opción
+                    </option>
 
-                        {projectTypeOptions.map(
-                            (option) => (
-                                <option
-                                    key={option.value}
-                                    value={option.value}
-                                >
-                                    {option.label}
-                                </option>
-                            )
-                        )}
+                    {projectTypeOptions.map((option) => (
+                        <option
+                        key={option.value}
+                        value={option.value}
+                        >
+                        {option.label}
+                        </option>
+                    ))}
                     </select>
                 </div>
-
             </div>
 
 
@@ -357,7 +331,7 @@ export default function ContactForm({
                         rounded-xl
                         border
                         border-gray-300
-                        bg-gray-50
+                        bg-white
                         px-3.5
                         py-2.5
                         text-sm
@@ -398,7 +372,7 @@ export default function ContactForm({
                 {showSubmitButton && (
                     <button
                         type="submit"
-                        disabled={sending}
+                        disabled={isSubmitting}
                         className={`
                             inline-flex
                             items-center
@@ -418,16 +392,14 @@ export default function ContactForm({
                             ${contactButtonVariantClass(submitButton?.variant)}
                         `}
                     >
-                        {sending ? (
+                        {isSubmitting ? (
                             <>
                                 <i className="fas fa-circle-notch animate-spin text-xs" />
-
                                 Enviando...
                             </>
                         ) : (
                             <>
                                 <i className={`${submitIcon} text-xs`} />
-
                                 {submitLabel}
                             </>
                         )}
@@ -456,3 +428,7 @@ export default function ContactForm({
         </form>
     );
 }
+
+// function useEffect(arg0: () => void, arg1: (string | undefined)[]) {
+//     throw new Error("Function not implemented.");
+// }

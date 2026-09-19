@@ -64,6 +64,39 @@ export type SiteSectionDto = {
   buttons: SiteSectionButtonDto[];
   items: SiteSectionItemDto[];
   images: SiteSectionImageDto[];
+  testimonies: SiteTestimonyDto[];
+  // `null` cuando la sección todavía no tiene fila propia en `testimony_web_setting` (el
+  // admin nunca guardó nada ahí) — tratar igual que "todo en true, salvo el correo" (ver
+  // widget/testimonial/lib/getTestimonySettings.ts).
+  testimony_settings: SiteTestimonySettingsDto | null;
+};
+
+// Un testimonio de cliente (sección "testimonial_carousel", ej. "home-testimonials") — tabla
+// propia `testimony_web` en el backend, ya NO vive dentro de `items` (ver
+// TestimonyWebSeeder.php / create_testimony_web_tables migration).
+export type SiteTestimonyDto = {
+  id_testimony_web: number;
+  name: string;
+  role: string | null;
+  city: string | null;
+  email: string | null;
+  rating: number | null;
+  message: string;
+  photo_url: string | null;
+  is_delivered: boolean;
+  is_verified: boolean;
+  order: number | null;
+  state: boolean;
+};
+
+// Qué columnas de la tarjeta de testimonio se muestran — 1 por SECCIÓN, no por testimonio.
+export type SiteTestimonySettingsDto = {
+  show_photo: boolean;
+  show_rating: boolean;
+  show_city: boolean;
+  show_email: boolean;
+  show_delivered: boolean;
+  show_verified: boolean;
 };
 
 export type SiteSectionButtonDto = {
