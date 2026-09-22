@@ -105,7 +105,7 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                     <div className="flex flex-wrap items-center gap-4 pt-2">
                         <Link
                             href="/#contacto"
-                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-6 py-3 rounded-full flex items-center gap-2 shadow-md"
+                            className="bg-brand-gold hover:bg-brand-gold-dark text-black text-sm font-semibold px-6 py-3 rounded-full flex items-center gap-2 shadow-md"
                         >
                             <i className="fas fa-phone-alt" />
                             Cotizar este modelo

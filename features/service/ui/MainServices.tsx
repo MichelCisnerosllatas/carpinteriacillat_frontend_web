@@ -1,18 +1,20 @@
 // features/service/ui/MainServices.tsx
 //
-// Mismo patron que features/home/ui/MainHome.tsx: recibe la navegacion
-// "/services" ya traida por app/services/page.tsx (desde getSite()) y
-// pinta sus secciones en el orden que ya llego (section_order), delegando
-// en SectionRenderer que componente usar para cada section_type.
-import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+// Mismo patron que features/home/ui/MainHome.tsx: lee la navegacion
+// "/services" del store de Zustand y pinta sus secciones en el orden que
+// ya llego (section_order), delegando en SectionRenderer que componente
+// usar para cada section_type.
+"use client";
+
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
+import { findSiteNavigationByUrl } from "@/shared/services/site_service/lib/findSiteNavigation";
 import { normalizeSections } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionRenderer from "@/shared/components/section_renderer/SectionRenderer";
 
-type Props = {
-    navigation: SiteNavigationDto | null;
-};
+export default function MainServices() {
+    const site = useSiteStore((s) => s.site);
+    const navigation = site ? findSiteNavigationByUrl(site.navigations, "/services") ?? null : null;
 
-export default function MainServices({ navigation }: Props) {
     if (!navigation) {
         return null;
     }

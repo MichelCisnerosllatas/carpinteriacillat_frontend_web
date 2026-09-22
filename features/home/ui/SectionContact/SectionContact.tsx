@@ -68,7 +68,7 @@ export default function SectionContact({ section }: Props) {
     return (
         <section id="contacto" className="relative bg-gray-100 py-16">
             <Container>
-                <ContactHeader/>
+                <ContactHeader section={section}/>
 
                 <div className={`grid gap-8 ${mapUrl ? "md:grid-cols-2" : ""}`}>
 

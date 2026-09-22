@@ -3,13 +3,13 @@
 
 import { useEffect, useState, FormEvent} from "react";
 import { contactButtonVariantClass } from "../lib/contactButtonVariant";
-import { projectTypeOptions } from "../model/constants";
 import type { SiteSectionButtonDto } from "@/shared/services/site_service/model/siteget.dto";
 import { useContactMessageStore } from "@/shared/services/contactmessages_service/store/useContactMessageStore";
 import { ContactMessageProjectType } from "@/shared/services/contactmessages_service/model/contactmessagespost.dto";
 import { useGoogleAuthStore } from "@/shared/services/auth/store/google-auth.store";
 import { SelectedEmailFieldGoogle } from "@/widget/buttonproveedor/SelectedEmailFieldGoogle";
 import { loginWithGoogle } from "@/shared/lib/firebase/google/login-with-google";
+import { notify } from "@/shared/lib/notify";
 
 // TODO(contacto-real): el backend retiro POST /v1/public/contact-messages
 // (ver FRONTEND_NEXTJS_SITE_V3.md #31-34) — hoy no existe forma publica de
@@ -48,6 +48,9 @@ export default function ContactForm({
 }: ContactFormProps) {
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
+    // Distinto de isSubmitting (llamada al backend): cubre el tiempo en que el
+    // popup de cuenta de Google está abierto, antes de llegar a enviar nada.
+    const [isConnecting, setIsConnecting] = useState(false);
 
     const submitLabel = submitButton?.label || "Enviar mensaje";
     const submitIcon = submitButton?.icon || "fas fa-paper-plane";
@@ -55,6 +58,8 @@ export default function ContactForm({
 
     const {submitContactMessage, isSubmitting} = useContactMessageStore();
     const user = useGoogleAuthStore((state) => state.user)
+    const isLoggedIn = Boolean(user?.email)
+    const busy = isConnecting || isSubmitting
     const [name, setName] = useState('');
 
     useEffect(() => {
@@ -66,13 +71,36 @@ export default function ContactForm({
 
         const form = event.currentTarget
         const formData = new FormData(form)
+        const nameValue = String(formData.get('name') ?? '')
+        const message = String(formData.get('message') ?? '')
 
+        // El correo sale de la cuenta de Google. Si todavía no hay sesión, el
+        // click en "Selecciona cuenta y enviar" primero abre el selector de
+        // Google y, apenas devuelve la cuenta, sigue con el envío — sin pedir
+        // un segundo click (mismo criterio que TestimonySubmitForm.tsx).
+        let email = user?.email ?? ''
+        if (!email) {
+            setIsConnecting(true)
+            try {
+                const googleUser = await loginWithGoogle()
+                email = googleUser.email ?? ''
+            } catch {
+                notify.error('No se pudo conectar con tu cuenta de Google. Intenta nuevamente.')
+                return
+            } finally {
+                setIsConnecting(false)
+            }
+        }
+
+        // El formulario visible ya no pide teléfono ni tipo de proyecto (ver
+        // pedido: solo Nombre, Correo y Mensaje) — el backend igual los exige
+        // en el DTO, así que van con un valor neutro fijo en vez de un input.
         const success = await submitContactMessage({
-            name: String(formData.get('name') ?? ''),
-            email: String(formData.get('email') ?? ''),
-            phone: String(formData.get('phone') ?? ''),
-            projectType: String(formData.get('projectType') ?? '') as ContactMessageProjectType,
-            message: String(formData.get('message') ?? ''),
+            name: nameValue,
+            email,
+            phone: '',
+            projectType: 'otro' as ContactMessageProjectType,
+            message,
         })
         if (!success) return
 
@@ -157,10 +185,10 @@ export default function ContactForm({
                         outline-none
                         transition-all
                         placeholder:text-gray-400
-                        focus:border-red-500
+                        focus:border-amber-500
                         focus:bg-white
                         focus:ring-2
-                        focus:ring-red-500/20
+                        focus:ring-amber-500/20
                     "
                     />
                 </div>
@@ -197,103 +225,6 @@ export default function ContactForm({
                         //     console.log('Cambiar cuenta')
                         // }}
                     />
-                </div>
-
-
-                {/* TELÉFONO */}
-                <div>
-                    <label
-                    htmlFor="contact-phone"
-                    className="
-                        mb-1.5
-                        block
-                        text-xs
-                        font-semibold
-                        text-gray-700
-                    "
-                    >
-                    Teléfono / WhatsApp
-                    </label>
-
-                    <input
-                    id="contact-phone"
-                    type="tel"
-                    name="phone"
-                    autoComplete="tel"
-                    placeholder="+51 999 999 999"
-                    className="
-                        w-full
-                        rounded-xl
-                        border
-                        border-gray-300
-                        bg-white
-                        px-3.5
-                        py-2.5
-                        text-sm
-                        text-gray-900
-                        outline-none
-                        transition-all
-                        placeholder:text-gray-400
-                        focus:border-red-500
-                        focus:bg-white
-                        focus:ring-2
-                        focus:ring-red-500/20
-                    "
-                    />
-                </div>
-
-
-                {/* TIPO DE PROYECTO */}
-                <div>
-                    <label
-                    htmlFor="contact-project-type"
-                    className="
-                        mb-1.5
-                        block
-                        text-xs
-                        font-semibold
-                        text-gray-700
-                    "
-                    >
-                    Tipo de proyecto
-                    </label>
-
-                    <select
-                    id="contact-project-type"
-                    name="projectType"
-                    defaultValue=""
-                    className="
-                        w-full
-                        cursor-pointer
-                        rounded-xl
-                        border
-                        border-gray-300
-                        bg-white
-                        px-3.5
-                        py-2.5
-                        text-sm
-                        text-gray-900
-                        outline-none
-                        transition-all
-                        focus:border-red-500
-                        focus:bg-white
-                        focus:ring-2
-                        focus:ring-red-500/20
-                    "
-                    >
-                    <option value="">
-                        Selecciona una opción
-                    </option>
-
-                    {projectTypeOptions.map((option) => (
-                        <option
-                        key={option.value}
-                        value={option.value}
-                        >
-                        {option.label}
-                        </option>
-                    ))}
-                    </select>
                 </div>
             </div>
 
@@ -340,10 +271,10 @@ export default function ContactForm({
                         outline-none
                         transition-all
                         placeholder:text-gray-400
-                        focus:border-red-500
+                        focus:border-amber-500
                         focus:bg-white
                         focus:ring-2
-                        focus:ring-red-500/20
+                        focus:ring-amber-500/20
                     "
                 />
             </div>
@@ -372,7 +303,7 @@ export default function ContactForm({
                 {showSubmitButton && (
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={busy}
                         className={`
                             inline-flex
                             items-center
@@ -392,15 +323,20 @@ export default function ContactForm({
                             ${contactButtonVariantClass(submitButton?.variant)}
                         `}
                     >
-                        {isSubmitting ? (
+                        {busy ? (
                             <>
                                 <i className="fas fa-circle-notch animate-spin text-xs" />
-                                Enviando...
+                                {isConnecting ? "Conectando con Google..." : "Enviando..."}
                             </>
-                        ) : (
+                        ) : isLoggedIn ? (
                             <>
                                 <i className={`${submitIcon} text-xs`} />
                                 {submitLabel}
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-brands fa-google text-xs" />
+                                Selecciona cuenta y enviar
                             </>
                         )}
                     </button>

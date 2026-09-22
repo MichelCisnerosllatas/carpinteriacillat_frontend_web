@@ -9,6 +9,7 @@ import {
     normalizeItems,
 } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Props = {
@@ -21,7 +22,7 @@ type Props = {
 // "primary". El backend solo manda el string en button.variant — las
 // clases CSS reales viven aca, nunca vienen de Laravel (ver
 // FRONTEND_NEXTJS_SITE_V3.md #54).
-const BUTTON_PRIMARY_CLASS = "bg-red-600 hover:bg-red-700 text-white shadow-2xl hover:shadow-red-500/50 hover:scale-105";
+const BUTTON_PRIMARY_CLASS = "bg-brand-gold hover:bg-brand-gold-dark text-black shadow-2xl hover:shadow-amber-400/50 hover:scale-105";
 const BUTTON_SECONDARY_CLASS = "bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white/30";
 
 export default function Section1({ section }: Props) {
@@ -46,11 +47,6 @@ export default function Section1({ section }: Props) {
 
     const buttons = normalizeButtons(section.buttons);
 
-    const title = section.section_title ?? "Creamos Espacios Extraordinarios";
-    const description =
-        section.section_description ??
-        "Fabricación de muebles a medida con diseños únicos y calidad premium. Transformamos tus ideas en realidad con más de 15 años de experiencia.";
-
     return (
         <section id="inicio" className="relative py-20 overflow-hidden flex items-center min-h-screen">
             {/* Carrusel de fondo */}
@@ -64,12 +60,14 @@ export default function Section1({ section }: Props) {
                 style={{ paddingTop: "calc(var(--app-header-height, 6rem) + 1.5rem)" }}
             >
                 <div className="max-w-3xl">
-                    <h2 className="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
-                        {title}
-                    </h2>
-                    <p className="text-xl text-gray-200 mb-8 leading-relaxed">
-                        {description}
-                    </p>
+                    <SectionHeading
+                        subtitle={section.section_subtitle}
+                        title={section.section_title}
+                        description={section.section_description}
+                        subtitleClassName="text-sm uppercase tracking-[0.2em] text-amber-400 font-semibold mb-2 block"
+                        titleClassName="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight"
+                        descriptionClassName="text-xl text-gray-200 mb-8 leading-relaxed"
+                    />
                     <div className="flex flex-wrap gap-4">
                         {buttons.length > 0 ? (
                             buttons.map((button) => (

@@ -22,14 +22,11 @@ type Props = {
     // section_type === "text_media" (confirmado contra /v1/public/site
     // real). Imagenes del carrusel <- section.images. El backend manda
     // AMBOS parrafos juntos en section_content, separados por una linea en
-    // blanco (section_description viene null) — se separan aca.
+    // blanco (section_description viene null) — se separan aca. Ninguno
+    // de los 3 campos de texto (subtitle/title/parrafos) se rellena con
+    // texto inventado: si vienen vacios, esa linea no se pinta.
     section: SiteSectionDto;
 };
-
-const DEFAULT_PARAGRAPHS = [
-    "Con más de 15 años de experiencia, hemos transformado ideas en realidad con diseño personalizado y materiales premium.",
-    "Cada pieza que creamos nace de la pasión por el detalle y el compromiso de ofrecer un resultado que supere expectativas.",
-];
 
 export default function WeSection2({ section }: Props) {
     const lightbox = useLightboxState();
@@ -51,10 +48,8 @@ export default function WeSection2({ section }: Props) {
         ? rawText.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
         : [];
 
-    const title = section.section_title ?? "Sobre Nosotros";
-    const eyebrow = section.section_subtitle ?? "Carpintería CILLAT";
-    const paragraph1 = paragraphs[0] ?? DEFAULT_PARAGRAPHS[0];
-    const paragraph2 = paragraphs[1] ?? DEFAULT_PARAGRAPHS[1];
+    const title = section.section_title;
+    const eyebrow = section.section_subtitle;
 
     return (
         // overflow-x-hidden para asegurarnos de que nada genere scroll horizontal
@@ -97,21 +92,26 @@ export default function WeSection2({ section }: Props) {
                         transition={{ duration: 0.4 }}
                         className="order-2 md:order-1 w-full"
                     >
-                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-red-500">
-                            {eyebrow}
-                        </span>
+                        {eyebrow && (
+                            <span className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-red-500">
+                                {eyebrow}
+                            </span>
+                        )}
 
-                        <h3 className="text-3xl md:text-4xl font-bold text-black leading-tight mt-2 mb-4">
-                            {title}
-                        </h3>
+                        {title && (
+                            <h3 className="text-3xl md:text-4xl font-bold text-black leading-tight mt-2 mb-4">
+                                {title}
+                            </h3>
+                        )}
 
-                        <p className="text-gray-700 text-base leading-relaxed mb-3">
-                            {paragraph1}
-                        </p>
-
-                        <p className="text-gray-700 text-base leading-relaxed">
-                            {paragraph2}
-                        </p>
+                        {paragraphs.map((paragraph, index) => (
+                            <p
+                                key={index}
+                                className={`text-gray-700 text-base leading-relaxed ${index < paragraphs.length - 1 ? "mb-3" : ""}`}
+                            >
+                                {paragraph}
+                            </p>
+                        ))}
                     </motion.div>
                 </div>
             </Container>

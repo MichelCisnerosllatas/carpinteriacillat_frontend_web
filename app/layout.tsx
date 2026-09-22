@@ -16,7 +16,7 @@ import AppProviders from "./providers";
 import { getSite } from "@/shared/services/site_service/lib/getSite";
 import { normalizeNavigations } from "@/shared/services/site_service/lib/normalizeNavigations";
 import { findFloatingWhatsapp, type FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
-import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import type { SiteDataDto, SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 import { GoogleOneTap } from "@/widget/buttonproveedor/GoogleOneTap";
 
 const geistSans = Geist({
@@ -60,6 +60,7 @@ export const metadata: Metadata = {
 //     y Footer necesitan saber si "no hay datos porque fallo" para poder
 //     mostrar su fallback.
 async function getLayoutData(): Promise<{
+  site: SiteDataDto | null;
   navigations: SiteNavigationDto[] | null;
   whatsappButton: FloatingWhatsappButton | null;
 }> {
@@ -67,9 +68,10 @@ async function getLayoutData(): Promise<{
   console.info("Layout ======================");
     console.info(JSON.stringify(site));
 
-  if (!site) return { navigations: null, whatsappButton: null };
+  if (!site) return { site: null, navigations: null, whatsappButton: null };
 
   return {
+    site,
     navigations: normalizeNavigations(site.navigations),
     whatsappButton: findFloatingWhatsapp(site),
   };
@@ -83,7 +85,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { navigations: initialNavigations, whatsappButton } = await getLayoutData();
+  const { site, navigations: initialNavigations, whatsappButton } = await getLayoutData();
 
   // suppressHydrationWarning solo evita el aviso de mismatch causado por
   // extensiones de navegador (ej. Dark Reader) que inyectan atributos en
@@ -94,7 +96,7 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <GoogleOneTap />
         
-        <AppProviders>
+        <AppProviders site={site}>
           <NextTopLoader
             color="#F5C400"   // tu amarillo marca
             height={3}

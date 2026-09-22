@@ -1,25 +1,26 @@
 // features/home/ui/MainHome.tsx
 //
 // Ya no arma el Home a mano (Section1, Section4, SectionProcess...) en un
-// orden fijo escrito aca: recibe la navegacion "/" que ya trajo
-// app/page.tsx (desde getSite(), el mismo JSON que uso app/layout.tsx para
-// Header/Footer) y pinta sus secciones en el orden que ya llego
+// orden fijo escrito aca: lee la navegacion "/" del store de Zustand
+// (hidratado una sola vez en app/providers.tsx con el JSON que trajo
+// app/layout.tsx) y pinta sus secciones en el orden que ya llego
 // (section_order), delegando en SectionRenderer que componente usar para
 // cada section_type.
+"use client";
 
-import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
+import { findSiteNavigationByUrl } from "@/shared/services/site_service/lib/findSiteNavigation";
 import { normalizeSections } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionRenderer from "@/shared/components/section_renderer/SectionRenderer";
 
-type Props = {
-    // null = /v1/public/site fallo (ver app/page.tsx) o esta navegacion no
-    // existe/esta desactivada. No hay fallback hardcodeado para todo el
+export default function MainHome() {
+    // null = /v1/public/site fallo (ver app/layout.tsx) o esta navegacion
+    // no existe/esta desactivada. No hay fallback hardcodeado para todo el
     // Home: si esto viene null, se prefiere no mostrar nada a mostrar un
     // Home "de mentira" con contenido inventado.
-    navigation: SiteNavigationDto | null;
-};
+    const site = useSiteStore((s) => s.site);
+    const navigation = site ? findSiteNavigationByUrl(site.navigations, "/") ?? null : null;
 
-export default function MainHome({ navigation }: Props) {
     if (!navigation) {
         return null;
     }

@@ -27,7 +27,7 @@ export default function TestimonialRatingInput({ value, onChange }: TestimonialR
 
     return (
         <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 sm:gap-2" onMouseLeave={() => setHovered(null)}>
+            <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4" onMouseLeave={() => setHovered(null)}>
                 {Array.from({ length: 5 }).map((_, index) => {
                     const starValue = index + 1;
                     const filled = starValue <= active;
@@ -42,7 +42,7 @@ export default function TestimonialRatingInput({ value, onChange }: TestimonialR
                             whileTap={{ scale: 0.9 }}
                             transition={{ type: "spring", stiffness: 400, damping: 15 }}
                             aria-label={`${starValue} de 5 estrellas`}
-                            className="text-2xl leading-none focus:outline-none sm:text-3xl md:text-4xl"
+                            className="text-5xl leading-none focus:outline-none sm:text-6xl md:text-7xl"
                         >
                             <i className={`fas fa-star ${filled ? "text-amber-400" : "text-slate-300"}`} />
                         </motion.button>
@@ -50,7 +50,7 @@ export default function TestimonialRatingInput({ value, onChange }: TestimonialR
                 })}
             </div>
 
-            <span className="text-sm font-medium text-slate-500 sm:text-base">
+            <span className="text-base font-medium text-slate-500 sm:text-lg md:text-xl">
                 {active > 0 ? RATING_LABELS[active] : "Sin valorar"}
             </span>
         </div>

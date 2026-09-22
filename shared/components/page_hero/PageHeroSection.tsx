@@ -8,17 +8,19 @@
 // WeSection1/GallerySection1 se eliminaron): SectionRenderer llama a este
 // componente directo para cualquier section_type === "page_hero".
 //
-// El "fallback" solo se usa si alguna vez esa seccion puntual viene sin
-// title/description/imagen (backend recien creado, sin contenido aun).
+// title/subtitle van directo a HeroHeader SIN texto inventado de respaldo:
+// si section_title/section_description vienen null, HeroHeader ya sabe
+// ocultar esa linea (ver widget/heroheader/ui/HeroHeader.tsx). El
+// "fallback" de aca es solo para la IMAGEN — un <Image> siempre necesita
+// un "src" valido, asi que si la seccion todavia no tiene ninguna imagen
+// cargada, se usa el logo como placeholder minimo.
 
 import HeroHeader from "@/widget/heroheader/ui/HeroHeader";
 import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
-type Fallback = {
-    title?: string;
-    subtitle?: string;
+type ImageFallback = {
     imageSrc?: string;
     imageAlt?: string;
     imageClassName?: string;
@@ -27,12 +29,10 @@ type Fallback = {
 
 type Props = {
     section: SiteSectionDto;
-    fallback?: Fallback;
+    fallback?: ImageFallback;
 };
 
-const GENERIC_FALLBACK: Required<Pick<Fallback, "title" | "subtitle" | "imageSrc" | "imageAlt">> = {
-    title: "Carpintería CILLAT",
-    subtitle: "Fabricación de muebles a medida.",
+const GENERIC_IMAGE_FALLBACK = {
     imageSrc: "/img/logo.png",
     imageAlt: "Carpintería CILLAT",
 };
@@ -50,10 +50,10 @@ export default function PageHeroSection({ section, fallback }: Props) {
 
     return (
         <HeroHeader
-            title={section.section_title ?? fallback?.title ?? GENERIC_FALLBACK.title}
-            subtitle={section.section_description ?? fallback?.subtitle ?? GENERIC_FALLBACK.subtitle}
-            imageSrc={heroImage?.url ?? fallback?.imageSrc ?? GENERIC_FALLBACK.imageSrc}
-            imageAlt={heroImage?.alt ?? fallback?.imageAlt ?? GENERIC_FALLBACK.imageAlt}
+            title={section.section_title}
+            subtitle={section.section_description}
+            imageSrc={heroImage?.url ?? fallback?.imageSrc ?? GENERIC_IMAGE_FALLBACK.imageSrc}
+            imageAlt={heroImage?.alt ?? fallback?.imageAlt ?? GENERIC_IMAGE_FALLBACK.imageAlt}
             imageClassName={imageClassName}
             sectionClassName={fallback?.sectionClassName}
         />

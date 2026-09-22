@@ -4,6 +4,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Sin esto, si el SO/navegador esta en modo oscuro, el navegador pinta los
+     controles nativos (popup del <select>, autofill, etc.) con su tema
+     oscuro por defecto aunque el CSS del sitio diga fondo blanco -- se ve
+     como un input "desactivado" en gris oscuro. El sitio es siempre claro. */
+  color-scheme: light;
   /* Alto del header fijo (Alert1 + Alert2 + Navbar). Se recalcula en JS
      (widget/header/Header.tsx) con ResizeObserver apenas monta, porque en
      mobile el texto de los banners puede partirse en varias líneas y el

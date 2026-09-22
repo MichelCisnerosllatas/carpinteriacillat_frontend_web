@@ -1,4 +1,4 @@
-import type { SiteTestimonySettingsDto } from "@/shared/services/site_service/model/siteget.dto";
+import type { SiteDataDto, SiteTestimonySettingsDto } from "@/shared/services/site_service/model/siteget.dto";
 import type { TestimonySettings } from "../model/types";
 
 // Mismos defaults que `Testimony_web_setting` (backend) — ver docblock de esa clase / de la
@@ -26,4 +26,18 @@ export function getTestimonySettings(
         showDelivered: dto.show_delivered,
         showVerified: dto.show_verified,
     };
+}
+
+// Misma seccion "testimonial_carousel" que ya usa el carrusel real (ver
+// SectionTestimonial.tsx) — el formulario de /testimonials la busca en el
+// store del sitio (useSiteStore) en vez de recibirla como prop desde el
+// servidor, para no tener que volver a llamar getSite().
+export function findTestimonySettingsInSite(
+    site: SiteDataDto | null
+): SiteTestimonySettingsDto | null {
+    return (
+        site?.navigations
+            .flatMap((n) => n.sections)
+            .find((s) => s.section_type === "testimonial_carousel")?.testimony_settings ?? null
+    );
 }

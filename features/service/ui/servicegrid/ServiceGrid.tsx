@@ -65,12 +65,30 @@ export default function ServiceGrid({ section }: Props) {
               iconColorClass: theme.iconColorClass,
           }));
 
-    const title = section.section_title ?? (isRed ? "Carpintería Comercial" : "Servicios Principales");
+    const hasHeading = section.section_subtitle || section.section_title || section.section_description;
 
     return (
         <section className="py-10">
             <Container>
-                <Servicelabeltitle title={title} barColor={theme.barColor} />
+                {/* section_title/subtitle/description: cada linea solo se
+                    pinta si tiene contenido real — nada de texto inventado
+                    ("Servicios Principales"/"Carpintería Comercial" eran
+                    fallbacks fijos, se retiraron). */}
+                {hasHeading && (
+                    <div className="mb-4">
+                        {section.section_subtitle && (
+                            <p className="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold mb-1">
+                                {section.section_subtitle}
+                            </p>
+                        )}
+                        {section.section_title && (
+                            <Servicelabeltitle title={section.section_title} barColor={theme.barColor} />
+                        )}
+                        {section.section_description && (
+                            <p className="text-gray-600 mt-2 max-w-2xl">{section.section_description}</p>
+                        )}
+                    </div>
+                )}
                 <ServicesGrid items={items} />
             </Container>
         </section>

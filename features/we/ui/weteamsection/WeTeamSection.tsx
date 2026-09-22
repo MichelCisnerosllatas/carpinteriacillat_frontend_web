@@ -27,11 +27,9 @@ export default function WeTeamSection({ section }: Props) {
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
     const disciplines = apiDisciplines.length > 0 ? apiDisciplines : defaultDisciplines;
 
-    const title = section.section_title ?? "Nuestro Equipo";
-    const eyebrow = section.section_subtitle ?? "Carpintería CILLAT";
-    const description =
-        section.section_description ??
-        "Detrás de cada mueble hay un equipo de carpinteros, ebanistas e instaladores que trabaja de la mano en cada etapa del proyecto, desde el corte de la madera hasta el acabado final en tu hogar o negocio.";
+    const title = section.section_title;
+    const eyebrow = section.section_subtitle;
+    const description = section.section_description;
 
     return (
         <section className="relative py-16 bg-gray-100 overflow-x-hidden">
@@ -78,17 +76,23 @@ export default function WeTeamSection({ section }: Props) {
                         transition={{ duration: 0.4 }}
                         className="w-full"
                     >
-                        <span className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-brand-red">
-                            {eyebrow}
-                        </span>
+                        {eyebrow && (
+                            <span className="inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-brand-red">
+                                {eyebrow}
+                            </span>
+                        )}
 
-                        <h3 className="text-3xl md:text-4xl font-bold text-black leading-tight mt-2 mb-4">
-                            {title}
-                        </h3>
+                        {title && (
+                            <h3 className="text-3xl md:text-4xl font-bold text-black leading-tight mt-2 mb-4">
+                                {title}
+                            </h3>
+                        )}
 
-                        <p className="text-gray-700 text-base leading-relaxed mb-6">
-                            {description}
-                        </p>
+                        {description && (
+                            <p className="text-gray-700 text-base leading-relaxed mb-6">
+                                {description}
+                            </p>
+                        )}
 
                         <div className="grid grid-cols-2 gap-3">
                             {disciplines.map((discipline) => (

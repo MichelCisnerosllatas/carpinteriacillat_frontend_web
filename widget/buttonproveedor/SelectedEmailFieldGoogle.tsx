@@ -71,9 +71,9 @@ export function SelectedEmailFieldGoogle({
           active:scale-[0.985]
           active:bg-gray-100
 
-          focus-visible:border-red-500
+          focus-visible:border-amber-500
           focus-visible:ring-2
-          focus-visible:ring-red-500/20
+          focus-visible:ring-amber-500/20
         "
       >
         {/* LEADING */}

@@ -43,15 +43,23 @@ export default function WeHistorySection({ section }: Props) {
     return (
         <section className="w-full py-20 bg-gray-50">
             <Container>
-                <h2 className="text-center text-4xl md:text-5xl font-extrabold mb-4">
-                    <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
-                        {section.section_title ?? "Nuestra Historia"}
-                    </span>
-                </h2>
-                <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">
-                    {section.section_description ??
-                        "Un recorrido de esfuerzo, dedicación y proyectos que han marcado nuestra trayectoria."}
-                </p>
+                {section.section_subtitle && (
+                    <p className="text-center text-sm uppercase tracking-[0.2em] text-brand-red font-semibold mb-2">
+                        {section.section_subtitle}
+                    </p>
+                )}
+                {section.section_title && (
+                    <h2 className="text-center text-4xl md:text-5xl font-extrabold mb-4">
+                        <span className="bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent">
+                            {section.section_title}
+                        </span>
+                    </h2>
+                )}
+                {section.section_description && (
+                    <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                        {section.section_description}
+                    </p>
+                )}
 
                 {/* Contenedor del carrusel (hero) */}
                 <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl bg-black/80">

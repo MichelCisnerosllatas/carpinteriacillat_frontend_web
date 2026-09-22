@@ -1,15 +1,17 @@
 // features/we/ui/MainWe.tsx
 //
 // Mismo patron que features/home/ui/MainHome.tsx.
-import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+"use client";
+
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
+import { findSiteNavigationByUrl } from "@/shared/services/site_service/lib/findSiteNavigation";
 import { normalizeSections } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionRenderer from "@/shared/components/section_renderer/SectionRenderer";
 
-type Props = {
-    navigation: SiteNavigationDto | null;
-};
+export default function MainWe() {
+    const site = useSiteStore((s) => s.site);
+    const navigation = site ? findSiteNavigationByUrl(site.navigations, "/we") ?? null : null;
 
-export default function MainWe({ navigation }: Props) {
     if (!navigation) {
         return null;
     }

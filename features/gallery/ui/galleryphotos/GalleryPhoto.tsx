@@ -16,6 +16,7 @@ import { useStickyTabs } from "@/widget/gallerywidget/galleryphotoswidget/lib/us
 import GalleryTabs from "@/widget/gallerywidget/galleryphotoswidget/ui/GalleryTabs";
 import GalleryPhotoCard from "@/widget/gallerywidget/galleryphotoswidget/ui/GalleryPhotoCard";
 import { getGalleryItems } from "@/features/gallery/lib/getGalleryItems";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Props = {
@@ -47,6 +48,15 @@ export default function GalleryPhoto({ section }: Props) {
 
     return (
         <section className="p-6">
+            {/* Antes esta seccion no mostraba section_title/subtitle/
+                description en ningun lado — se agrega aca. */}
+            <SectionHeading
+                subtitle={section.section_subtitle}
+                title={section.section_title}
+                description={section.section_description}
+                className="text-center mb-8"
+            />
+
             {/* TAB STICKY + ANIMADO */}
             <GalleryTabs
                 tabRef={tabRef}

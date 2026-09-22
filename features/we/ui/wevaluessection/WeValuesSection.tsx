@@ -4,6 +4,7 @@ import { defaultCoreValues, type CoreValue } from "@/widget/we/values/model/mock
 import CoreValueCard from "@/widget/we/values/ui/CoreValueCard";
 import MissionVisionCard from "@/widget/we/values/ui/MissionVisionCard";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Props = {
@@ -36,6 +37,14 @@ export default function WeValuesSection({ section }: Props) {
     return (
         <section className="py-16 bg-white">
             <Container>
+                {/* Antes esta seccion no mostraba section_title/subtitle/
+                    description en ningun lado — se agrega aca. */}
+                <SectionHeading
+                    subtitle={section.section_subtitle}
+                    title={section.section_title}
+                    description={section.section_description}
+                    className="text-center mb-10"
+                />
                 <div className="grid md:grid-cols-2 gap-6">
                     <MissionVisionCard
                         title={mission?.title ?? "Misión"}

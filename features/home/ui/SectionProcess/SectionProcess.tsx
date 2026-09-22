@@ -1,6 +1,7 @@
 // features/home/ui/SectionProcess/SectionProcess.tsx
 import Container from "@/shared/ui/container/Container";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Step = {
@@ -59,18 +60,13 @@ export default function SectionProcess({ section }: Props) {
     return (
         <section id="proceso" className="py-16 bg-white">
             <Container>
-                <div className="text-center mb-10">
-                    <p className="text-sm uppercase tracking-[0.2em] text-brand-red font-semibold">
-                        {section.section_subtitle ?? "Nuestro Proceso"}
-                    </p>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">
-                        {section.section_title ?? "Cómo Trabajamos"}
-                    </h2>
-                    <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-                        {section.section_description ??
-                            "De la idea al mueble terminado, en cuatro pasos claros y acompañados en todo momento."}
-                    </p>
-                </div>
+                <SectionHeading
+                    subtitle={section.section_subtitle}
+                    title={section.section_title}
+                    description={section.section_description}
+                    className="text-center mb-10"
+                    subtitleClassName="text-sm uppercase tracking-[0.2em] text-brand-red font-semibold"
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {steps.map((step, index) => (

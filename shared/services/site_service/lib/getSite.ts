@@ -21,23 +21,23 @@
 // red por carga de pagina — pero solo si ambas usan exactamente las mismas
 // opciones, por eso no se debe duplicar esta funcion.
 //
-// CACHE: "no-store" a proposito — CADA carga de pagina/navegacion pide el
-// dato real a Laravel, sin guardar ninguna copia entre peticiones. Antes
-// se guardaba con "force-cache" (cacheado indefinidamente) y hacia falta
-// invalidarlo a mano visitando app/api/revalidate-site — eso se retiro:
-// si editas algo en el intranet, se ve reflejado en el sitio en la
-// siguiente carga de pagina, sin ningun paso manual y sin tocar el
-// backend. El costo es que Laravel recibe una peticion real por cada
-// visita (no hay nada gratis en cache), que para el trafico de este sitio
-// es un costo aceptable a cambio de tener siempre el dato real (igual que
-// Postman).
+// CACHE: "force-cache" EXPLICITO. Desde Next.js 15, fetch() ya NO cachea
+// por defecto (se comporta como "no-store" salvo que se pida lo
+// contrario), asi que omitir la opcion no alcanza — hay que pedirlo a
+// mano. Un cambio en el intranet se refleja recien en el proximo
+// build/redeploy o reinicio del server — por ahora eso es aceptable (la
+// sincronizacion en vivo llegara mas adelante via WebSocket). A cambio,
+// esta es la UNICA peticion real que le pega a Laravel: layout.tsx la
+// dispara una vez y Next sirve esa misma respuesta desde su Data Cache a
+// cualquier otro llamador (otras paginas, generateMetadata, otros
+// visitantes) sin volver a tocar el backend en cada navegacion.
 import { siteService } from "../services/site.service";
 import type { SiteDataDto } from "../model/siteget.dto";
 
 export async function getSite(): Promise<SiteDataDto | null> {
   try {
     const response = await siteService.get({
-      cache: "no-store",
+      cache: "force-cache",
     });
 
     return response.data;

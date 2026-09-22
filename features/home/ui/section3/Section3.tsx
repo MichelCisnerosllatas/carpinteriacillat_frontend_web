@@ -9,6 +9,7 @@ import { defaultGalleryPreviewItems } from "@/widget/galleryhome/model/mock";
 import GalleryPreviewCard from "@/widget/galleryhome/ui/GalleryPreviewCard";
 import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Props = {
@@ -44,18 +45,15 @@ export default function Section3({ section }: Props) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.4 }}
-                    className="text-center mb-10"
                 >
-                    <p className="text-sm uppercase tracking-[0.2em] text-red-600  font-semibold">
-                        {section.section_subtitle ?? "Trabajos Realizados"}
-                    </p>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-black mt-2">
-                        {section.section_title ?? "Proyectos que hablan por nosotros"}
-                    </h2>
-                    <p className="text-gray-400 mt-3 max-w-2xl mx-auto text-sm md:text-base">
-                        {section.section_description ??
-                            "Cada proyecto es diseñado a medida según el espacio, estilo y necesidades de nuestros clientes."}
-                    </p>
+                    <SectionHeading
+                        subtitle={section.section_subtitle}
+                        title={section.section_title}
+                        description={section.section_description}
+                        className="text-center mb-10"
+                        titleClassName="text-3xl md:text-4xl font-extrabold text-black mt-2"
+                        descriptionClassName="text-gray-400 mt-3 max-w-2xl mx-auto text-sm md:text-base"
+                    />
                 </motion.div>
 
                 {/* Grid de galería */}

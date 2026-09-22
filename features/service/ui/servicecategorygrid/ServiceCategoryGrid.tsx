@@ -59,10 +59,27 @@ export default function ServiceCategoryGrid({ section }: Props) {
 
     const items = apiItems.length > 0 ? apiItems : FALLBACK_ITEMS;
 
+    const hasHeading = section.section_subtitle || section.section_title || section.section_description;
+
     return (
         <section className="py-10">
             <Container>
-                <Servicelabeltitle title={section.section_title ?? "Carpintería para el Hogar"} />
+                {/* section_title/subtitle/description: cada linea solo se
+                    pinta si tiene contenido real (antes "Carpintería para
+                    el Hogar" era un fallback fijo). */}
+                {hasHeading && (
+                    <div className="mb-4">
+                        {section.section_subtitle && (
+                            <p className="text-xs uppercase tracking-[0.2em] text-gray-500 font-semibold mb-1">
+                                {section.section_subtitle}
+                            </p>
+                        )}
+                        {section.section_title && <Servicelabeltitle title={section.section_title} />}
+                        {section.section_description && (
+                            <p className="text-gray-600 mt-2 max-w-2xl">{section.section_description}</p>
+                        )}
+                    </div>
+                )}
                 <ServiceGridHouseWidget items={items} />
             </Container>
         </section>
