@@ -24,7 +24,42 @@ export type SiteResponseDto = {
 };
 
 export type SiteDataDto = {
+  company: SiteCompanyDto | null;
+  social_networks: SiteSocialNetworkDto[];
+  footer_settings: SiteFooterSettingsDto;
   navigations: SiteNavigationDto[];
+};
+
+// De `footer_setting` (backend, singleton) — visibilidad del footer completo y de cada una de
+// sus columnas. `footer_state` en false = no se renderiza el footer en ninguna página.
+export type SiteFooterSettingsDto = {
+  // URL ya resuelta por el backend: prioriza el logo propio del footer (`footer_setting.logo`)
+  // y cae al de `company` si no se subió uno — el frontend no necesita repetir esa prioridad.
+  logo_url: string | null;
+  // Configurables desde /footer (intranet) — `logo_width` en null = automático (según la
+  // proporción real de la imagen a `logo_height`, sin forzar ningún ancho).
+  logo_height: number;
+  logo_width: number | null;
+  logo_object_fit: "contain" | "cover";
+  footer_state: boolean;
+  show_brand: boolean;
+  show_quick_links: boolean;
+  show_services: boolean;
+  show_access: boolean;
+};
+
+// De `company_settings`/`company_social_networks` (backend) — hasta ahora solo usadas en el
+// intranet para facturacion/proformas, reutilizadas aca para el logo y los iconos de redes del
+// footer. `company` es null si esa fila nunca se guardo. `social_networks` ya viene filtrado a
+// `show_on_website=true` y `status=1` y ordenado — no hay nada que filtrar/ordenar en el cliente.
+export type SiteCompanyDto = {
+  name: string;
+  logo_url: string | null;
+};
+
+export type SiteSocialNetworkDto = {
+  name: string;
+  link: string;
 };
 
 export type SiteNavigationDto = {

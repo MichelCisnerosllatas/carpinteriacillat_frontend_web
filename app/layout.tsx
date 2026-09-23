@@ -16,7 +16,23 @@ import AppProviders from "./providers";
 import { getSite } from "@/shared/services/site_service/lib/getSite";
 import { normalizeNavigations } from "@/shared/services/site_service/lib/normalizeNavigations";
 import { findFloatingWhatsapp, type FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
-import type { SiteDataDto, SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
+import { findFooterServiceLinks, type FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
+import type { SiteCompanyDto, SiteDataDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
+
+// Si falló la petición del sitio, se prefiere mostrar el footer con sus fallbacks fijos (mismo
+// criterio que la navegación) antes que ocultarlo por completo — "todo visible" es el default
+// seguro cuando no hay config real que consultar.
+const DEFAULT_FOOTER_SETTINGS: SiteFooterSettingsDto = {
+  logo_url: null,
+  logo_height: 64,
+  logo_width: null,
+  logo_object_fit: "contain",
+  footer_state: true,
+  show_brand: true,
+  show_quick_links: true,
+  show_services: true,
+  show_access: true,
+};
 import { GoogleOneTap } from "@/widget/buttonproveedor/GoogleOneTap";
 
 const geistSans = Geist({
@@ -63,17 +79,30 @@ async function getLayoutData(): Promise<{
   site: SiteDataDto | null;
   navigations: SiteNavigationDto[] | null;
   whatsappButton: FloatingWhatsappButton | null;
+  company: SiteCompanyDto | null;
+  socialNetworks: SiteSocialNetworkDto[];
+  serviceLinks: FooterServiceLink[];
+  footerSettings: SiteFooterSettingsDto;
 }> {
   const site = await getSite();
   console.info("Layout ======================");
     console.info(JSON.stringify(site));
 
-  if (!site) return { site: null, navigations: null, whatsappButton: null };
+  if (!site) {
+    return {
+      site: null, navigations: null, whatsappButton: null, company: null, socialNetworks: [], serviceLinks: [],
+      footerSettings: DEFAULT_FOOTER_SETTINGS,
+    };
+  }
 
   return {
     site,
     navigations: normalizeNavigations(site.navigations),
     whatsappButton: findFloatingWhatsapp(site),
+    company: site.company,
+    socialNetworks: site.social_networks,
+    serviceLinks: findFooterServiceLinks(site),
+    footerSettings: site.footer_settings ?? DEFAULT_FOOTER_SETTINGS,
   };
 }
 
@@ -85,7 +114,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { site, navigations: initialNavigations, whatsappButton } = await getLayoutData();
+  const { site, navigations: initialNavigations, whatsappButton, company, socialNetworks, serviceLinks, footerSettings } = await getLayoutData();
 
   // suppressHydrationWarning solo evita el aviso de mismatch causado por
   // extensiones de navegador (ej. Dark Reader) que inyectan atributos en
@@ -108,7 +137,16 @@ export default async function RootLayout({
               desde aca. */}
           <Header initialNavigations={initialNavigations} />
           {children}
-          <Footer initialNavigations={initialNavigations} whatsappButton={whatsappButton} />
+          {footerSettings.footer_state && (
+            <Footer
+              initialNavigations={initialNavigations}
+              whatsappButton={whatsappButton}
+              company={company}
+              socialNetworks={socialNetworks}
+              serviceLinks={serviceLinks}
+              footerSettings={footerSettings}
+            />
+          )}
         </AppProviders>
       </body>
     </html>
