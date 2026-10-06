@@ -11,6 +11,7 @@ import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSec
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "gallery_preview". Mapeo: id <- id_section_image,
@@ -58,14 +59,18 @@ export default function Section3({ section }: Props) {
 
                 {/* Grid de galería */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {data.map((item, index) => (
-                        <GalleryPreviewCard
-                            key={item.id}
-                            item={item}
-                            index={index}
-                            onOpen={lightbox.open}
-                        />
-                    ))}
+                    {data.map((item, index) => {
+                        const numericId = Number(item.id);
+                        return (
+                            <div
+                                key={item.id}
+                                id={previewAnchorId("section-image", Number.isFinite(numericId) ? numericId : undefined)}
+                                style={PREVIEW_ANCHOR_STYLE}
+                            >
+                                <GalleryPreviewCard item={item} index={index} onOpen={lightbox.open} />
+                            </div>
+                        );
+                    })}
                 </div>
             </Container>
 

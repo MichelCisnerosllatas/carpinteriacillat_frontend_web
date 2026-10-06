@@ -3,6 +3,7 @@ import Container from "@/shared/ui/container/Container";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Step = {
     number: string;
@@ -49,13 +50,14 @@ type Props = {
 
 export default function SectionProcess({ section }: Props) {
     const apiSteps = normalizeItems(section.items).map((item) => ({
+        id: item.id_section_item as number | undefined,
         number: item.label ?? "",
         title: item.title ?? "",
         description: item.description ?? "",
         icon: item.icon ?? "",
     }));
 
-    const steps = apiSteps.length > 0 ? apiSteps : FALLBACK_STEPS;
+    const steps = apiSteps.length > 0 ? apiSteps : FALLBACK_STEPS.map((s) => ({ ...s, id: undefined }));
 
     return (
         <section id="proceso" className="py-16 bg-white">
@@ -72,6 +74,8 @@ export default function SectionProcess({ section }: Props) {
                     {steps.map((step, index) => (
                         <div
                             key={`${step.number}-${index}`}
+                            id={previewAnchorId("section-item", step.id)}
+                            style={PREVIEW_ANCHOR_STYLE}
                             className="relative bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-md hover:-translate-y-[1px] transition-all"
                         >
                             <span className="absolute top-4 right-5 text-3xl font-extrabold text-gray-100">

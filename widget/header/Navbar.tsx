@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {useNavbarStore} from "@/shared/store/navbar/useNavbarStore";
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
 import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/site_service/lib/site.fallback";
 import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 import { usePathname } from "next/navigation";
@@ -43,13 +44,19 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
     const closeMobile = () => setOpenMobile(false);
 
     // De donde salen los links, en orden de prioridad:
-    //   1) "initialNavigations": lo que ya trajo el SERVIDOR (getSite())
-    //      antes de mandar el HTML. Como ya viene con el HTML inicial, el
-    //      usuario nunca ve un hueco vacio ni un skeleton en la carga normal
-    //      (no hay ningun fetch pendiente del lado del navegador).
-    //   2) Si vino null/vacio (la peticion en el servidor fallo), recien ahi
-    //      se usa el fallback fijo — siempre hay algo que mostrar.
-    const resolvedNavigations = initialNavigations ?? [];
+    //   1) "useSiteStore": el mismo JSON de "initialNavigations" pero leído del store de
+    //      Zustand en vez de la prop. En un visitante normal es EXACTAMENTE el mismo dato
+    //      (AppProviders hidrata el store con este site en el cuerpo del componente, antes
+    //      del primer pintado de hijos — ver app/providers.tsx), así que esto no cambia nada
+    //      para nadie. Solo importa en /preview (ver shared/store/preview/preview.bridge.ts),
+    //      donde el store SÍ puede traer una navegación sobreescrita en caliente por el
+    //      intranet — si siguiéramos leyendo la prop, ese cambio nunca se reflejaría acá.
+    //   2) "initialNavigations": lo que trajo el SERVIDOR (getSite()), por si el store
+    //      todavía no se hidrató (no debería pasar, pero es la red de seguridad original).
+    //   3) Si todo vino null/vacío (la petición en el servidor falló), recién ahí se usa el
+    //      fallback fijo — siempre hay algo que mostrar.
+    const storeNavigations = useSiteStore((s) => s.site?.navigations);
+    const resolvedNavigations = storeNavigations ?? initialNavigations ?? [];
     const links: NavLink[] = resolvedNavigations.length > 0
         ? toNavLinks(resolvedNavigations)
         : NAVIGATION_FALLBACK_LINKS;

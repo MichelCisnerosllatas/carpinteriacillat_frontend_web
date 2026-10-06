@@ -2,7 +2,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import BackgroundCarousel, { type BackgroundCarouselSlide } from "@/shared/components/background_carousel/BackgroundCarousel";
 
 type HeroHeaderProps = {
     // Opcionales a proposito: si section_title/section_description vienen
@@ -10,21 +10,21 @@ type HeroHeaderProps = {
     // simplemente no se pinta (ver mas abajo).
     title?: string | null;
     subtitle?: string | null;
-    imageSrc: string;
-    imageAlt: string;
-    imageClassName?: string;
+    // 1 o varias imagenes de fondo — el admin del intranet puede subir
+    // cualquiera de las dos para este header. Con 1 sola se ve fija (sin
+    // puntos ni autoplay); con varias, es un carrusel (ver
+    // BackgroundCarousel).
+    images: BackgroundCarouselSlide[];
     sectionClassName?: string;
 };
 
-// Header de página reutilizable (imagen de fondo + overlay + título +
+// Header de página reutilizable (imagen(es) de fondo + overlay + título +
 // subtítulo animados). Usado por Servicios, Nosotros y Galería, que antes
 // tenían cada uno una copia casi idéntica de este mismo componente.
 export default function HeroHeader({
     title,
     subtitle,
-    imageSrc,
-    imageAlt,
-    imageClassName = "object-cover",
+    images,
     sectionClassName = "bg-black",
 }: HeroHeaderProps) {
     return (
@@ -40,21 +40,14 @@ export default function HeroHeader({
                 ${sectionClassName}
             `}
         >
-            {/* Imagen de fondo */}
+            {/* Imagen(es) de fondo */}
             <motion.div
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
                 className="absolute inset-0"
             >
-                <Image
-                    src={imageSrc}
-                    alt={imageAlt}
-                    fill
-                    sizes="100vw"
-                    priority
-                    className={imageClassName}
-                />
+                <BackgroundCarousel slides={images} />
             </motion.div>
 
             {/* Overlay */}

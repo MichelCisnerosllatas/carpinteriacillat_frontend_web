@@ -1,6 +1,7 @@
 import { ContactInfo } from "@/widget/contacto/model/type";
 import type { SiteSectionButtonDto } from "@/shared/services/site_service/model/siteget.dto";
 import { contactButtonVariantClass } from "@/widget/contacto/lib/contactButtonVariant";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type ContactInfoCardProps = {
     contact: ContactInfo;
@@ -100,6 +101,8 @@ export default function ContactInfoCard({
                     {buttons.map((button) => (
                         <a
                             key={button.id_section_button}
+                            id={previewAnchorId("section-button", button.id_section_button)}
+                            style={PREVIEW_ANCHOR_STYLE}
                             href={button.url ?? "#"}
                             target="_blank"
                             rel="noopener noreferrer"

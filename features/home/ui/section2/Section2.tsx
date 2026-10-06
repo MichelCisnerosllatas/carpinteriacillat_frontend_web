@@ -11,6 +11,7 @@ import { defaultServiceCarouselItems } from "@/widget/servicecarousel/model/mock
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "service_carousel". Se usa tanto en Home
@@ -47,6 +48,7 @@ export default function Section2({ section }: Props) {
     }, [swiperInstance]);
 
     const apiItems = normalizeItems(section.items).map((item) => ({
+        id: item.id_section_item as number | undefined,
         iconClass: item.icon ?? "",
         titulo: item.title ?? "",
         descripcion: item.description ?? "",
@@ -54,7 +56,7 @@ export default function Section2({ section }: Props) {
     }));
 
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
-    const servicios = apiItems.length > 0 ? apiItems : defaultServiceCarouselItems;
+    const servicios = apiItems.length > 0 ? apiItems : defaultServiceCarouselItems.map((item) => ({ ...item, id: undefined }));
 
     return (
         <section id="servicios" className="relative py-16 bg-gray-200">
@@ -84,7 +86,11 @@ export default function Section2({ section }: Props) {
                         className="pb-10"
                     >
                         {servicios.map((servicio, index) => (
-                            <SwiperSlide key={servicio.titulo || index}>
+                            <SwiperSlide
+                                key={servicio.titulo || index}
+                                id={previewAnchorId("section-item", servicio.id)}
+                                style={PREVIEW_ANCHOR_STYLE}
+                            >
                                 <ServiceCarouselCard item={servicio} />
                             </SwiperSlide>
                         ))}

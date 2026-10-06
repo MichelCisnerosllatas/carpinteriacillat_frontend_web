@@ -13,6 +13,27 @@ export function GoogleOneTap() {
   const user = useGoogleAuthStore((state) => state.user)
 
   const initializeGoogleOneTap = () => {
+    // ¿Esta página está embebida en un <iframe> de OTRA página (sin importar el origen)?
+    // `window.top` es siempre la ventana del navegador de más afuera (la pestaña real);
+    // `window.self` es la ventana de ESTE documento en particular. Cuando la página se carga
+    // normal (una pestaña, sin iframes), esta ES la ventana de más afuera, así que
+    // `window.self === window.top`. Cuando la carga OTRA página dentro de un <iframe> (como
+    // hace el LandingPreview del intranet, ver widgets/landing-preview en
+    // carpinteriacillat_intranet_frontend: carga /preview en un <iframe> para mostrar
+    // ediciones sin guardar), `window.top` apunta a la ventana de ESA página padre, distinta
+    // de `window.self` — de ahí la comparación. No hace falta mirar la URL ni el dominio: es
+    // una propiedad del DOM que el navegador ya resuelve solo, y funciona igual sin importar
+    // de qué origen venga el iframe.
+    //
+    // Por qué importa acá puntualmente: Google bloquea el prompt de FedCM dentro de iframes
+    // cross-origin (permission policy "identity-credentials-get") — intentarlo ahí no muestra
+    // nada, solo deja un "NotAllowedError" pegado en la consola para siempre (y en desarrollo,
+    // el overlay de errores de Next.js tapando todo el iframe). El LandingPreview nunca es un
+    // lugar donde alguien deba iniciar sesión, así que ni vale la pena intentarlo.
+    if (window.self !== window.top) {
+      return
+    }
+
     // Si ya tenemos un usuario en nuestro estado,
     // no intentamos mostrar One Tap otra vez.
     if (user) {

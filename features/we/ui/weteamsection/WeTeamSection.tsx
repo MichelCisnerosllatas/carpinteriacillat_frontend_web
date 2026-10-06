@@ -9,6 +9,7 @@ import DisciplineBadge from "@/widget/we/team/ui/DisciplineBadge";
 import { normalizeImages, normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "team_grid". Foto <- section.images[0]. Disciplinas <-
@@ -19,13 +20,14 @@ type Props = {
 export default function WeTeamSection({ section }: Props) {
     const photo = normalizeImages(section.images)[0];
 
-    const apiDisciplines: Discipline[] = normalizeItems(section.items).map((item) => ({
+    const apiDisciplines: (Discipline & { id?: number })[] = normalizeItems(section.items).map((item) => ({
+        id: item.id_section_item,
         label: item.title ?? "",
         icon: item.icon ?? "",
     }));
 
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
-    const disciplines = apiDisciplines.length > 0 ? apiDisciplines : defaultDisciplines;
+    const disciplines = apiDisciplines.length > 0 ? apiDisciplines : defaultDisciplines.map((d) => ({ ...d, id: undefined }));
 
     const title = section.section_title;
     const eyebrow = section.section_subtitle;
@@ -96,7 +98,9 @@ export default function WeTeamSection({ section }: Props) {
 
                         <div className="grid grid-cols-2 gap-3">
                             {disciplines.map((discipline) => (
-                                <DisciplineBadge key={discipline.label} discipline={discipline} />
+                                <div key={discipline.label} id={previewAnchorId("section-item", discipline.id)} style={PREVIEW_ANCHOR_STYLE}>
+                                    <DisciplineBadge discipline={discipline} />
+                                </div>
                             ))}
                         </div>
                     </motion.div>

@@ -7,6 +7,7 @@ import type { FloatingWhatsappButton } from "@/shared/services/site_service/lib/
 import type { FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
 import type { SiteCompanyDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
 import Container from "@/shared/ui/container/Container";
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
 
 type FooterProps = {
     // Navegacion ya resuelta por el servidor (ver app/layout.tsx -> getSite()),
@@ -116,7 +117,21 @@ const SERVICES_FALLBACK_LINKS: FooterServiceLink[] = [
     { href: "/#servicios", label: "Restauración" },
 ];
 
-export default function Footer({ initialNavigations, whatsappButton, company, socialNetworks, serviceLinks, footerSettings }: FooterProps) {
+export default function Footer({ initialNavigations, whatsappButton, company, socialNetworks, serviceLinks, footerSettings: initialFooterSettings }: FooterProps) {
+    // Mismo criterio que Navbar.tsx: preferir el store de Zustand sobre la prop del servidor.
+    // Para un visitante normal es EXACTAMENTE el mismo dato (AppProviders hidrata el store con
+    // este mismo site antes del primer pintado de hijos) — esto solo importa en /preview,
+    // donde el store SÍ puede traer footer_settings sobreescrito en caliente por el intranet
+    // (ver shared/store/preview/preview.bridge.ts). Si seguimos leyendo la prop, ese cambio
+    // nunca se reflejaría acá.
+    const footerSettings = useSiteStore((s) => s.site?.footer_settings) ?? initialFooterSettings;
+
+    // Antes esto se decidía en app/layout.tsx (Server Component) ANTES de montar este
+    // componente — nunca se re-evaluaba en el cliente, así que apagar/prender "Mostrar footer"
+    // desde /footer (intranet) jamás se reflejaba en el preview en vivo. Ahora layout.tsx
+    // siempre monta <Footer/>, y es ESTE componente (cliente, ya lee el store) el que decide.
+    if (!footerSettings.footer_state) return null;
+
     // Misma logica de prioridad que usa Navbar.tsx: lo que trajo el
     // servidor (getSite()) y, si vino null/vacio, el fallback fijo.
     const resolvedNavigations = initialNavigations ?? [];
@@ -145,7 +160,9 @@ export default function Footer({ initialNavigations, whatsappButton, company, so
 
     return (
         <>
-            <footer className="bg-gray-900 text-white py-12">
+            {/* id ancla para /preview (ver shared/store/preview/preview.bridge.ts): permite
+                hacer scrollIntoView() hasta acá cuando se está editando el footer. */}
+            <footer id="site-footer" className="bg-gray-900 text-white py-12" style={{ scrollMarginTop: "var(--app-header-height, 0px)" }}>
                 <Container>
                     <div className={footerGridClass}>
                         {/* Col 1 - Marca + redes — apagable desde /footer (intranet) */}

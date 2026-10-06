@@ -6,6 +6,7 @@ import MissionVisionCard from "@/widget/we/values/ui/MissionVisionCard";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "value_grid". Misión/Visión son items con item_type
@@ -23,16 +24,17 @@ export default function WeValuesSection({ section }: Props) {
     const mission = items.find((item) => item.item_type === "mission");
     const vision = items.find((item) => item.item_type === "vision");
 
-    const apiValues: CoreValue[] = items
+    const apiValues: (CoreValue & { id?: number })[] = items
         .filter((item) => item.item_type === "value")
         .map((item) => ({
+            id: item.id_section_item,
             label: item.title ?? "",
             icon: item.icon ?? "",
             accent: resolveAccent(item.variant),
         }));
 
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
-    const values = apiValues.length > 0 ? apiValues : defaultCoreValues;
+    const values = apiValues.length > 0 ? apiValues : defaultCoreValues.map((value) => ({ ...value, id: undefined }));
 
     return (
         <section className="py-16 bg-white">
@@ -69,7 +71,9 @@ export default function WeValuesSection({ section }: Props) {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
                     {values.map((value) => (
-                        <CoreValueCard key={value.label} value={value} />
+                        <div key={value.label} id={previewAnchorId("section-item", value.id)} style={PREVIEW_ANCHOR_STYLE}>
+                            <CoreValueCard value={value} />
+                        </div>
                     ))}
                 </div>
             </Container>

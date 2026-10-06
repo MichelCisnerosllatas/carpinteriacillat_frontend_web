@@ -16,6 +16,7 @@ import HistorySlide from "@/widget/we/history/ui/HistorySlide";
 import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "history_carousel". Mapeo: story.img <- image.url,
@@ -29,6 +30,7 @@ export default function WeHistorySection({ section }: Props) {
     const lightbox = useLightboxState();
 
     const apiStories = normalizeImages(section.images).map((image) => ({
+        id: image.id_section_image as number | undefined,
         title: image.title ?? "",
         desc: image.description ?? "",
         img: image.url,
@@ -38,7 +40,7 @@ export default function WeHistorySection({ section }: Props) {
     }));
 
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
-    const stories = apiStories.length > 0 ? apiStories : defaultHistoryStories;
+    const stories = apiStories.length > 0 ? apiStories : defaultHistoryStories.map((s) => ({ ...s, id: undefined }));
 
     return (
         <section className="w-full py-20 bg-gray-50">
@@ -75,7 +77,7 @@ export default function WeHistorySection({ section }: Props) {
                         className="w-full h-[360px] md:h-[520px]"
                     >
                         {stories.map((story, index) => (
-                            <SwiperSlide key={index}>
+                            <SwiperSlide key={index} id={previewAnchorId("section-image", story.id)} style={PREVIEW_ANCHOR_STYLE}>
                                 <HistorySlide
                                     story={story}
                                     stepNumber={index + 1}

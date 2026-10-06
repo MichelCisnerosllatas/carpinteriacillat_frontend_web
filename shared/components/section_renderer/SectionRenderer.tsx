@@ -60,6 +60,18 @@ export default function SectionRenderer({ section }: Props) {
     return null;
   }
 
+  // id ancla para /preview (ver shared/store/preview/preview.bridge.ts): permite hacer
+  // scrollIntoView() a la sección puntual que se está editando en el intranet.
+  // scrollMarginTop usa la misma variable que ya publica Header.tsx para el offset del
+  // header fijo, así el scroll no la deja tapada.
+  return (
+    <div id={`section-${section.id_section}`} style={{ scrollMarginTop: "var(--app-header-height, 0px)" }}>
+      {renderSection(section)}
+    </div>
+  );
+}
+
+function renderSection(section: SiteSectionDto) {
   switch (section.section_type) {
     // --- *_hero ---
     case "hero":

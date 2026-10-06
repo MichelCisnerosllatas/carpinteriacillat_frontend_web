@@ -17,6 +17,7 @@ import AboutGallerySlide from "@/widget/we/aboutgallery/ui/AboutGallerySlide";
 import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "text_media" (confirmado contra /v1/public/site
@@ -32,6 +33,7 @@ export default function WeSection2({ section }: Props) {
     const lightbox = useLightboxState();
 
     const apiImages = normalizeImages(section.images).map((image) => ({
+        id: image.id_section_image as number | undefined,
         src: image.url,
         title: image.title ?? image.alt ?? "",
         fit: resolveImageFit(image.fix),
@@ -41,7 +43,7 @@ export default function WeSection2({ section }: Props) {
     }));
 
     // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
-    const images = apiImages.length > 0 ? apiImages : defaultAboutGalleryItems;
+    const images = apiImages.length > 0 ? apiImages : defaultAboutGalleryItems.map((img) => ({ ...img, id: undefined }));
 
     const rawText = section.section_content ?? section.section_description;
     const paragraphs = rawText
@@ -76,7 +78,7 @@ export default function WeSection2({ section }: Props) {
                                 className="w-full h-full"
                             >
                                 {images.map((item, index) => (
-                                    <SwiperSlide key={index}>
+                                    <SwiperSlide key={index} id={previewAnchorId("section-image", item.id)} style={PREVIEW_ANCHOR_STYLE}>
                                         <AboutGallerySlide item={item} onOpen={() => lightbox.open(index)} />
                                     </SwiperSlide>
                                 ))}

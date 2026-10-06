@@ -1,6 +1,6 @@
 // home/ui/section1/Section1.tsx
 import Container from "@/shared/ui/container/Container";
-import HeroSlideshow from "@/widget/homehero/ui/HeroSlideshow";
+import BackgroundCarousel from "@/shared/components/background_carousel/BackgroundCarousel";
 import Counter from "@/widget/homehero/ui/Counter";
 import { heroSlides, heroStats } from "@/widget/homehero/model/mock";
 import {
@@ -11,6 +11,7 @@ import {
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "hero". Ver FRONTEND_NEXTJS_SITE_V3.md #21.
@@ -49,8 +50,10 @@ export default function Section1({ section }: Props) {
 
     return (
         <section id="inicio" className="relative py-20 overflow-hidden flex items-center min-h-screen">
-            {/* Carrusel de fondo */}
-            <HeroSlideshow slides={slides} />
+            {/* Carrusel de fondo — con 1 sola imagen se ve fija, sin
+                puntos ni autoplay (ver BackgroundCarousel). */}
+            <BackgroundCarousel slides={slides} />
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/70 to-transparent" />
 
             {/* Contenido Hero */}
             {/* padding-top dinámico: el header fijo (banners + navbar) puede
@@ -73,6 +76,8 @@ export default function Section1({ section }: Props) {
                             buttons.map((button) => (
                                 <a
                                     key={button.id_section_button}
+                                    id={previewAnchorId("section-button", button.id_section_button)}
+                                    style={PREVIEW_ANCHOR_STYLE}
                                     href={button.url ?? "#"}
                                     className={`${button.variant === "secondary" ? BUTTON_SECONDARY_CLASS : BUTTON_PRIMARY_CLASS} px-8 py-4 rounded-full font-bold text-lg transition-all`}
                                 >

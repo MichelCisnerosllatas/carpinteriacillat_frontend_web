@@ -17,6 +17,7 @@ import { getTestimonySettings } from "@/widget/testimonial/lib/getTestimonySetti
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 import type { Testimonial } from "@/widget/testimonial/model/types";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "testimonial_carousel". Testimonios en su propia tabla
@@ -129,11 +130,19 @@ export default function SectionTestimonial({ section }: Props) {
                         }}
                         className="testimonial-swiper !pb-14"
                     >
-                        {data.map((item) => (
-                            <SwiperSlide key={item.id} className="!h-auto">
-                                <TestimonialCard item={item} settings={settings}/>
-                            </SwiperSlide>
-                        ))}
+                        {data.map((item) => {
+                            const numericId = Number(item.id);
+                            return (
+                                <SwiperSlide
+                                    key={item.id}
+                                    className="!h-auto"
+                                    id={previewAnchorId("testimony", Number.isFinite(numericId) ? numericId : undefined)}
+                                    style={PREVIEW_ANCHOR_STYLE}
+                                >
+                                    <TestimonialCard item={item} settings={settings}/>
+                                </SwiperSlide>
+                            );
+                        })}
                     </Swiper>
 
 

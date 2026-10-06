@@ -86,11 +86,16 @@ async function getLayoutData(): Promise<{
 }> {
   const site = await getSite();
   console.info("Layout ======================");
-    console.info(JSON.stringify(site));
+  console.info(JSON.stringify(site));
 
   if (!site) {
     return {
-      site: null, navigations: null, whatsappButton: null, company: null, socialNetworks: [], serviceLinks: [],
+      site: null, 
+      navigations: null, 
+      whatsappButton: null, 
+      company: null, 
+      socialNetworks: [], 
+      serviceLinks: [],
       footerSettings: DEFAULT_FOOTER_SETTINGS,
     };
   }
@@ -137,16 +142,19 @@ export default async function RootLayout({
               desde aca. */}
           <Header initialNavigations={initialNavigations} />
           {children}
-          {footerSettings.footer_state && (
-            <Footer
-              initialNavigations={initialNavigations}
-              whatsappButton={whatsappButton}
-              company={company}
-              socialNetworks={socialNetworks}
-              serviceLinks={serviceLinks}
-              footerSettings={footerSettings}
-            />
-          )}
+          {/* Antes el "footer_state && " vivía acá — un Server Component que nunca se
+              re-evalúa en el cliente, así que apagar/prender el footer desde /preview jamás
+              se reflejaba. Ahora <Footer/> siempre se monta y ES ÉL quien decide (ya lee el
+              store, ver widget/footer/Footer.tsx) — para un visitante normal no cambia nada,
+              `footerSettings` (la prop) y el store arrancan con el mismo valor. */}
+          <Footer
+            initialNavigations={initialNavigations}
+            whatsappButton={whatsappButton}
+            company={company}
+            socialNetworks={socialNetworks}
+            serviceLinks={serviceLinks}
+            footerSettings={footerSettings}
+          />
         </AppProviders>
       </body>
     </html>

@@ -18,6 +18,7 @@ import GalleryPhotoCard from "@/widget/gallerywidget/galleryphotoswidget/ui/Gall
 import { getGalleryItems } from "@/features/gallery/lib/getGalleryItems";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
 type Props = {
     // section_type === "gallery_grid".
@@ -74,9 +75,14 @@ export default function GalleryPhoto({ section }: Props) {
                 speed={300}
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredImages.map((img) => (
-                        <GalleryPhotoCard key={img.id} item={img} />
-                    ))}
+                    {filteredImages.map((img) => {
+                        const numericId = Number(img.id);
+                        return (
+                            <div key={img.id} id={previewAnchorId("section-image", Number.isFinite(numericId) ? numericId : undefined)} style={PREVIEW_ANCHOR_STYLE}>
+                                <GalleryPhotoCard item={img} />
+                            </div>
+                        );
+                    })}
                 </div>
             </LightGallery>
         </section>

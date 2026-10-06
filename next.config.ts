@@ -20,14 +20,15 @@ const nextConfig: NextConfig = {
             // muestra).
             { protocol: "https", hostname: "api.dev.carpinteriacillat.com" },
             { protocol: "https", hostname: "api.carpinteriacillat.com" },
-            // NOTA: el backend en LOCAL corre en una IP de red (ver
-            // NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL en .env) que cambia segun
-            // a que red te conectes — por eso NO se hardcodea aca. Si en
-            // local empiezas a ver este mismo error con una imagen que
-            // viene de esa IP (ej. "192.168.x.x"), agrega esa IP puntual
-            // aca temporalmente, o mejor: pedile al backend un hostname
-            // estable (ej. "carpinteriacillat.test" con Laragon) en vez
-            // de la IP.
+            // IP de red del backend en LOCAL (ver NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL en .env) —
+            // esta SÍ se hardcodea a propósito (era la excepción que pedía la nota vieja de
+            // este archivo): en esta máquina de desarrollo es siempre la misma IP, pero el
+            // PUERTO del backend varía según cómo se levante Laragon (se vio responder en 8000
+            // y en 8001 en la misma sesión de pruebas) — por eso no se fija `port`, así
+            // remotePatterns matchea esa IP sin importar el puerto. Si alguna vez cambia la IP
+            // de red (otra red, otra máquina), hay que actualizar este hostname o, mejor, pedirle
+            // al backend un hostname estable (ej. "carpinteriacillat.test" con Laragon).
+            { protocol: "http", hostname: "192.168.18.32" },
         ],
     },
     output: 'standalone',

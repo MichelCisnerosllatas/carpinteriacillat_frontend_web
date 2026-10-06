@@ -52,6 +52,7 @@ const FALLBACK_ITEMS: ServiceCardHouseWidgetProps[] = [
 
 export default function ServiceCategoryGrid({ section }: Props) {
     const apiItems: ServiceCardHouseWidgetProps[] = normalizeItems(section.items).map((item) => ({
+        id: item.id_section_item,
         title: item.title ?? "",
         icono: item.icon ?? "",
         listadescripcion: normalizeDetails(item.details).map((detail) => ({ title: detail.title ?? "" })),
