@@ -24,10 +24,93 @@
   --color-brand-red-dark: #b91c1c;
   --color-brand-gold: #f5c400;
   --color-brand-gold-dark: #e7b700;
+
+  /* Tokens del design system "Innova Loreto" (rediseño de Servicios/Galería). Generan
+     utilidades como bg-il-amarillo-500 / text-il-neutro-600 / border-il-neutro-200, y
+     también quedan como variables CSS (var(--color-il-amarillo-500)) para estilos inline. */
+  --color-il-amarillo-100: #FFF3CC;
+  --color-il-amarillo-500: #FFC300;
+  --color-il-amarillo-600: #E0AC00;
+  --color-il-neutro-050: #F8F9FB;
+  --color-il-neutro-100: #F1F3F7;
+  --color-il-neutro-200: #E3E7ED;
+  --color-il-neutro-300: #C6CCD6;
+  --color-il-neutro-400: #8B93A1;
+  --color-il-neutro-600: #5B5B5B;
+  --color-il-neutro-700: #3A4150;
+  --color-il-neutro-900: #14181F;
+
+  /* Curvas de animación del diseño: "ease-il" (entrada suave) y "ease-il-page" (pasar página). */
+  --ease-il: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-il-page: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Cinta de palabras de Servicios y barra de progreso de las pestañas del hero (6 s =
+     lo mismo que tarda la rotación automática, ver ServiceShowcase.tsx). */
+  --animate-il-marquee: il-marquee 40s linear infinite;
+  --animate-il-progress: il-progress 6s linear forwards;
+
+  @keyframes il-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes il-progress {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
 }
 
+/* --font-poppins la crea next/font en app/layout.tsx (antes Poppins se nombraba acá pero
+   nunca se cargaba, y el navegador caía a otra fuente). 'Poppins' queda de respaldo. */
 * {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+/* Secciones del rediseño (Servicios, Galería, Detalle): llevan la clase "il-scope" en su
+   contenedor. Adentro el texto corrido usa Figtree y los títulos usan Poppins con la clase
+   "il-display". Hace falta ".il-scope *" (y no solo ".il-scope") porque la regla "*" de
+   arriba se aplica a CADA elemento y le ganaría a la herencia. */
+.il-scope {
+  color: var(--color-il-neutro-900);
+}
+
+/* OJO: se excluyen los íconos de Font Awesome (<i class="fa-...">). Estas reglas se cargan
+   DESPUÉS del CSS de Font Awesome, así que sin el :not() le quitaban su fuente de íconos y
+   el ícono salía vacío (pasó con el botón de "ver foto en grande"). */
+.il-scope,
+.il-scope *:not([class*="fa-"]) {
+  font-family: var(--font-figtree), 'Figtree', system-ui, sans-serif;
+}
+
+.il-scope .il-display,
+.il-scope .il-display *:not([class*="fa-"]) {
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+/* Si la persona pidió "reducir movimiento" en su sistema, se apagan las animaciones y
+   transiciones del rediseño (el JS además frena la rotación automática y el barrido). */
+@media (prefers-reduced-motion: reduce) {
+  .il-scope *,
+  .il-scope *::before,
+  .il-scope *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Oculta la barra de scroll de la fila de categorías de la galería (se sigue pudiendo
+   deslizar con el dedo o la rueda). */
+.il-no-scrollbar {
+  scrollbar-width: none;
+}
+
+.il-no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Carrusel del hero */
@@ -176,5 +259,9 @@ html {
 html,
 body {
   overflow-x: hidden;
+  /* "clip" recorta igual que "hidden" pero NO convierte a <body> en un contenedor de scroll.
+     Con "hidden", position: sticky deja de funcionar en toda la página (ej. la ficha del
+     detalle de un trabajo). Los navegadores que no conocen "clip" se quedan con "hidden". */
+  overflow-x: clip;
   max-width: 100%;
 }

@@ -1,24 +1,33 @@
 // shared/components/section_heading/SectionHeading.tsx
 //
-// Encabezado estandar de una seccion: subtitulo (eyebrow) + titulo +
-// descripcion — section_subtitle / section_title / section_description.
+// Encabezado ESTÁNDAR de una sección: eyebrow (section_subtitle) + título (section_title) +
+// descripción (section_description). Mismo estilo en todo el sitio (ver sectionHeading.styles.ts):
 //
-// REGLA (pedida explicitamente): ninguno de los 3 es obligatorio, y
-// NINGUNO se rellena con texto inventado por el frontend. Si un campo
-// viene null/vacio, esa linea NO se pinta — no queda un <h2> o <p> vacio
-// reservando espacio en el documento. Si los 3 vienen vacios, el
-// componente entero no renderiza nada (ni siquiera el div contenedor).
+//   ▬▬  NUESTRO PROCESO          <- rojo del logo + rayita amarilla
+//   Así trabajamos contigo       <- negro, se achica en celular
+//   Desde la medida hasta...     <- gris
 //
-// Cada seccion tiene su propia tipografia/color ya definidos desde antes
-// de esta migracion — se pasan por *ClassName para no perder esa
-// identidad visual section por seccion; los defaults son solo un estilo
-// neutro para secciones que nunca tuvieron uno propio (ver Section4,
-// WeValuesSection, GalleryPhoto).
+// REGLA: ninguno de los 3 es obligatorio, y NINGUNO se rellena con texto inventado por el
+// frontend. Si un campo viene null/vacío, esa línea NO se pinta. Si los 3 vienen vacíos, el
+// componente no renderiza nada.
+//
+// Opciones:
+//   align: "center" (por defecto) o "left".
+//   tone:  "light" (fondo claro, por defecto) o "dark" (fondo oscuro: textos claros).
+//   as:    "h2" (por defecto), "h1" para el título principal de una página (más grande),
+//          o "h3" si la sección va dentro de otra.
+//
+// *ClassName: SOLO para portadas (hero sobre foto, ej. Section1 del Home), que tienen su propio
+// diseño grande. Las secciones normales NO deben pasarlos, así todas se ven iguales.
+import { headingStyles as s, type HeadingTone } from "./sectionHeading.styles";
 
 type Props = {
     subtitle?: string | null;
     title?: string | null;
     description?: string | null;
+    align?: "center" | "left";
+    tone?: HeadingTone;
+    as?: "h1" | "h2" | "h3";
     className?: string;
     subtitleClassName?: string;
     titleClassName?: string;
@@ -29,20 +38,42 @@ export default function SectionHeading({
     subtitle,
     title,
     description,
-    className,
-    subtitleClassName = "text-sm uppercase tracking-[0.2em] text-red-600 font-semibold",
-    titleClassName = "text-3xl md:text-4xl font-extrabold text-gray-900 mt-2",
-    descriptionClassName = "text-gray-600 mt-3 max-w-2xl mx-auto",
+    align = "center",
+    tone = "light",
+    as: TitleTag = "h2",
+    className = "",
+    subtitleClassName,
+    titleClassName,
+    descriptionClassName,
 }: Props) {
     if (!subtitle && !title && !description) {
         return null;
     }
 
+    const isCenter = align === "center";
+    const titleSize = TitleTag === "h1" ? s.pageTitleSize : s.sectionTitleSize;
+
     return (
-        <div className={className}>
-            {subtitle && <p className={subtitleClassName}>{subtitle}</p>}
-            {title && <h2 className={titleClassName}>{title}</h2>}
-            {description && <p className={descriptionClassName}>{description}</p>}
+        <div className={`flex flex-col gap-3 ${isCenter ? "items-center text-center" : "items-start text-left"} ${className}`}>
+            {subtitle &&
+                (subtitleClassName ? (
+                    <p className={subtitleClassName}>{subtitle}</p>
+                ) : (
+                    <p className={`m-0 ${s.eyebrow} ${s.eyebrowColor[tone]}`}>
+                        <span aria-hidden="true" className={s.eyebrowBar} />
+                        {subtitle}
+                    </p>
+                ))}
+
+            {title && (
+                <TitleTag className={titleClassName ?? `${s.title} ${titleSize} ${s.titleColor[tone]}`}>{title}</TitleTag>
+            )}
+
+            {description && (
+                <p className={descriptionClassName ?? `${s.description} ${s.descriptionColor[tone]} ${isCenter ? "mx-auto" : ""}`}>
+                    {description}
+                </p>
+            )}
         </div>
     );
 }

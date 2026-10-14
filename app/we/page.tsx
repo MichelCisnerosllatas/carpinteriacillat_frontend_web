@@ -1,4 +1,4 @@
-import MainWe from "@/features/we/ui/MainWe";
+import MainWe from "@/features/we/ui/main-we/MainWe";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

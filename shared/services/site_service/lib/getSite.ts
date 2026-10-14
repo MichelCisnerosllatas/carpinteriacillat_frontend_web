@@ -34,10 +34,16 @@
 import { siteService } from "../services/site.service";
 import type { SiteDataDto } from "../model/siteget.dto";
 
+// En desarrollo (npm run dev) NO se guarda en caché: así, al cambiar datos en el
+// intranet o correr los seeders, basta con recargar la página para verlos.
+// En producción (npm run build / start) se mantiene "force-cache" como siempre.
+const SITE_CACHE: RequestCache =
+  process.env.NODE_ENV === "development" ? "no-store" : "force-cache";
+
 export async function getSite(): Promise<SiteDataDto | null> {
   try {
     const response = await siteService.get({
-      cache: "force-cache",
+      cache: SITE_CACHE,
     });
 
     return response.data;

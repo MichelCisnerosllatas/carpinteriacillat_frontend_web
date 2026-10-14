@@ -6,8 +6,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
 import Container from "@/shared/ui/container/Container";
-import ServiceCarouselCard from "@/widget/servicecarousel/ui/ServiceCarouselCard";
-import { defaultServiceCarouselItems } from "@/widget/servicecarousel/model/mock";
+import ServiceCarouselCard from "@/features/home/ui/section2/ServiceCarouselCard";
+import { defaultServiceCarouselItems } from "@/features/home/ui/section2/section2.mock";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
@@ -65,7 +65,7 @@ export default function Section2({ section }: Props) {
                     subtitle={section.section_subtitle}
                     title={section.section_title}
                     description={section.section_description}
-                    className="text-center mb-10"
+                    className="mb-10"
                 />
 
                 {/* Carrusel */}

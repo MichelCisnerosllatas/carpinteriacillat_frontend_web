@@ -1,8 +1,8 @@
 // home/ui/section1/Section1.tsx
 import Container from "@/shared/ui/container/Container";
 import BackgroundCarousel from "@/shared/components/background_carousel/BackgroundCarousel";
-import Counter from "@/widget/homehero/ui/Counter";
-import { heroSlides, heroStats } from "@/widget/homehero/model/mock";
+import Counter from "@/features/home/ui/section1/Counter";
+import { heroSlides, heroStats } from "@/features/home/ui/section1/section1.mock";
 import {
     normalizeButtons,
     normalizeImages,
@@ -67,6 +67,7 @@ export default function Section1({ section }: Props) {
                         subtitle={section.section_subtitle}
                         title={section.section_title}
                         description={section.section_description}
+                        align="left"
                         subtitleClassName="text-sm uppercase tracking-[0.2em] text-amber-400 font-semibold mb-2 block"
                         titleClassName="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight"
                         descriptionClassName="text-xl text-gray-200 mb-8 leading-relaxed"

@@ -1,5 +1,5 @@
 //app/gallery/page.tsx
-import MainGallery from "@/features/gallery/ui/MainGallery";
+import MainGallery from "@/features/gallery/ui/main-gallery/MainGallery";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

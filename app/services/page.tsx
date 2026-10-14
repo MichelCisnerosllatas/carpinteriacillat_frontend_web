@@ -1,4 +1,4 @@
-import MainServices from "@/features/service/ui/MainServices";
+import MainServices from "@/features/service/ui/main-services/MainServices";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

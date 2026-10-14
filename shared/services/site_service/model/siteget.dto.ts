@@ -28,6 +28,54 @@ export type SiteDataDto = {
   social_networks: SiteSocialNetworkDto[];
   footer_settings: SiteFooterSettingsDto;
   navigations: SiteNavigationDto[];
+  // Trabajos (muebles) publicados en la galería web — viene al mismo nivel que navigations.
+  // Un backend viejo puede no mandarlo todavía: quien lo lea debe usar `site.works ?? []`
+  // (ver shared/store/site/useSiteWorks.ts).
+  works: SiteWorkDto[];
+};
+
+// Un trabajo de la galería (tablas furnitures + furniture_web en el backend). Lo usan la
+// galería (/gallery), el detalle (/gallery/[id]) y las secciones de Servicios que se calculan
+// solas (category_coverflow, restoration_compare). Casi todo puede venir null: el admin
+// completa los datos web de a poco.
+export type SiteWorkDto = {
+  id_furniture: number;
+  id_furniture_web: number;
+  title: string | null;
+  description: string | null;
+  category: { id_category: number; name: string } | null;
+  wood: { id_typewood: number; name: string } | null;
+  style: string | null;
+  measures: string | null;
+  finish: string | null;
+  build_time: string | null;
+  location: string | null;
+  delivered_at: string | null; // "2026-05-10"
+  price_approx: number | null;
+  order: number | null;
+  // La primera es la portada; después las demás fotos ya ordenadas por el backend.
+  photos: SiteWorkPhotoDto[];
+  rating_avg: number | null;
+  testimonies: SiteWorkTestimonyDto[];
+};
+
+export type SiteWorkPhotoDto = {
+  // null = es la portada del mueble (furnitures.id_image), no una fila de furnitures_images.
+  id_furniture_image: number | null;
+  url: string;
+  alt: string | null;
+  caption: string | null;
+  // "before" | "after" solo en restauraciones (comparador antes/después); null en el resto.
+  variant: string | null;
+  order: number;
+};
+
+export type SiteWorkTestimonyDto = {
+  id_testimony_web: number;
+  name: string;
+  rating: number | null;
+  message: string;
+  date: string | null; // "2026-05-12"
 };
 
 // De `footer_setting` (backend, singleton) — visibilidad del footer completo y de cada una de
@@ -102,8 +150,13 @@ export type SiteSectionDto = {
   testimonies: SiteTestimonyDto[];
   // `null` cuando la sección todavía no tiene fila propia en `testimony_web_setting` (el
   // admin nunca guardó nada ahí) — tratar igual que "todo en true, salvo el correo" (ver
-  // widget/testimonial/lib/getTestimonySettings.ts).
+  // features/testimony/lib/getTestimonySettings.ts).
   testimony_settings: SiteTestimonySettingsDto | null;
+  // Qué elementos de las tarjetas se muestran (ej. { show_card_count: false }). Viene de
+  // section_web_setting.card_settings; el catálogo de claves vive en el backend
+  // (config/section_card_settings.php). Objeto vacío o clave ausente = visible.
+  // Leerlo SIEMPRE con isCardElementVisible() (shared/services/site_service/lib/cardSettings.ts).
+  card_settings?: Record<string, boolean>;
 };
 
 // Un testimonio de cliente (sección "testimonial_carousel", ej. "home-testimonials") — tabla
@@ -208,6 +261,10 @@ export type SiteSectionImageDto = {
   // a la clase de Tailwind real, nunca se usa este string crudo en un
   // className.
   fix: string | null;
+
+  // Item de la misma sección al que pertenece la foto (ej. cada servicio del hero
+  // "service_showcase" tiene sus propias fotos). null = foto de la sección en general.
+  id_section_item: number | null;
 
   order: number;
   state: boolean;

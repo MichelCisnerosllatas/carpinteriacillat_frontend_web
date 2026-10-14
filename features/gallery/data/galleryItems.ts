@@ -30,30 +30,33 @@ export type GalleryItem = {
     linkLabel?: string;
 };
 
+// ids "fallback-N" (texto, no numero) a proposito: GalleryPhoto.tsx solo pone el ancla de
+// vista previa ("section-image-N") cuando el id es numerico. Con "1".."4" el fallback generaba
+// "section-image-1", que podia chocar con una imagen real de otra seccion.
 export const FALLBACK_GALLERY_ITEMS: GalleryItem[] = [
     {
-        id: "1",
+        id: "fallback-1",
         category: "Puertas y Ventanas",
         title: "Ventana corrediza a medida",
         url: "/img/sistema/carpinteriacillat1.png",
         description: "Ventana de madera fabricada e instalada a medida, con acabado natural.",
     },
     {
-        id: "2",
+        id: "fallback-2",
         category: "Comedor",
         title: "Aparador de comedor con vitrina",
         url: "/img/sistema/carpinteriacillat3.png",
         description: "Aparador y vitrina en madera, con espacio de almacenaje y exhibición.",
     },
     {
-        id: "3",
+        id: "fallback-3",
         category: "Estanterías",
         title: "Estantería modular",
         url: "/img/sistema/carpinteriacillat2.jpg",
         description: "Estantería de madera a medida, ideal para sala o depósito.",
     },
     {
-        id: "4",
+        id: "fallback-4",
         category: "Estanterías",
         title: "Estantería en proceso de fabricación",
         url: "/img/sistema/carpinteriacillat4.jpg",

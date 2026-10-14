@@ -1,7 +1,7 @@
 // home/ui/section4/Section4.tsx
 import Container from "@/shared/ui/container/Container";
-import { defaultWhyUsItems } from "@/widget/whyus/model/mock";
-import WhyUsCard from "@/widget/whyus/ui/WhyUsCard";
+import { defaultWhyUsItems } from "@/features/home/ui/section4/section4.mock";
+import WhyUsCard from "@/features/home/ui/section4/WhyUsCard";
 import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
@@ -33,7 +33,7 @@ export default function Section4({ section }: Props) {
                     subtitle={section.section_subtitle}
                     title={section.section_title}
                     description={section.section_description}
-                    className="text-center mb-10"
+                    className="mb-10"
                 />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {items.map((item) => (

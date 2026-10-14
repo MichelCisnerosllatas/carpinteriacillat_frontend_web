@@ -90,6 +90,7 @@ function resolveSection(site: SiteDataDto, payload: PreviewPayload): PreviewReso
   if (!navigation) return null; // navegación aún no guardada — nada que enlazar todavía
 
   const existing = payload.id != null ? navigation.sections.find((s) => s.id_section === payload.id) : undefined;
+  const fields = payload.fields as Partial<SiteSectionDto>;
   const merged: SiteSectionDto = {
     id_section: payload.id ?? TEMP_ID,
     id_type_section: 0,
@@ -109,7 +110,10 @@ function resolveSection(site: SiteDataDto, payload: PreviewPayload): PreviewReso
     testimonies: existing?.testimonies ?? [],
     testimony_settings: existing?.testimony_settings ?? null,
     ...existing,
-    ...(payload.fields as Partial<SiteSectionDto>),
+    ...fields,
+    // "Elementos de las tarjetas": si el intranet manda fields.card_settings, se mezcla con lo
+    // ya cargado (así una clave que no venga en el formulario conserva su valor).
+    card_settings: { ...existing?.card_settings, ...fields.card_settings },
   };
 
   const sections = existing
@@ -217,6 +221,8 @@ function buildImage(existing: SiteSectionImageDto | undefined, fields: Record<st
     link_label: null,
     variant: null,
     fix: null,
+    // Foto nueva sin item asignado; si el intranet manda `id_section_item` en fields, lo pisa abajo.
+    id_section_item: null,
     order: 9999,
     state: true,
     ...existing,

@@ -27,6 +27,23 @@ function toNavLinks(items: SiteNavigationDto[]): NavLink[] {
     return items.map((item) => ({ href: item.navigation_url, label: item.navigation_name }));
 }
 
+// El link queda marcado en su ruta y en todas sus subrutas (ej. "Galería" sigue
+// marcado en /gallery/123). "/" (Inicio) solo coincide exacto, si no estaría
+// marcado en todas las páginas. Se ignoran "#ancla" y "?query" del href.
+function isActiveRoute(pathname: string, href: string): boolean {
+    // Normaliza "gallery", "/gallery/" y "/gallery" al mismo valor (el href viene del
+    // navigation_url que se escribe a mano en el intranet).
+    const normalize = (p: string) => `/${p.trim().replace(/^\/+|\/+$/g, "")}`;
+    const path = normalize(href.split(/[?#]/)[0]);
+    const current = normalize(pathname);
+    if (path === "/") return current === "/";
+    return current === path || current.startsWith(`${path}/`);
+}
+
+// Mismo estándar en todas las paletas: hover amarillo, al presionar amarillo más fuerte.
+const LINK_PRESSED = "active:text-brand-gold-dark";
+const LINK_ACTIVE = "text-brand-gold underline underline-offset-8";
+
 export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps) {
     const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
@@ -37,7 +54,6 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
 
     // o mejor usando tus nuevas variables:
     const mobileBtnClass = openMobile ? style.mobileMenuBtnOpen : (navbarSolid ? style.linkSolid : style.linkTransparent);
-    const mobileIconColor = openMobile ? style.mobileMenuBtnOpen : style.mobileMenuBtn;
 
 
     const toggleMobile = () => setOpenMobile((prev) => !prev);
@@ -134,19 +150,21 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                         {/*    </Link>*/}
                         {/*))}*/}
                         {links.map((item) => {
+                            // isSameRoute: exactamente la página del link (clic = volver arriba).
+                            // isActive: la página del link o una de sus subrutas (queda marcado).
                             const isSameRoute = pathname === item.href;
+                            const isActive = isActiveRoute(pathname, item.href);
 
-                            const base = "font-medium transition-colors";
-                            const active = "text-[#f5c400] underline underline-offset-8";
+                            const base = clsx("font-medium transition-colors", LINK_PRESSED);
                             const normal = clsx(linkClass, linkHoverClass);
-                            const className = clsx(base, isSameRoute ? active : normal);
+                            const className = clsx(base, isActive ? LINK_ACTIVE : normal);
 
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
                                     className={className}
-                                    aria-current={isSameRoute ? "page" : undefined}
+                                    aria-current={isActive ? "page" : undefined}
                                     onClick={(e) => {
                                         if (isSameRoute) {
                                             // ✅ evita navegación Next => NO loader
@@ -174,7 +192,10 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                         id="menuBtn"
                         className={clsx(
                             "md:hidden text-2xl z-[10000] relative transition-colors",
-                            mobileIconColor,
+                            // mobileBtnClass sigue el scroll (igual que los links): en la paleta
+                            // "claro" el ☰ es negro arriba y blanco sobre el rojo. En las demás
+                            // paletas da el mismo color que antes.
+                            mobileBtnClass,
                             style.mobileMenuBtnHover
                         )}
                         onClick={toggleMobile}
@@ -227,10 +248,13 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                                             href={item.href}
                                             className={clsx(
                                                 "block text-xl font-semibold py-2 border-b transition-colors",
-                                                style.mobileLink,
-                                                style.mobileLinkHover,
+                                                LINK_PRESSED,
+                                                isActiveRoute(pathname, item.href)
+                                                    ? "text-brand-gold"
+                                                    : clsx(style.mobileLink, style.mobileLinkHover),
                                                 style.mobileLinkBorder
                                             )}
+                                            aria-current={isActiveRoute(pathname, item.href) ? "page" : undefined}
                                             onClick={closeMobile}
                                         >
                                             {item.label}

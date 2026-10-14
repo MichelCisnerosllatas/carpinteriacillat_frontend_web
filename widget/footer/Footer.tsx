@@ -177,16 +177,30 @@ export default function Footer({ initialNavigations, whatsappButton, company, so
                                 {/* Tamaño y object-fit configurables desde /footer (intranet) —
                                     `logo_width` viene `null` cuando debe calcularse automático
                                     según la proporción real de la imagen (no forzarse), por eso
-                                    va por `style` (inline) y no por clases fijas de Tailwind. */}
+                                    va por `style` (inline) y no por clases fijas de Tailwind.
+                                    Con ancho automático, `logo_height` es un MÁXIMO (maxHeight) y
+                                    la imagen escala proporcional al ancho de la columna: antes
+                                    era un alto fijo + tope de 220px de ancho, y con
+                                    object-fit "contain" la caja quedaba más alta que el dibujo
+                                    (espacio vacío arriba y abajo del logo). */}
                                 <img
                                     src={footerSettings.logo_url ?? LOGO_FALLBACK}
                                     alt={company?.name ?? "CILLAT - Fabricación de Muebles"}
-                                    style={{
-                                        height: footerSettings.logo_height,
-                                        width: footerSettings.logo_width ?? "auto",
-                                        objectFit: footerSettings.logo_object_fit,
-                                        maxWidth: footerSettings.logo_width ? undefined : 220,
-                                    }}
+                                    style={
+                                        footerSettings.logo_width
+                                            ? {
+                                                height: footerSettings.logo_height,
+                                                width: footerSettings.logo_width,
+                                                maxWidth: "100%",
+                                                objectFit: footerSettings.logo_object_fit,
+                                            }
+                                            : {
+                                                height: "auto",
+                                                width: "auto",
+                                                maxHeight: footerSettings.logo_height,
+                                                maxWidth: "100%",
+                                            }
+                                    }
                                 />
                             </Link>
 

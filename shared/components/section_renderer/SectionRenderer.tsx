@@ -1,7 +1,7 @@
 // shared/components/section_renderer/SectionRenderer.tsx
 //
 // Este componente NO pide datos: recibe una seccion que ya viene adentro
-// del JSON de getSite() (ver features/home/ui/MainHome.tsx) y decide QUE
+// del JSON de getSite() (ver features/home/ui/main-home/MainHome.tsx) y decide QUE
 // componente de UI pintar segun section.section_type. La POSICION de la
 // seccion (section_order) ya la resolvio quien arma la lista (ver
 // normalizeSections en shared/services/site_service/lib/
@@ -26,26 +26,33 @@
 // componente nunca deberia tener que "adivinar" la UI mirando item_type u
 // otro campo del contenido.
 
+import { Suspense } from "react";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 // *_hero
 import PageHeroSection from "@/shared/components/page_hero/PageHeroSection";
 import Section1 from "@/features/home/ui/section1/Section1";
 // *_grid
 import Section4 from "@/features/home/ui/section4/Section4";
-import ServiceGrid from "@/features/service/ui/servicegrid/ServiceGrid";
-import ServiceCategoryGrid from "@/features/service/ui/servicecategorygrid/ServiceCategoryGrid";
-import GalleryPhoto from "@/features/gallery/ui/galleryphotos/GalleryPhoto";
-import WeValuesSection from "@/features/we/ui/wevaluessection/WeValuesSection";
-import WeTeamSection from "@/features/we/ui/weteamsection/WeTeamSection";
+import ServiceGrid from "@/features/service/ui/service-grid/ServiceGrid";
+import ServiceCategoryGrid from "@/features/service/ui/service-category-grid/ServiceCategoryGrid";
+import GalleryPhoto from "@/features/gallery/ui/gallery-photo/GalleryPhoto";
+import WeValuesSection from "@/features/we/ui/we-values-section/WeValuesSection";
+import WeTeamSection from "@/features/we/ui/we-team-section/WeTeamSection";
 // *_carousel
 import Section2 from "@/features/home/ui/section2/Section2";
-import SectionTestimonial from "@/features/home/ui/SectionTestimonial/SectionTestimonial";
-import WeHistorySection from "@/features/we/ui/wehostorysection/WeHistorySection";
+import SectionTestimonial from "@/features/home/ui/section-testimonial/SectionTestimonial";
+import WeHistorySection from "@/features/we/ui/we-history-section/WeHistorySection";
 // sin sufijo (forma unica)
-import SectionProcess from "@/features/home/ui/SectionProcess/SectionProcess";
-import SectionContact from "@/features/home/ui/SectionContact/SectionContact";
-import WeSection2 from "@/features/we/ui/wesection2/WeSection2";
+import SectionProcess from "@/features/home/ui/section-process/SectionProcess";
+import SectionContact from "@/features/home/ui/section-contact/SectionContact";
+import WeSection2 from "@/features/we/ui/we-section2/WeSection2";
 import Section3 from "@/features/home/ui/section3/Section3";
+// Rediseño de Servicios y Galería (secciones que también leen site.works)
+import ServiceShowcase from "@/features/service/ui/service-showcase/ServiceShowcase";
+import ServiceMarquee from "@/features/service/ui/service-marquee/ServiceMarquee";
+import CategoryCoverflow from "@/features/service/ui/category-coverflow/CategoryCoverflow";
+import RestorationCompare from "@/features/service/ui/restoration-compare/RestorationCompare";
+import WorkGallery from "@/features/gallery/ui/work-gallery/WorkGallery";
 
 type Props = {
   section: SiteSectionDto;
@@ -129,6 +136,31 @@ function renderSection(section: SiteSectionDto) {
 
     case "gallery_preview":
       return <Section3 section={section} />;
+
+    // --- Rediseño Servicios / Galería ---
+    case "service_showcase":
+      // Hero acordeón de Servicios (items "showcase" + sus fotos).
+      return <ServiceShowcase section={section} />;
+
+    case "marquee":
+      return <ServiceMarquee section={section} />;
+
+    case "category_coverflow":
+      // Carrusel 3D de categorías: sus tarjetas se calculan desde site.works.
+      return <CategoryCoverflow section={section} />;
+
+    case "restoration_compare":
+      // Antes/después: usa los trabajos con fotos "before" y "after" de site.works.
+      return <RestorationCompare section={section} />;
+
+    case "work_gallery":
+      // WorkGallery lee los filtros de la URL con useSearchParams, y Next exige que eso
+      // esté dentro de un <Suspense> (si no, falla el build de la página).
+      return (
+        <Suspense fallback={null}>
+          <WorkGallery section={section} />
+        </Suspense>
+      );
 
     default:
       // No rompe la pagina: si el backend agrega un section_type nuevo

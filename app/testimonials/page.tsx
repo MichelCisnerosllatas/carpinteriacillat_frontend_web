@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Container from "@/shared/ui/container/Container";
-import TestimonySubmitForm from "@/widget/testimonial/ui/TestimonySubmitForm";
+import TestimonySubmitForm from "@/features/testimony/ui/testimony-submit-form/TestimonySubmitForm";
 
 export const metadata: Metadata = {
     title: "CILLAT | Deja tu testimonio",

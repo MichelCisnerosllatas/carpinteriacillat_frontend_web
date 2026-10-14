@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import Lightbox from "yet-another-react-lightbox";
 import Container from "@/shared/ui/container/Container";
 import { useLightboxState } from "@/shared/lib/useLightboxState";
-import { defaultGalleryPreviewItems } from "@/widget/galleryhome/model/mock";
-import GalleryPreviewCard from "@/widget/galleryhome/ui/GalleryPreviewCard";
+import { defaultGalleryPreviewItems } from "@/features/home/ui/section3/section3.mock";
+import GalleryPreviewCard from "@/features/home/ui/section3/GalleryPreviewCard";
 import { normalizeImages } from "@/shared/services/site_service/lib/normalizeSectionContent";
 import { resolveImageFit } from "@/shared/services/site_service/lib/resolveImageFit";
 import SectionHeading from "@/shared/components/section_heading/SectionHeading";
@@ -51,9 +51,7 @@ export default function Section3({ section }: Props) {
                         subtitle={section.section_subtitle}
                         title={section.section_title}
                         description={section.section_description}
-                        className="text-center mb-10"
-                        titleClassName="text-3xl md:text-4xl font-extrabold text-black mt-2"
-                        descriptionClassName="text-gray-400 mt-3 max-w-2xl mx-auto text-sm md:text-base"
+                        className="mb-10"
                     />
                 </motion.div>
 

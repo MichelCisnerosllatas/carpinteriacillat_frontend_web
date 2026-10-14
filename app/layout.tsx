@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Figtree } from "next/font/google";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // ⬅️ AQUÍ
 import "swiper/css";
 import "swiper/css/navigation";
@@ -33,7 +33,7 @@ const DEFAULT_FOOTER_SETTINGS: SiteFooterSettingsDto = {
   show_services: true,
   show_access: true,
 };
-import { GoogleOneTap } from "@/widget/buttonproveedor/GoogleOneTap";
+import { GoogleOneTap } from "@/features/google-auth/ui/google-one-tap/GoogleOneTap";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +43,22 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Poppins: fuente de todo el sitio (globals.css la usa con var(--font-poppins)).
+// next/font la descarga en el build y la sirve desde el propio sitio (sin pedirla a Google
+// en cada visita). Solo se cargan los pesos que de verdad se usan.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+});
+
+// Figtree: texto corrido de las secciones del rediseño (clase "il-scope", ver globals.css).
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 
@@ -126,7 +142,9 @@ export default async function RootLayout({
   // <html> antes de que React hidrate. No oculta errores reales de
   // hidratación del propio contenido.
   return (
-    <html lang="en" suppressHydrationWarning>
+    // Las variables de fuente van en <html> (y no en <body>) porque la regla "*" de globals.css
+    // también alcanza a <html>, y ahí la variable tiene que existir.
+    <html lang="en" className={`${poppins.variable} ${figtree.variable}`} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <GoogleOneTap />
         
