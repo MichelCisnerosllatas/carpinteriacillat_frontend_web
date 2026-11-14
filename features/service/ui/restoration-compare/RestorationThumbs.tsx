@@ -1,7 +1,8 @@
 // features/service/ui/restoration-compare/RestorationThumbs.tsx
 //
-// Miniaturas para elegir qué restauración se compara. La elegida sube un poco, lleva anillo
-// amarillo y cambia a la forma "hoja".
+// Miniaturas para elegir qué restauración (trabajo) se compara. Miniatura = foto de DESPUÉS
+// del primer par del trabajo. La elegida sube un poco, lleva anillo amarillo y cambia a la
+// forma "hoja".
 
 import CoverImage from "@/shared/ui/cover-image/CoverImage";
 import { EASE_IL, SHAPE_LEAF, SHAPE_SOFT } from "@/shared/lib/ilDesign";
@@ -42,7 +43,7 @@ export default function RestorationThumbs({ works, activeIndex, onPick }: Props)
                                 }}
                             >
                                 <span className="pointer-events-none absolute inset-0 block">
-                                    <CoverImage url={work.after.url} alt="" />
+                                    <CoverImage url={work.pairs[0]?.after.url} alt="" />
                                 </span>
                             </span>
                             <span

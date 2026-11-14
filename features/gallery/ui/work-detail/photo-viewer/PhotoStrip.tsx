@@ -3,6 +3,8 @@
 // Tira de miniaturas "PORTADA Y FOTOS DEL TRABAJO" debajo del visor. Las fotos que se están
 // viendo (una en Abanico, dos en Libro) se marcan con anillo amarillo. A la derecha del
 // título va el botón "ver en grande" (abre todas las fotos en la que se está viendo).
+// El título (viewer.strip_title, puede venir vacío) y el botón (viewer.show_expand) salen de la
+// Apariencia; si no hay ninguno de los dos, no se pinta esa fila.
 
 import CoverImage from "@/shared/ui/cover-image/CoverImage";
 import ExpandPhotoButton from "@/shared/ui/expand-photo-button/ExpandPhotoButton";
@@ -14,6 +16,8 @@ type Props = {
     visibleIndexes: number[];
     onPick: (index: number) => void;
     onExpand: () => void;
+    title: string;
+    showExpand: boolean;
 };
 
 // "isla de desayuno" -> "Isla de desayuno". La primera siempre se llama "Portada".
@@ -23,13 +27,15 @@ function photoLabel(photo: Photo, index: number): string {
     return photo.caption.charAt(0).toUpperCase() + photo.caption.slice(1);
 }
 
-export default function PhotoStrip({ photos, visibleIndexes, onPick, onExpand }: Props) {
+export default function PhotoStrip({ photos, visibleIndexes, onPick, onExpand, title, showExpand }: Props) {
     return (
-        <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between gap-3">
-                <span className="il-display text-[13px] font-bold tracking-[.14em] text-il-neutro-600">PORTADA Y FOTOS DEL TRABAJO</span>
-                <ExpandPhotoButton onClick={onExpand} className="border border-il-neutro-200" />
-            </div>
+        <div data-el="detail-strip" className="flex flex-col gap-2.5">
+            {(title || showExpand) && (
+                <div className="flex items-center justify-between gap-3">
+                    <span className="il-display text-[13px] font-bold tracking-[.14em] text-il-neutro-600">{title}</span>
+                    {showExpand && <ExpandPhotoButton onClick={onExpand} className="border border-il-neutro-200" dataEl="detail-expand" />}
+                </div>
+            )}
             <div className="grid grid-cols-4 gap-2.5">
                 {photos.map((photo, k) => {
                     const isOn = visibleIndexes.includes(k);

@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/site_service/lib/site.fallback";
 import type { FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
+import { buildWhatsappHref } from "@/shared/services/site_service/lib/whatsappLink";
 import type { FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
 import type { SiteCompanyDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
 import Container from "@/shared/ui/container/Container";
@@ -87,15 +88,9 @@ const GRID_CLASS_BY_VISIBLE_COUNT: Record<number, string> = {
     0: "",
 };
 
-// Numero de siempre (wa.me/51999999999) — SOLO como ultimo recurso si el numero que trae el
-// item no sirve para armar el link (ver buildWhatsappHref). No es un fallback de VISIBILIDAD:
-// si el item no existe o esta desactivado, `whatsappButton` ya llega `null` y no se pinta nada.
-const WHATSAPP_PHONE_FALLBACK = "51999999999";
-
-function buildWhatsappHref(phone: string): string {
-    const digits = phone.replace(/\D/g, "");
-    return `https://wa.me/${digits || WHATSAPP_PHONE_FALLBACK}`;
-}
+// El link wa.me se arma con buildWhatsappHref (shared/services/site_service/lib/whatsappLink.ts),
+// el mismo que usa el botón «Cotizar uno similar» del detalle de un trabajo. Si el item no
+// existe o está desactivado, `whatsappButton` ya llega `null` y no se pinta nada.
 
 // "Contacto" no es parte de la navegacion que devuelve la API (en el
 // header es un boton aparte, no un link mas). Acá el footer SI lo agrega

@@ -13,3 +13,13 @@ export type Photo = {
     // (ver shared/lib/previewAnchor.ts). Solo lo llevan las imágenes de sección.
     anchorId?: string;
 };
+
+// Un par "Antes / Después" (comparador de restauraciones, ver shared/ui/before-after).
+export type PhotoPair = {
+    // Clave única del par (para el `key` de React).
+    key: string;
+    // Pie del par ("Frente", "Detalle del tirador"), si existe.
+    caption: string | null;
+    before: Photo;
+    after: Photo;
+};

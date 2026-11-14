@@ -16,7 +16,7 @@ const MODES: { key: PhotoViewMode; label: string }[] = [
 
 export default function PhotoViewerTabs({ mode, onChange }: Props) {
     return (
-        <div role="tablist" aria-label="Forma de ver las fotos" className="inline-flex gap-1 rounded-full bg-il-neutro-100 p-1">
+        <div data-el="detail-viewer-tabs" role="tablist" aria-label="Forma de ver las fotos" className="inline-flex gap-1 rounded-full bg-il-neutro-100 p-1">
             {MODES.map((item) => {
                 const isActive = item.key === mode;
                 return (

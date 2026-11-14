@@ -16,6 +16,8 @@
 // distinto al resto de la API (intranet), donde "state" es un entero
 // 0-5. No confundir ambos contratos.
 
+import type { SiteAlertDto } from "./siteAlert.dto";
+
 export type SiteResponseDto = {
   success: boolean;
   status: number;
@@ -28,19 +30,31 @@ export type SiteDataDto = {
   social_networks: SiteSocialNetworkDto[];
   footer_settings: SiteFooterSettingsDto;
   navigations: SiteNavigationDto[];
-  // Trabajos (muebles) publicados en la galería web — viene al mismo nivel que navigations.
+  // Trabajos del portafolio web (web_works, state 1) — viene al mismo nivel que navigations.
   // Un backend viejo puede no mandarlo todavía: quien lo lea debe usar `site.works ?? []`
   // (ver shared/store/site/useSiteWorks.ts).
   works: SiteWorkDto[];
+  // Barras de aviso arriba del header (web_alerts): solo las que se están mostrando, ya
+  // ordenadas. Opcional porque un backend viejo puede no mandarlo. Las pinta
+  // features/site-alerts/ui/SiteAlerts.tsx.
+  alerts?: SiteAlertDto[];
 };
 
-// Un trabajo de la galería (tablas furnitures + furniture_web en el backend). Lo usan la
-// galería (/gallery), el detalle (/gallery/[id]) y las secciones de Servicios que se calculan
-// solas (category_coverflow, restoration_compare). Casi todo puede venir null: el admin
-// completa los datos web de a poco.
+// Un trabajo del portafolio web (tabla web_works en el backend, con su tipo en type_works).
+// NO es un mueble del catálogo: puede relacionarse opcionalmente con uno (id_furniture), pero
+// la web lo identifica SIEMPRE por id_web_work (ruta /gallery/<id_web_work>, reseñas, keys).
+// Lo usan la galería (/gallery), el detalle (/gallery/[id]) y las secciones de Servicios que
+// se calculan solas (category_coverflow → fotos automáticas; restoration_compare → trabajos
+// de tipo "restoration" con pares Antes/Después). Casi todo puede venir null: el admin
+// completa los datos de a poco.
 export type SiteWorkDto = {
-  id_furniture: number;
-  id_furniture_web: number;
+  id_web_work: number;
+  // Mueble del catálogo relacionado (opcional). La web no lo usa para navegar.
+  id_furniture: number | null;
+  // Tipo del trabajo: key "manufacture" (Fabricación) o "restoration" (Restauración). Las
+  // claves las usa el código (ver lib/workTypes.ts); el nombre es el texto a mostrar.
+  // Siempre viene (es obligatorio en el backend); igual se lee con getWorkTypeKey().
+  type: SiteWorkTypeDto;
   title: string | null;
   description: string | null;
   category: { id_category: number; name: string } | null;
@@ -53,21 +67,42 @@ export type SiteWorkDto = {
   delivered_at: string | null; // "2026-05-10"
   price_approx: number | null;
   order: number | null;
-  // La primera es la portada; después las demás fotos ya ordenadas por el backend.
+  // Fotos de GALERÍA: la primera es la portada; después las demás ya ordenadas por el
+  // backend. No incluyen las fotos de los pares Antes/Después.
   photos: SiteWorkPhotoDto[];
+  // Pares Antes/Después (solo restauraciones; [] en los demás tipos), ya ordenados.
+  pairs: SiteWorkPairDto[];
   rating_avg: number | null;
   testimonies: SiteWorkTestimonyDto[];
 };
 
+export type SiteWorkTypeDto = {
+  key: string; // "manufacture" | "restoration" (puede haber otros en el futuro)
+  name: string; // "Fabricación" | "Restauración"
+};
+
 export type SiteWorkPhotoDto = {
-  // null = es la portada del mueble (furnitures.id_image), no una fila de furnitures_images.
-  id_furniture_image: number | null;
+  // null = es la portada del trabajo (web_works.id_image) y no coincide con ninguna fila de
+  // web_work_images (entra con order 0).
+  id_web_work_image: number | null;
   url: string;
   alt: string | null;
   caption: string | null;
-  // "before" | "after" solo en restauraciones (comparador antes/después); null en el resto.
-  variant: string | null;
   order: number;
+};
+
+// Un par Antes/Después de una restauración (tabla web_work_pairs): 1 foto antes + 1 después.
+export type SiteWorkPairDto = {
+  id_web_work_pair: number;
+  caption: string | null; // "Frente", "Detalle del tirador"…
+  order: number | null;
+  before: SiteWorkPairPhotoDto;
+  after: SiteWorkPairPhotoDto;
+};
+
+export type SiteWorkPairPhotoDto = {
+  url: string;
+  alt: string | null;
 };
 
 export type SiteWorkTestimonyDto = {
@@ -152,11 +187,11 @@ export type SiteSectionDto = {
   // admin nunca guardó nada ahí) — tratar igual que "todo en true, salvo el correo" (ver
   // features/testimony/lib/getTestimonySettings.ts).
   testimony_settings: SiteTestimonySettingsDto | null;
-  // Qué elementos de las tarjetas se muestran (ej. { show_card_count: false }). Viene de
-  // section_web_setting.card_settings; el catálogo de claves vive en el backend
-  // (config/section_card_settings.php). Objeto vacío o clave ausente = visible.
-  // Leerlo SIEMPRE con isCardElementVisible() (shared/services/site_service/lib/cardSettings.ts).
-  card_settings?: Record<string, boolean>;
+  // "Apariencia" de la sección: qué muestra la web (ej. { "card.show_price": false,
+  // "card.price_prefix": "Aprox." }). Viene de la tabla section_display_setting, ya resuelto
+  // con TODAS las claves del catálogo del backend (config/section_display/*.php).
+  // Leerlo SIEMPRE con los getters de shared/services/site_service/lib/displaySettings.ts.
+  display_settings?: Record<string, unknown>;
 };
 
 // Un testimonio de cliente (sección "testimonial_carousel", ej. "home-testimonials") — tabla

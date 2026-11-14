@@ -58,7 +58,7 @@ export default function RelatedWorkCard({ work, index }: Props) {
                 <div className={`absolute inset-0 transition-transform duration-1000 ease-il ${zoomClass}`}>
                     <CoverImage url={cover?.url} alt={cover?.alt ?? title} />
                 </div>
-                <Link href={`/gallery/${work.id_furniture}`} aria-label={`Ver ${title}`} className="absolute inset-0" />
+                <Link href={`/gallery/${work.id_web_work}`} aria-label={`Ver ${title}`} className="absolute inset-0" />
                 {photos.length > 0 && (
                     <ExpandPhotoButton onClick={() => lightbox.open(0)} className="absolute right-4 top-4 z-10" />
                 )}

@@ -113,7 +113,9 @@ export default function ServiceShowcase({ section }: Props) {
 
                     <div className="flex flex-col gap-[18px]">
                         {section.section_description && (
-                            <p className="m-0 max-w-[48ch] text-[17px] leading-[1.6] text-il-neutro-600">{section.section_description}</p>
+                            <p data-el="header-description" className="m-0 max-w-[48ch] text-[17px] leading-[1.6] text-il-neutro-600">
+                                {section.section_description}
+                            </p>
                         )}
                         {items.length > 1 && (
                             <ShowcaseTabs

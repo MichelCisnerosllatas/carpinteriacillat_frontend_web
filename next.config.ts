@@ -1,34 +1,51 @@
 import type { NextConfig } from "next";
 
+// Hosts del backend tomados del .env (storage y api de cada entorno), en vez de escribir una IP
+// a mano: antes estaba fija "192.168.18.32" y, al cambiar la IP del backend, las fotos dejaban de
+// verse. Ahora basta con cambiar el .env (y reiniciar `npm run dev`: este archivo se lee al arrancar).
+// Nota: las fotos que vienen de una IP privada (backend local) igual se muestran SIN optimizar
+// (ver shared/lib/imageOptimization.ts): Next 16 no optimiza imágenes de IPs privadas.
+const backendUrls = [
+    process.env.NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL,
+    process.env.NEXT_PUBLIC_CORE_STORAGE_URL_DEVELOPMENT,
+    process.env.NEXT_PUBLIC_CORE_STORAGE_URL_PRODUCTION,
+    process.env.NEXT_PUBLIC_CORE_API_URL_LOCAL,
+    process.env.NEXT_PUBLIC_CORE_API_URL_DEVELOPMENT,
+    process.env.NEXT_PUBLIC_CORE_API_URL_PRODUCTION,
+];
+
+// URL del .env → patrón de next/image (sin fijar puerto: el backend local cambia de puerto)
+function toRemotePattern(url: string | undefined) {
+    if (!url) return null;
+    try {
+        const { protocol, hostname } = new URL(url);
+        return { protocol: protocol.replace(":", "") as "http" | "https", hostname };
+    } catch {
+        return null;
+    }
+}
+
+const envPatterns = backendUrls
+    .map(toRemotePattern)
+    .filter((p): p is { protocol: "http" | "https"; hostname: string } => p !== null);
+
 const nextConfig: NextConfig = {
-    /* config options here */
     images: {
-        // next/image exige que cada dominio EXTERNO de donde vengan
-        // imagenes este autorizado aca a proposito (seguridad: evita que
-        // el optimizador de imagenes de Next procese cualquier URL
-        // arbitraria). Cada vez que el backend agregue una imagen alojada
-        // en un dominio nuevo, hay que sumarlo aca o next/image tira
-        // "Invalid src prop ... hostname X is not configured".
+        // next/image exige que cada dominio EXTERNO de donde vengan imagenes este autorizado aca
+        // (seguridad: evita que el optimizador de imagenes procese cualquier URL arbitraria).
+        // Las fotos de dominios que NO estan aca igual se ven: los componentes usan
+        // `unoptimized={!canOptimizeImage(url)}` (shared/lib/imageOptimization.ts) y en ese caso
+        // la foto se muestra tal cual, sin pasar por el optimizador.
         remotePatterns: [
             { protocol: "https", hostname: "i.pinimg.com" },
-            // Imagenes de muestra/placeholder que usa el seeder del
-            // backend mientras no hay contenido real cargado.
+            // Fotos reales del sitio ya alojadas (las usa el seeder del backend)
             { protocol: "https", hostname: "demo.carpinteriacillat.com" },
             { protocol: "https", hostname: "placehold.co" },
-            // Storage real del backend en desarrollo/produccion (para
-            // cuando se empiecen a subir imagenes reales, no solo de
-            // muestra).
+            // Storage del backend en desarrollo/produccion
             { protocol: "https", hostname: "api.dev.carpinteriacillat.com" },
             { protocol: "https", hostname: "api.carpinteriacillat.com" },
-            // IP de red del backend en LOCAL (ver NEXT_PUBLIC_CORE_STORAGE_URL_LOCAL en .env) —
-            // esta SÍ se hardcodea a propósito (era la excepción que pedía la nota vieja de
-            // este archivo): en esta máquina de desarrollo es siempre la misma IP, pero el
-            // PUERTO del backend varía según cómo se levante Laragon (se vio responder en 8000
-            // y en 8001 en la misma sesión de pruebas) — por eso no se fija `port`, así
-            // remotePatterns matchea esa IP sin importar el puerto. Si alguna vez cambia la IP
-            // de red (otra red, otra máquina), hay que actualizar este hostname o, mejor, pedirle
-            // al backend un hostname estable (ej. "carpinteriacillat.test" con Laragon).
-            { protocol: "http", hostname: "192.168.18.32" },
+            // Hosts del backend definidos en el .env (local, desarrollo y produccion)
+            ...envPatterns,
         ],
     },
     output: 'standalone',

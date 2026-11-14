@@ -146,14 +146,19 @@ function renderSection(section: SiteSectionDto) {
       return <ServiceMarquee section={section} />;
 
     case "category_coverflow":
-      // Carrusel 3D de categorías: sus tarjetas se calculan desde site.works.
+      // Carrusel 3D de categorías: tarjetas = items "category" de la sección (key
+      // "category-<id>") con sus fotos propias; si una no tiene fotos, usa las de los trabajos
+      // de site.works con esa categoría (cualquier tipo; ver buildItemCategoryCards.ts).
       return <CategoryCoverflow section={section} />;
 
     case "restoration_compare":
-      // Antes/después: usa los trabajos con fotos "before" y "after" de site.works.
+      // Antes/después: tarjetas = trabajos de site.works con type.key "restoration" y al
+      // menos un par Antes/Después (work.pairs). Ya no usa items ni imágenes de la sección.
       return <RestorationCompare section={section} />;
 
     case "work_gallery":
+      // Galería: todos los trabajos de site.works (Fabricación y Restauración), con filtros
+      // ?q&type&cat&mad&est. El detalle /gallery/<id_web_work> es app/gallery/[id]/page.tsx.
       // WorkGallery lee los filtros de la URL con useSearchParams, y Next exige que eso
       // esté dentro de un <Suspense> (si no, falla el build de la página).
       return (

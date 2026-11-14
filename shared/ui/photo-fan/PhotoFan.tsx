@@ -31,6 +31,8 @@ type Props = {
     // Al tocar la ficha "+N": recibe el índice de la primera foto que no entró.
     // Si no se pasa, la ficha simplemente elige esa foto.
     onMoreClick?: (startIndex: number) => void;
+    // Ancla data-el de la Apariencia de quien lo usa (ej. "coverflow-card-thumbs").
+    dataEl?: string;
 };
 
 const THUMB_WIDTH = 62;
@@ -43,7 +45,7 @@ function openGap(canHover: boolean, count: number): number {
     return count > 4 ? 38 : 46; // celular (siempre abierto)
 }
 
-export default function PhotoFan({ photos, selected, onSelect, visible, side, maxVisible = 4, onMoreClick }: Props) {
+export default function PhotoFan({ photos, selected, onSelect, visible, side, maxVisible = 4, onMoreClick, dataEl }: Props) {
     const canHover = useCanHover();
     const [hoverOpen, setHoverOpen] = useState(false);
 
@@ -83,6 +85,7 @@ export default function PhotoFan({ photos, selected, onSelect, visible, side, ma
 
     return (
         <div
+            data-el={dataEl}
             onMouseEnter={() => canHover && setHoverOpen(true)}
             onMouseLeave={() => setHoverOpen(false)}
             style={{

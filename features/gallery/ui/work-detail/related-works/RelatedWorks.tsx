@@ -4,6 +4,8 @@
 // fila con scroll horizontal. Las flechas mueven la fila de a una tarjeta y SOLO aparecen
 // cuando hay tarjetas que no se ven (useScrollArrows); al llegar a un extremo, esa flecha se
 // deshabilita. Cada tarjeta está en RelatedWorkCard.tsx.
+// Título y cantidad máxima salen de la Apariencia (related.title, related.max). Ancla
+// data-el="detail-related".
 "use client";
 
 import { useRef } from "react";
@@ -17,24 +19,26 @@ import type { SiteWorkDto } from "@/shared/services/site_service/model/siteget.d
 type Props = {
     work: SiteWorkDto;
     works: SiteWorkDto[];
+    title: string;
+    max: number;
 };
 
 const ARROW_CLASS =
     "inline-flex size-[52px] cursor-pointer items-center justify-center rounded-full text-lg transition-colors disabled:cursor-not-allowed disabled:opacity-35";
 
-export default function RelatedWorks({ work, works }: Props) {
-    const related = getRelatedWorks(work, works);
+export default function RelatedWorks({ work, works, title, max }: Props) {
+    const related = getRelatedWorks(work, works, max);
     const rowRef = useRef<HTMLDivElement>(null);
     const { hasOverflow, canPrev, canNext, scrollByCard } = useScrollArrows(rowRef);
 
     if (related.length === 0) return null;
 
     return (
-        <section className="pb-[clamp(3.5rem,8vw,6.5rem)]">
+        <section data-el="detail-related" className="pb-[clamp(3.5rem,8vw,6.5rem)]">
             <Container className="flex flex-col gap-7">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <h2 className={`${hs.title} ${hs.sectionTitleSize} ${hs.titleColor.light}`}>
-                        Otros trabajos que le pueden gustar
+                        {title}
                     </h2>
                     {hasOverflow && (
                         <div className="flex gap-2">
@@ -68,7 +72,7 @@ export default function RelatedWorks({ work, works }: Props) {
                 >
                     {related.map((item, i) => (
                         <div
-                            key={item.id_furniture}
+                            key={item.id_web_work}
                             className="flex-none basis-[80%] snap-start sm:basis-[calc((100%-28px)/2)] lg:basis-[calc((100%-56px)/3)]"
                         >
                             <RelatedWorkCard work={item} index={i} />

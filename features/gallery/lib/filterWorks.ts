@@ -1,24 +1,28 @@
 // features/gallery/lib/filterWorks.ts
 //
 // Lógica pura (sin React) del buscador y los filtros de la galería:
-//   - búsqueda de texto en título, categoría, madera, estilo, lugar y acabado;
-//   - filtros de selección múltiple por categoría, madera y estilo;
+//   - búsqueda de texto en título, tipo, categoría, madera, estilo, lugar y acabado;
+//   - filtros de selección múltiple por tipo, categoría, madera y estilo;
 //   - conteos para los botones ("Cocinas · 3 trabajos").
 // Se separa de los componentes para poder leerla (y cambiarla) sin tocar el HTML.
 
 import type { SiteWorkDto } from "@/shared/services/site_service/model/siteget.dto";
+import { getWorkTypeKey, getWorkTypeName } from "@/shared/services/site_service/lib/workTypes";
 
 export type WorkFilters = {
     query: string;
+    // Claves de tipo ("restoration"), no nombres: así la URL ?type=restoration no depende del
+    // texto que el admin le ponga al tipo. Para mostrar se usa getTypeLabel().
+    types: string[];
     categories: string[];
     woods: string[];
     styles: string[];
 };
 
-// Las tres listas de selección múltiple (sirve para escribir una sola función toggle/clear).
-export type FilterListKey = "categories" | "woods" | "styles";
+// Las listas de selección múltiple (sirve para escribir una sola función toggle/clear).
+export type FilterListKey = "types" | "categories" | "woods" | "styles";
 
-export const EMPTY_FILTERS: WorkFilters = { query: "", categories: [], woods: [], styles: [] };
+export const EMPTY_FILTERS: WorkFilters = { query: "", types: [], categories: [], woods: [], styles: [] };
 
 // --- Lectores: un solo lugar que sabe de dónde sale cada dato del trabajo -------------------
 
@@ -35,6 +39,7 @@ export function getWorkStyle(work: SiteWorkDto): string | null {
 }
 
 const READERS: Record<FilterListKey, (work: SiteWorkDto) => string | null> = {
+    types: getWorkTypeKey,
     categories: getWorkCategory,
     woods: getWorkWood,
     styles: getWorkStyle,
@@ -51,7 +56,7 @@ function matchesQuery(work: SiteWorkDto, query: string): boolean {
     const wanted = normalizeText(query.trim());
     if (!wanted) return true;
 
-    const searchable = [work.title, getWorkCategory(work), getWorkWood(work), work.style, work.location, work.finish]
+    const searchable = [work.title, getWorkTypeName(work), getWorkCategory(work), getWorkWood(work), work.style, work.location, work.finish]
         .filter(Boolean)
         .join(" ");
 
@@ -75,6 +80,7 @@ export function filterWorks(works: SiteWorkDto[], filters: WorkFilters, ignore?:
     return works.filter(
         (work) =>
             matchesQuery(work, filters.query) &&
+            (ignore === "types" || matchesList(work, "types", filters.types)) &&
             (ignore === "categories" || matchesList(work, "categories", filters.categories)) &&
             (ignore === "woods" || matchesList(work, "woods", filters.woods)) &&
             (ignore === "styles" || matchesList(work, "styles", filters.styles))
@@ -96,6 +102,13 @@ export function getOptions(works: SiteWorkDto[], key: FilterListKey): string[] {
 
 export function countWorksWith(works: SiteWorkDto[], key: FilterListKey, value: string): number {
     return works.filter((work) => READERS[key](work) === value).length;
+}
+
+// Nombre para mostrar de una clave de tipo ("restoration" → "Restauración"), sacado del
+// primer trabajo con ese tipo. Si ninguno lo tiene, se muestra la clave tal cual.
+export function getTypeLabel(works: SiteWorkDto[], key: string): string {
+    const work = works.find((w) => getWorkTypeKey(w) === key);
+    return (work && getWorkTypeName(work)) || key;
 }
 
 // "1 trabajo" / "3 trabajos".

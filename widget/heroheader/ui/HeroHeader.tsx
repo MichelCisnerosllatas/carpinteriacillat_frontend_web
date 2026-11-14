@@ -62,14 +62,16 @@ export default function HeroHeader({
                     transition={{ duration: 0.8 }}
                     className="relative z-10 text-center px-6"
                 >
+                    {/* data-el: anclas del grupo "Encabezado" de la Apariencia (vista previa).
+                        El "subtitle" de este header es section_description. */}
                     {title && (
-                        <h1 className="text-white text-4xl md:text-6xl font-bold drop-shadow-xl">
+                        <h1 data-el="header-title" className="text-white text-4xl md:text-6xl font-bold drop-shadow-xl">
                             {title}
                         </h1>
                     )}
 
                     {subtitle && (
-                        <p className="text-gray-200 mt-4 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
+                        <p data-el="header-description" className="text-gray-200 mt-4 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
                             {subtitle}
                         </p>
                     )}

@@ -1,4 +1,4 @@
-// features/service/ui/restoration-compare/BeforeAfterSlider.tsx
+// shared/ui/before-after/BeforeAfterSlider.tsx
 //
 // Comparador "antes / después": la foto de DESPUÉS va encima de la de ANTES y se recorta con
 // clip-path desde la izquierda hasta `value` (en %). Mover la manija cambia ese porcentaje.
@@ -10,11 +10,17 @@
 //   (24% → 76% → 50%) para mostrar que se puede mover. No se hace con "reducir movimiento"
 //   ni si el intranet lo apagó (autoSweep).
 // - Etiquetas, ayuda y botón "ver en grande" se pueden ocultar desde el intranet (props show*).
-// - Anclas de la vista previa: "section-item-<id>" en cada trabajo y "section-image-<id>" en
-//   sus fotos propias.
+// - `elements`: anclas data-el de la Apariencia de quien lo usa (ej. "restoration-labels"),
+//   para que la vista previa del intranet resalte cada parte.
+// - Recibe varios "cuadros" (frames = un par antes/después cada uno) apilados y muestra solo
+//   el activo, con un fundido al cambiar. Así el cambio de trabajo o de par no parpadea
+//   (las fotos ya están cargadas).
 //
-// Es un componente "controlado": el porcentaje lo guarda el padre (RestorationCompare), que
-// también lo vuelve a 50 al elegir otro trabajo.
+// Vive en shared/ui porque lo usan Servicios (sección restoration_compare) y Galería (bloque
+// "Antes y después" del detalle de una restauración).
+//
+// Es un componente "controlado": el porcentaje lo guarda el padre, que también lo vuelve a 50
+// al elegir otro trabajo u otro par.
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -22,20 +28,39 @@ import CoverImage from "@/shared/ui/cover-image/CoverImage";
 import ExpandPhotoButton from "@/shared/ui/expand-photo-button/ExpandPhotoButton";
 import { useReducedMotion } from "@/shared/lib/useReducedMotion";
 import { EASE_IL, EASE_IL_PAGE } from "@/shared/lib/ilDesign";
-import { PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
-import type { RestorationCard } from "@/features/service/lib/buildRestorationCards";
+import type { Photo } from "@/shared/lib/photo";
+
+// Un cuadro del comparador: una foto de antes y una de después.
+export type BeforeAfterFrame = {
+    key: string;
+    // Nombre de lo que se compara (para el texto alternativo: "Antes: Cómoda Luis XV").
+    title: string;
+    before: Photo;
+    after: Photo;
+};
 
 type Props = {
-    works: RestorationCard[];
-    activeIndex: number;
+    frames: BeforeAfterFrame[];
+    activeIndex: number; // cuadro visible
     value: number; // 0 a 100
     onChange: (value: number) => void;
     onExpand: () => void; // abre "antes" y "después" en grande
-    // "Elementos de las tarjetas" (card_settings de la sección):
+    // Apariencia de la sección (display_settings, ej. compare.* o pairs.*):
     showLabels: boolean; // etiquetas "Antes" / "Después"
     showHint: boolean; // ayuda "Toque y arrastre para comparar"
     showExpand: boolean; // botón "ver foto en grande"
     autoSweep: boolean; // barrido automático al aparecer
+    // Clases extra del recuadro (ej. otra proporción). Por defecto 4/4.6.
+    className?: string;
+    elements?: BeforeAfterElements;
+};
+
+// Anclas data-el opcionales de cada parte del comparador.
+export type BeforeAfterElements = {
+    slider?: string; // el recuadro entero
+    labels?: string; // etiquetas "Antes" / "Después"
+    hint?: string; // ayuda "Toque y arrastre…"
+    expand?: string; // botón "ver en grande"
 };
 
 // [milisegundos desde que se ve, posición en %]
@@ -52,7 +77,7 @@ function clamp(value: number): number {
 }
 
 export default function BeforeAfterSlider({
-    works,
+    frames,
     activeIndex,
     value,
     onChange,
@@ -61,6 +86,8 @@ export default function BeforeAfterSlider({
     showHint,
     showExpand,
     autoSweep,
+    className = "aspect-[4/4.6]",
+    elements = {},
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const alreadySwept = useRef(false);
@@ -130,37 +157,36 @@ export default function BeforeAfterSlider({
     return (
         <div
             ref={containerRef}
+            data-el={elements.slider}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={() => setDragging(false)}
             onPointerCancel={() => setDragging(false)}
-            className="relative aspect-[4/4.6] select-none overflow-hidden rounded-[28px] bg-il-neutro-700 shadow-[0_30px_70px_rgba(0,0,0,.45)] outline outline-1 outline-white/10 [touch-action:pan-y]"
+            className={`relative ${className} select-none overflow-hidden rounded-[28px] bg-il-neutro-700 shadow-[0_30px_70px_rgba(0,0,0,.45)] outline outline-1 outline-white/10 [touch-action:pan-y]`}
             style={{
                 cursor: dragging ? "grabbing" : "grab",
                 transform: `scale(${dragging ? 0.99 : 1})`,
                 transition: `transform 300ms ${EASE_IL}`,
             }}
         >
-            {works.map((work, i) => (
+            {frames.map((frame, i) => (
                 <div
-                    key={work.key}
-                    id={work.anchorId}
+                    key={frame.key}
+                    aria-hidden={i !== activeIndex}
                     className="absolute inset-0"
-                    style={{ ...PREVIEW_ANCHOR_STYLE, opacity: i === activeIndex ? 1 : 0, transition: "opacity 500ms" }}
+                    style={{ opacity: i === activeIndex ? 1 : 0, transition: "opacity 500ms" }}
                 >
-                    <div id={work.before.anchorId} className="absolute inset-0" style={PREVIEW_ANCHOR_STYLE}>
-                        <CoverImage url={work.before.url} alt={`Antes: ${work.title}`} />
+                    <div className="absolute inset-0">
+                        <CoverImage url={frame.before.url} alt={frame.before.alt || `Antes: ${frame.title}`} />
                     </div>
                     <div
-                        id={work.after.anchorId}
                         className="absolute inset-0 bg-il-neutro-600"
                         style={{
-                            ...PREVIEW_ANCHOR_STYLE,
                             clipPath: `inset(0 0 0 ${value}%)`,
                             transition: sweepTransition ? `clip-path ${sweepTransition}` : "none",
                         }}
                     >
-                        <CoverImage url={work.after.url} alt={`Después: ${work.title}`} />
+                        <CoverImage url={frame.after.url} alt={frame.after.alt || `Después: ${frame.title}`} />
                     </div>
                 </div>
             ))}
@@ -190,12 +216,14 @@ export default function BeforeAfterSlider({
             {showLabels && (
                 <>
                     <span
+                        data-el={elements.labels}
                         className="il-display pointer-events-none absolute left-[18px] top-[18px] rounded-full bg-[rgba(20,24,31,.85)] px-3.5 py-[7px] text-sm font-bold text-white transition-opacity duration-300"
                         style={{ opacity: value > 14 ? 1 : 0 }}
                     >
                         Antes
                     </span>
                     <span
+                        data-el={elements.labels}
                         className="il-display pointer-events-none absolute right-[18px] top-[18px] rounded-full bg-il-amarillo-500 px-3.5 py-[7px] text-sm font-bold text-il-neutro-900 transition-opacity duration-300"
                         style={{ opacity: value < 86 ? 1 : 0 }}
                     >
@@ -205,9 +233,10 @@ export default function BeforeAfterSlider({
             )}
             {/* Ver en grande: arriba al centro, entre "Antes" y "Después". El botón corta el
                 pointerdown, así tocarlo no mueve la línea del comparador. */}
-            {showExpand && <ExpandPhotoButton onClick={onExpand} className="absolute left-1/2 top-[14px] z-10 -translate-x-1/2" />}
+            {showExpand && <ExpandPhotoButton onClick={onExpand} className="absolute left-1/2 top-[14px] z-10 -translate-x-1/2" dataEl={elements.expand} />}
             {showHint && (
                 <span
+                    data-el={elements.hint}
                     className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold text-il-neutro-900 transition-opacity duration-[400ms]"
                     style={{ opacity: touched || sweeping ? 0 : 1 }}
                 >

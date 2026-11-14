@@ -6,7 +6,7 @@
 import type { SiteWorkDto } from "@/shared/services/site_service/model/siteget.dto";
 
 export function getNeighborWorks(work: SiteWorkDto, works: SiteWorkDto[]) {
-    const index = works.findIndex((w) => w.id_furniture === work.id_furniture);
+    const index = works.findIndex((w) => w.id_web_work === work.id_web_work);
     if (index === -1 || works.length < 2) {
         return { previous: null, next: null };
     }

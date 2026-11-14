@@ -7,17 +7,20 @@
 //   - stopPropagation: el clic/toque no llega al panel, carrusel o comparador de abajo.
 //
 // La posición la decide quien lo usa con `className` (ej. "absolute right-3 top-3 z-10").
+// `dataEl`: ancla data-el de la Apariencia de la sección (la vista previa del intranet lo resalta).
 "use client";
 
 type Props = {
     onClick: () => void;
     className?: string;
+    dataEl?: string;
 };
 
-export default function ExpandPhotoButton({ onClick, className = "" }: Props) {
+export default function ExpandPhotoButton({ onClick, className = "", dataEl }: Props) {
     return (
         <button
             type="button"
+            data-el={dataEl}
             aria-label="Ver foto en grande"
             title="Ver foto en grande"
             onPointerDown={(e) => {

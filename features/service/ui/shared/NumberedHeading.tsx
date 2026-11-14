@@ -5,6 +5,7 @@
 // (section_description). Cada línea solo se pinta si tiene texto.
 // Título y descripción usan el estándar del sitio (sectionHeading.styles.ts); solo el número
 // tiene su estilo propio.
+// Cada línea lleva su ancla data-el del grupo "Encabezado" de la Apariencia (vista previa).
 import { headingStyles as hs } from "@/shared/components/section_heading/sectionHeading.styles";
 
 type Props = {
@@ -26,6 +27,7 @@ export default function NumberedHeading({ number, title, description, align, dar
         >
             {number && (
                 <span
+                    data-el="header-subtitle"
                     className={`il-display border-b-[3px] border-brand-gold pb-1.5 text-[13px] font-extrabold tracking-[.06em] md:text-[15px] ${
                         dark ? "text-white" : "text-il-neutro-900"
                     }`}
@@ -34,12 +36,12 @@ export default function NumberedHeading({ number, title, description, align, dar
                 </span>
             )}
             {title && (
-                <h2 className={`${hs.title} ${hs.sectionTitleSize} ${hs.titleColor[dark ? "dark" : "light"]}`}>
+                <h2 data-el="header-title" className={`${hs.title} ${hs.sectionTitleSize} ${hs.titleColor[dark ? "dark" : "light"]}`}>
                     {title}
                 </h2>
             )}
             {description && (
-                <p className={`${hs.description} ${hs.descriptionColor[dark ? "dark" : "light"]}`}>
+                <p data-el="header-description" className={`${hs.description} ${hs.descriptionColor[dark ? "dark" : "light"]}`}>
                     {description}
                 </p>
             )}

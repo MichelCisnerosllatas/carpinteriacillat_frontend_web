@@ -7,6 +7,7 @@
 // Regla simple (para no tener que configurar nada en el intranet): las palabras de más de
 // 2 letras se numeran 0, 1, 2… en orden, y se subraya la que tenga el número del panel activo.
 // Las cortas ("e", "y", "de") nunca se subrayan.
+// data-el: anclas del grupo "Encabezado" de la Apariencia (vista previa del intranet).
 
 import { EASE_IL } from "@/shared/lib/ilDesign";
 import { headingStyles as hs } from "@/shared/components/section_heading/sectionHeading.styles";
@@ -35,13 +36,13 @@ export default function ShowcaseTitle({ kicker, title, activeIndex }: Props) {
     return (
         <div className="flex flex-col gap-[18px]">
             {kicker && (
-                <span className={`${hs.eyebrow} ${hs.eyebrowColor.light}`}>
+                <span data-el="header-subtitle" className={`${hs.eyebrow} ${hs.eyebrowColor.light}`}>
                     <span aria-hidden="true" className={hs.eyebrowBar} />
                     {kicker}
                 </span>
             )}
             {title && (
-                <h1 className={`${hs.title} ${hs.pageTitleSize} ${hs.titleColor.light} flex flex-wrap gap-x-[.26em]`}>
+                <h1 data-el="header-title" className={`${hs.title} ${hs.pageTitleSize} ${hs.titleColor.light} flex flex-wrap gap-x-[.26em]`}>
                     {numbered.map(({ word, number }, k) => (
                         <span
                             key={`${word}-${k}`}

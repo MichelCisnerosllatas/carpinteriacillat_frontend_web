@@ -5,8 +5,9 @@ export type TestimonyPostRequestDto = {
   testimony_email?: string
   testimony_rating?: number
   testimony_message: string
-  // Mueble de la galería al que pertenece el comentario (opcional; el Home no lo manda).
-  id_furniture?: number
+  // Trabajo de la galería (web_works.id_web_work) al que pertenece el comentario (opcional;
+  // el Home no lo manda). El backend solo lo acepta si el trabajo está publicado.
+  id_web_work?: number
 }
 
 export type TestimonyApiItem = {

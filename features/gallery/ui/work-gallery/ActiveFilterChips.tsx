@@ -9,6 +9,10 @@ type Props = {
     filters: WorkFilters;
     resultsCount: number;
     totalCount: number;
+    // Apariencia search.show_results_summary: false = sin el texto "N de M trabajos".
+    showSummary?: boolean;
+    // Texto de la ficha de cada valor (ej. tipo "restoration" → "Restauración"). Sin él, el valor.
+    labelFor?: (key: FilterListKey, value: string) => string;
     onRemove: (key: FilterListKey, value: string) => void;
     onClearQuery: () => void;
     onResetAll: () => void;
@@ -20,12 +24,16 @@ type Chip = {
     onRemove: () => void;
 };
 
-const LIST_KEYS: FilterListKey[] = ["categories", "woods", "styles"];
+const LIST_KEYS: FilterListKey[] = ["types", "categories", "woods", "styles"];
 
-export default function ActiveFilterChips({ filters, resultsCount, totalCount, onRemove, onClearQuery, onResetAll }: Props) {
+export default function ActiveFilterChips({ filters, resultsCount, totalCount, showSummary = true, labelFor, onRemove, onClearQuery, onResetAll }: Props) {
     // Una ficha por cada valor marcado, y una más para el texto buscado.
     const chips: Chip[] = LIST_KEYS.flatMap((key) =>
-        filters[key].map((value) => ({ id: `${key}-${value}`, text: value, onRemove: () => onRemove(key, value) }))
+        filters[key].map((value) => ({
+            id: `${key}-${value}`,
+            text: labelFor ? labelFor(key, value) : value,
+            onRemove: () => onRemove(key, value),
+        }))
     );
     if (filters.query.trim()) {
         chips.push({ id: "query", text: `«${filters.query}»`, onRemove: onClearQuery });
@@ -59,9 +67,11 @@ export default function ActiveFilterChips({ filters, resultsCount, totalCount, o
             )}
 
             {/* aria-live: un lector de pantalla anuncia cuántos resultados quedan al filtrar. */}
-            <span aria-live="polite" className="ml-auto text-[15px] text-il-neutro-600">
-                {resultsCount} de {totalCount} trabajos
-            </span>
+            {showSummary && (
+                <span data-el="gallery-results-summary" aria-live="polite" className="ml-auto text-[15px] text-il-neutro-600">
+                    {resultsCount} de {totalCount} trabajos
+                </span>
+            )}
         </>
     );
 }

@@ -8,6 +8,7 @@
 import type { SiteWorkDto } from "@/shared/services/site_service/model/siteget.dto";
 import { getWorkPhotos } from "@/shared/services/site_service/lib/workPhotos";
 import type { Photo } from "@/shared/lib/photo";
+import { getDisplayBool, type DisplaySettingsSource } from "@/shared/services/site_service/lib/displaySettings";
 
 export type CategoryCard = {
     // Clave única de la tarjeta (para el `key` de React y para recordar la foto elegida).
@@ -22,18 +23,18 @@ export type CategoryCard = {
 
 export const MAX_AUTO_PHOTOS = 4;
 
-// Claves de "Elementos de las tarjetas" de esta sección (catálogo del backend:
-// config/section_card_settings.php → 'category_coverflow'). Se leen con isCardElementVisible().
-export const COVERFLOW_CARD_SETTINGS = {
-    title: "show_card_title", // nombre de la categoría
-    count: "show_card_count", // contador «N trabajos»
-    thumbs: "show_card_thumbs", // abanico de miniaturas
-    expand: "show_card_expand", // botón «ver foto en grande»
-    link: "show_card_link", // flecha amarilla «ir a la galería»
-    nav: "show_nav", // flechas y puntos del carrusel
+// Claves de la Apariencia de esta sección (catálogo del backend:
+// config/section_display/category_coverflow.php, grupos "card" y "nav"). Todas visibles por defecto.
+export const COVERFLOW_DISPLAY_KEYS = {
+    title: "card.show_title", // nombre de la categoría
+    count: "card.show_count", // contador «N trabajos»
+    thumbs: "card.show_thumbs", // abanico de miniaturas
+    expand: "card.show_expand", // botón «ver foto en grande»
+    link: "card.show_link", // flecha amarilla «ir a la galería»
+    nav: "nav.show", // flechas y puntos del carrusel
 } as const;
 
-// Qué partes de UNA tarjeta se pintan (lo calcula CategoryCoverflow con card_settings).
+// Qué partes de UNA tarjeta se pintan (lo calcula CategoryCoverflow con getCoverflowDisplay).
 export type CoverflowCardShow = {
     title: boolean;
     count: boolean;
@@ -41,6 +42,21 @@ export type CoverflowCardShow = {
     expand: boolean;
     link: boolean;
 };
+
+// Apariencia ya resuelta: partes de cada tarjeta + si se muestran flechas y puntos.
+export function getCoverflowDisplay(section: DisplaySettingsSource): { card: CoverflowCardShow; showNav: boolean } {
+    const K = COVERFLOW_DISPLAY_KEYS;
+    return {
+        card: {
+            title: getDisplayBool(section, K.title),
+            count: getDisplayBool(section, K.count),
+            thumbs: getDisplayBool(section, K.thumbs),
+            expand: getDisplayBool(section, K.expand),
+            link: getDisplayBool(section, K.link),
+        },
+        showNav: getDisplayBool(section, K.nav),
+    };
+}
 
 // Tipo y prefijo del key con el que el intranet guarda cada tarjeta (ver contrato).
 export const CATEGORY_ITEM_TYPE = "category";

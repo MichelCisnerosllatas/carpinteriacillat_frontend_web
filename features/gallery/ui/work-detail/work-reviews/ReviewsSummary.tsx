@@ -13,9 +13,11 @@ type Props = {
     formOpen: boolean;
     formId: string;
     onAddComment: () => void;
+    // false = el intranet apagó el formulario «Agregar comentario» (reviews.show_form; no se pinta el botón).
+    showAddButton?: boolean;
 };
 
-export default function ReviewsSummary({ average, averageLabel, total, counts, formOpen, formId, onAddComment }: Props) {
+export default function ReviewsSummary({ average, averageLabel, total, counts, formOpen, formId, onAddComment, showAddButton = true }: Props) {
     return (
         <aside className="flex flex-col gap-6 rounded-[24px] border border-il-neutro-200 bg-white p-6 lg:sticky lg:top-[calc(var(--app-header-height,0px)+24px)]">
             {averageLabel ? (
@@ -66,17 +68,20 @@ export default function ReviewsSummary({ average, averageLabel, total, counts, f
                 </ul>
             )}
 
-            <button
-                type="button"
-                onClick={onAddComment}
-                disabled={formOpen}
-                aria-expanded={formOpen}
-                aria-controls={formId}
-                className="il-display inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border-0 bg-brand-gold px-5 text-[15px] font-bold text-black transition-colors hover:bg-brand-gold-dark disabled:cursor-default disabled:opacity-60"
-            >
-                <i className="fas fa-pen text-xs" aria-hidden="true" />
-                {total > 0 ? "Agregar comentario" : "Sé el primero en comentar"}
-            </button>
+            {showAddButton && (
+                <button
+                    type="button"
+                    data-el="detail-review-form"
+                    onClick={onAddComment}
+                    disabled={formOpen}
+                    aria-expanded={formOpen}
+                    aria-controls={formId}
+                    className="il-display inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border-0 bg-brand-gold px-5 text-[15px] font-bold text-black transition-colors hover:bg-brand-gold-dark disabled:cursor-default disabled:opacity-60"
+                >
+                    <i className="fas fa-pen text-xs" aria-hidden="true" />
+                    {total > 0 ? "Agregar comentario" : "Sé el primero en comentar"}
+                </button>
+            )}
         </aside>
     );
 }

@@ -18,6 +18,7 @@ export type CategoryTile = {
 type Props = {
     allCount: number; // número a mostrar en "Todos"
     allPhotoUrl: string | null;
+    allLabel: string; // texto del botón «Todos» (Apariencia: search.all_label)
     tiles: CategoryTile[];
     selected: string[];
     onToggle: (name: string) => void;
@@ -30,7 +31,7 @@ const EDGE_PX = 2; // margen para no mostrar una flecha por un pixel de diferenc
 const ARROW_CLASS =
     "absolute top-1/2 z-10 inline-flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-il-neutro-200 bg-white text-base text-il-neutro-900 shadow-[0_6px_16px_rgba(20,24,31,.16)] transition-colors hover:border-brand-gold hover:bg-brand-gold hover:text-black";
 
-export default function CategoryTiles({ allCount, allPhotoUrl, tiles, selected, onToggle, onShowAll }: Props) {
+export default function CategoryTiles({ allCount, allPhotoUrl, allLabel, tiles, selected, onToggle, onShowAll }: Props) {
     const rowRef = useRef<HTMLDivElement>(null);
     const [canLeft, setCanLeft] = useState(false);
     const [canRight, setCanRight] = useState(false);
@@ -64,7 +65,7 @@ export default function CategoryTiles({ allCount, allPhotoUrl, tiles, selected, 
     }
 
     return (
-        <div className="relative">
+        <div data-el="gallery-category-tiles" className="relative">
             {canLeft && (
                 <button type="button" onClick={() => scrollByStep(-1)} aria-label="Ver categorías anteriores" className={`${ARROW_CLASS} left-0`}>
                     <span aria-hidden="true">←</span>
@@ -78,7 +79,7 @@ export default function CategoryTiles({ allCount, allPhotoUrl, tiles, selected, 
                 className="il-no-scrollbar -mb-1 -mt-2 flex gap-2.5 overflow-x-auto py-2 pl-0.5 pr-2"
             >
                 <CategoryTileButton
-                    label="Todos"
+                    label={allLabel}
                     count={allCount}
                     photoUrl={allPhotoUrl}
                     isOn={selected.length === 0}

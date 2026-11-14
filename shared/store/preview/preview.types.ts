@@ -43,13 +43,23 @@ export type PreviewPayload = {
   id_navigation?: number;
   id_section?: number;
   id_section_item?: number;
+  // Entidad "section": además de sus columnas públicas (section_title, ...), puede traer
+  //   - fields.display_settings: la "Apariencia" COMPLETA ya resuelta { "<clave>": valor } (la
+  //     arma el intranet con display_settings_schema + los valores del formulario). Reemplaza a
+  //     la vieja fields.card_settings. Se aplica a la sección (ver preview.resolve.ts).
+  //   - section_title / section_subtitle / section_description en null cuando la Apariencia
+  //     apaga header.show_title / header.show_subtitle / header.show_description.
+  // Si la página montada ya pertenece a la navegación de la sección (ej. el detalle
+  // /gallery/<id> y la sección es de /gallery), la web NO cambia de página al aplicarlo.
   fields: Record<string, unknown>;
 };
 
 // "Llevame a tal lugar" SIN ningún registro de por medio — lo manda el intranet al entrar a
 // pantallas que no editan contenido del sitio (ej. Mensajes de Contacto → la sección
 // #contacto del Home). Copia de `PreviewFocus` en landing-preview.types.ts del intranet.
-//   - navigationUrl: página a montar (ausente = se queda en la que ya estaba).
+//   - navigationUrl: página a montar (ausente = se queda en la que ya estaba). Puede ser
+//                    "/gallery/<id_web_work>": monta el detalle de ese trabajo (si el id no
+//                    existe usa el primer trabajo; sin trabajos, la galería).
 //   - anchorId:      id del DOM al que hacer scroll (ausente = arriba de todo).
 //   - label:         solo lo usa el header del panel del intranet — acá se ignora.
 export type PreviewFocus = {
@@ -61,11 +71,19 @@ export type PreviewFocus = {
 export type PreviewInboundMessage =
   | { source: "cillat-intranet-preview"; type: "preview"; payload: PreviewPayload }
   | { source: "cillat-intranet-preview"; type: "focus"; focus: PreviewFocus }
+  // Resalta un elemento de la página montada: busca [data-el="<element>"] (el primero visible),
+  // hace scroll hasta él y le pone un contorno con pulso ~1,6 s. element: null quita el
+  // resaltado. Si no lo encuentra (ej. oculto por un toggle apagado), no hace nada. Las anclas
+  // data-el salen del catálogo de la Apariencia (campo "element" de display_settings_schema).
+  // sectionId: se busca primero dentro de #section-<id> (los data-el se repiten entre secciones);
+  // si ahí no está (ej. detalle /gallery/<id>), en toda la página.
+  | { source: "cillat-intranet-preview"; type: "highlight"; element: string | null; sectionId?: number | null }
   | { source: "cillat-intranet-preview"; type: "ping" };
 
 export type PreviewOutboundMessage =
   | { source: "cillat-web-preview"; type: "ready" }
   // Avisa al intranet a qué página real quedó apuntando el preview (para el botón "Ver
   // original" y el label de "qué se está editando" — el intranet nunca resuelve esto por su
-  // cuenta, solo manda claves crudas, ver PreviewPayload de arriba).
+  // cuenta, solo manda claves crudas, ver PreviewPayload de arriba). Para el detalle de un
+  // trabajo es la URL real montada ("/gallery/12"), ya con el id corregido si hizo falta.
   | { source: "cillat-web-preview"; type: "active-url"; navigationUrl: string };

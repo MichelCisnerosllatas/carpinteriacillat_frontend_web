@@ -17,8 +17,6 @@ export default function MainWe() {
     }
 
     const sections = normalizeSections(navigation.sections);
-    console.info("we ======================");
-    console.info(JSON.stringify(sections));
 
     return (
         <main>

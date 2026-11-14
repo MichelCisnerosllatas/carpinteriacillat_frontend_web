@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { canOptimizeImage } from "@/shared/lib/imageOptimization";
 import Link from "next/link";
 import type { GalleryItem } from "@/features/gallery/data/galleryItems";
 
@@ -19,6 +20,7 @@ export default function GalleryPhotoCard({ item }: GalleryPhotoCardProps) {
             >
                 <Image
                     src={item.url}
+                    unoptimized={!canOptimizeImage(item.url)}
                     alt={item.title}
                     fill
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"

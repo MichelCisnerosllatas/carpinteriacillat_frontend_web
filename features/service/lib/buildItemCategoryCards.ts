@@ -6,8 +6,8 @@
 // Por cada item:
 //   - Nombre  = item.title.
 //   - id de la categoría = número del key ("category-12" → 12).
-//   - Trabajos = works con esa categoría (por id; si el key no trae id, por nombre sin
-//     tildes ni mayúsculas).
+//   - Trabajos = works (portafolio, cualquier tipo: Fabricación o Restauración) con esa
+//     categoría (por id; si el key no trae id, por nombre sin tildes ni mayúsculas).
 //   - Fotos   = imágenes de la sección con id_section_item = el item (fotos propias).
 //               Si no tiene ninguna → fotos automáticas de sus trabajos, del más reciente
 //               al más antiguo, máximo 4.

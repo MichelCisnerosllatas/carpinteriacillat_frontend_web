@@ -21,7 +21,7 @@ type TestimonyQuickState = {
 
   setRating: (rating: number) => void
   setMessage: (message: string) => void
-  submit: (idFurniture: number) => Promise<boolean>
+  submit: (idWebWork: number) => Promise<boolean>
   reset: () => void
 }
 
@@ -41,7 +41,7 @@ export const useTestimonyQuickStore = create<TestimonyQuickState>((set, get) => 
 
   // Valida, pide la cuenta de Google si todavía no hay sesión y envía.
   // Devuelve true si el comentario se guardó (queda pendiente de aprobación en el intranet).
-  submit: async (idFurniture) => {
+  submit: async (idWebWork) => {
     const { rating, message } = get()
 
     if (!rating) {
@@ -74,7 +74,7 @@ export const useTestimonyQuickStore = create<TestimonyQuickState>((set, get) => 
         testimony_email: user.email ?? undefined,
         testimony_rating: rating,
         testimony_message: message.trim(),
-        id_furniture: idFurniture,
+        id_web_work: idWebWork,
       })
 
       set({ ...initialState })

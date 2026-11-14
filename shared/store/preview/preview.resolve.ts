@@ -111,9 +111,9 @@ function resolveSection(site: SiteDataDto, payload: PreviewPayload): PreviewReso
     testimony_settings: existing?.testimony_settings ?? null,
     ...existing,
     ...fields,
-    // "Elementos de las tarjetas": si el intranet manda fields.card_settings, se mezcla con lo
-    // ya cargado (así una clave que no venga en el formulario conserva su valor).
-    card_settings: { ...existing?.card_settings, ...fields.card_settings },
+    // "Apariencia": el intranet manda fields.display_settings COMPLETO, pero se mezcla con lo ya
+    // cargado igual (si algún formulario mandara solo algunas claves, el resto conserva su valor).
+    display_settings: { ...existing?.display_settings, ...fields.display_settings },
   };
 
   const sections = existing

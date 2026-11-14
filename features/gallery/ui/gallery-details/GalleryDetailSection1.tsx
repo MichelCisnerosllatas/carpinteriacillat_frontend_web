@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { canOptimizeImage } from "@/shared/lib/imageOptimization";
 import Link from "next/link";
 import type { GalleryItem } from "@/features/gallery/data/galleryItems";
 import Container from "@/shared/ui/container/Container";
@@ -15,6 +16,7 @@ export default function GalleryDetailSection1({ item }: GalleryDetailSection1Pro
                 <div className="bg-gray-100 rounded-2xl relative min-h-[260px] overflow-hidden">
                     <Image
                         src={item.url}
+                        unoptimized={!canOptimizeImage(item.url)}
                         alt={item.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"

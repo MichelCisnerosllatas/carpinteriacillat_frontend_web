@@ -17,13 +17,13 @@ import { useGoogleAuthStore } from "@/features/google-auth/store/google-auth.sto
 
 type Props = {
     id?: string;
-    // Mueble de la galería al que queda ligado el comentario.
-    idFurniture: number;
+    // Trabajo de la galería (id_web_work) al que queda ligado el comentario.
+    idWebWork: number;
     onClose: () => void;
     onSuccess: () => void;
 };
 
-export default function TestimonyQuickForm({ id, idFurniture, onClose, onSuccess }: Props) {
+export default function TestimonyQuickForm({ id, idWebWork, onClose, onSuccess }: Props) {
     const { rating, message, formError, isConnecting, isSubmitting, setRating, setMessage, submit, reset } =
         useTestimonyQuickStore();
     const user = useGoogleAuthStore((state) => state.user);
@@ -37,7 +37,7 @@ export default function TestimonyQuickForm({ id, idFurniture, onClose, onSuccess
 
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        const success = await submit(idFurniture);
+        const success = await submit(idWebWork);
         if (success) onSuccess();
     }
 

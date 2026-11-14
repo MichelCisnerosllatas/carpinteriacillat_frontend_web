@@ -6,6 +6,8 @@
 // Las tarjetas salen de los items visibles de tipo "category" de la sección (intranet). Si no
 // hay ninguno, solo se muestra la cabecera (ver buildCategoryCards.ts).
 // Se cambia de tarjeta con las flechas, los puntos, tocando una tarjeta lateral o deslizando con el dedo/mouse.
+// Qué partes se pintan sale de la Apariencia de la sección (display_settings, grupos "card" y
+// "nav"); cada parte lleva su ancla data-el (vista previa del intranet).
 "use client";
 
 import { useRef, useState } from "react";
@@ -19,8 +21,7 @@ import { useSiteWorks } from "@/shared/store/site/useSiteWorks";
 import { useIsMobile } from "@/shared/lib/useIsMobile";
 import { useLightboxState } from "@/shared/lib/useLightboxState";
 import { toneAt } from "@/shared/lib/ilDesign";
-import { isCardElementVisible } from "@/shared/services/site_service/lib/cardSettings";
-import { COVERFLOW_CARD_SETTINGS, type CoverflowCardShow } from "@/features/service/lib/categoryCard";
+import { getCoverflowDisplay } from "@/features/service/lib/categoryCard";
 import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type Props = {
@@ -42,15 +43,8 @@ export default function CategoryCoverflow({ section }: Props) {
     const cards = buildCategoryCards(section, works);
     const total = cards.length;
 
-    // "Elementos de las tarjetas" que el intranet puede ocultar (ausente = visible).
-    const show: CoverflowCardShow = {
-        title: isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.title),
-        count: isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.count),
-        thumbs: isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.thumbs),
-        expand: isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.expand),
-        link: isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.link),
-    };
-    const showNav = isCardElementVisible(section, COVERFLOW_CARD_SETTINGS.nav);
+    // Apariencia de la sección (lo que falte usa el default del catálogo: visible).
+    const { card: show, showNav } = getCoverflowDisplay(section);
 
     const isMobile = useIsMobile();
     const [current, setCurrent] = useState(0);
@@ -117,7 +111,7 @@ export default function CategoryCoverflow({ section }: Props) {
 
                         {/* Flechas y puntos (se pueden ocultar; igual queda tocar o deslizar las tarjetas). */}
                         {showNav && (
-                            <div className="flex items-center justify-center gap-4">
+                            <div data-el="coverflow-nav" className="flex items-center justify-center gap-4">
                                 <button
                                     type="button"
                                     onClick={() => go(-1)}

@@ -16,11 +16,14 @@ import { worksLabel } from "@/features/gallery/lib/filterWorks";
 
 export type FilterOption = {
     value: string;
+    // Texto a mostrar si es distinto del valor (ej. tipo: value "restoration", label "Restauración").
+    label?: string;
     count: number;
 };
 
 type Props = {
-    label: string; // texto del botón: "Madera"
+    label: string; // texto del botón: "Madera" (Apariencia: search.filter_*_label)
+    dataEl?: string; // ancla data-el del botón (ej. "gallery-filter-wood")
     panelTitle: string; // título dentro del panel: "Tipo de madera"
     options: FilterOption[];
     selected: string[];
@@ -34,6 +37,7 @@ type Props = {
 
 export default function FilterDropdown({
     label,
+    dataEl,
     panelTitle,
     options,
     selected,
@@ -79,6 +83,7 @@ export default function FilterDropdown({
         <>
             <button
                 ref={buttonRef}
+                data-el={dataEl}
                 type="button"
                 onClick={onToggleOpen}
                 aria-expanded={isOpen}
@@ -135,7 +140,7 @@ export default function FilterDropdown({
                                     >
                                         {isOn ? "✓" : ""}
                                     </span>
-                                    {option.value}
+                                    {option.label ?? option.value}
                                     <span className="text-[13px] text-il-neutro-600">{option.count}</span>
                                 </button>
                             );

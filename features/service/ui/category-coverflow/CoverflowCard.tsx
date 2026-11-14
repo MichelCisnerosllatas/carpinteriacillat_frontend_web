@@ -26,7 +26,7 @@ type Props = {
     offset: number;
     tone: string;
     isMobile: boolean;
-    show: CoverflowCardShow; // qué partes de la tarjeta se pintan (card_settings)
+    show: CoverflowCardShow; // qué partes de la tarjeta se pintan (Apariencia, grupo "card")
     mainPhoto: number;
     onPickPhoto: (index: number) => void;
     onPick: () => void;
@@ -85,21 +85,24 @@ export default function CoverflowCard({ card, offset, tone, isMobile, show, main
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-[22px]">
                     <div className="pointer-events-none flex flex-col gap-1">
                         {show.count && (
-                            <span className="il-display text-xs font-bold tracking-[.14em] text-il-amarillo-500">
+                            <span data-el="coverflow-card-count" className="il-display text-xs font-bold tracking-[.14em] text-il-amarillo-500">
                                 {card.count} {card.count === 1 ? "TRABAJO" : "TRABAJOS"}
                             </span>
                         )}
                         {show.title && (
-                            <span className="il-display text-[22px] font-extrabold tracking-[-0.02em] text-white">{card.name}</span>
+                            <span data-el="coverflow-card-title" className="il-display text-[22px] font-extrabold tracking-[-0.02em] text-white">
+                                {card.name}
+                            </span>
                         )}
                     </div>
                     <div className="flex flex-none items-center gap-2">
                         {/* Ver en grande: solo en la tarjeta del centro (el abanico está arriba a la izquierda). */}
-                        {show.expand && isCenter && card.photos.length > 0 && <ExpandPhotoButton onClick={onExpand} />}
+                        {show.expand && isCenter && card.photos.length > 0 && <ExpandPhotoButton onClick={onExpand} dataEl="coverflow-card-expand" />}
                         {show.link && (
                             <Link
                                 href={`/gallery?cat=${encodeURIComponent(card.name)}`}
                                 aria-label={`Ver trabajos de ${name}`}
+                                data-el="coverflow-card-link"
                                 tabIndex={isCenter ? undefined : -1}
                                 className="inline-flex size-12 flex-none items-center justify-center rounded-full bg-il-amarillo-500 text-lg text-il-neutro-900 hover:scale-110"
                                 style={{
@@ -125,7 +128,14 @@ export default function CoverflowCard({ card, offset, tone, isMobile, show, main
                 />
 
                 {show.thumbs && (
-                    <PhotoFan photos={card.photos} selected={mainPhoto} onSelect={onPickPhoto} visible={isCenter} side="left" />
+                    <PhotoFan
+                        photos={card.photos}
+                        selected={mainPhoto}
+                        onSelect={onPickPhoto}
+                        visible={isCenter}
+                        side="left"
+                        dataEl="coverflow-card-thumbs"
+                    />
                 )}
             </div>
         </div>
