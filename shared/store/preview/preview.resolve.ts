@@ -10,7 +10,9 @@
 // rama que cambia, y todo lo demás (otras secciones, otros botones, otras imágenes...) se deja
 // exactamente como ya estaba cargado desde el getSite() real.
 
+import { DEFAULT_CHATBOT_SETTINGS } from "@/shared/services/site_service/lib/chatbotDefaults";
 import type {
+  SiteChatbotSettingsDto,
   SiteDataDto,
   SiteFooterSettingsDto,
   SiteNavigationDto,
@@ -36,6 +38,7 @@ export type PreviewResolution =
   // elemento no existe en el DOM (ver preview.bridge.ts).
   | { kind: "sections"; idNavigation: number; sections: SiteSectionDto[]; scrollToSectionId: number; scrollToChildId?: string }
   | { kind: "footer"; footerSettings: SiteFooterSettingsDto }
+  | { kind: "chatbot"; chatbotSettings: SiteChatbotSettingsDto }
   | null; // no se encontró dónde aplicar el cambio (ver notas de cada rama abajo)
 
 export function resolvePreviewPayload(site: SiteDataDto, payload: PreviewPayload): PreviewResolution {
@@ -56,6 +59,15 @@ export function resolvePreviewPayload(site: SiteDataDto, payload: PreviewPayload
       return resolveItemDetail(site, payload);
     case "footer":
       return { kind: "footer", footerSettings: { ...site.footer_settings, ...(payload.fields as Partial<SiteFooterSettingsDto>) } };
+    case "chatbot":
+      // Base: lo que ya está cargado (o los defaults si el backend no mandó `chatbot`).
+      return {
+        kind: "chatbot",
+        chatbotSettings: {
+          ...(site.chatbot?.settings ?? DEFAULT_CHATBOT_SETTINGS),
+          ...(payload.fields as Partial<SiteChatbotSettingsDto>),
+        },
+      };
   }
 }
 

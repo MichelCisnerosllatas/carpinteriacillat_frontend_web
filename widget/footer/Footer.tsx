@@ -3,8 +3,6 @@
 
 import Link from "next/link";
 import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/site_service/lib/site.fallback";
-import type { FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
-import { buildWhatsappHref } from "@/shared/services/site_service/lib/whatsappLink";
 import type { FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
 import type { SiteCompanyDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
 import Container from "@/shared/ui/container/Container";
@@ -17,11 +15,9 @@ type FooterProps = {
     // navegador (antes existia useNavigationStore como "respaldo en segundo
     // plano" — se elimino a proposito).
     initialNavigations: SiteNavigationDto[] | null;
-    // El boton flotante de WhatsApp ahora es administrable desde el intranet
-    // (section_item item_type "whatsapp" de la seccion "contact") — ver
-    // findFloatingWhatsapp.ts. `null` = el item no existe o el admin lo
-    // desactivo: no se pinta nada, a proposito (sin fallback fijo).
-    whatsappButton: FloatingWhatsappButton | null;
+    // (El boton flotante de WhatsApp ya NO vive aca: se movio a
+    // widget/floating-actions/FloatingActions.tsx junto con el del chatbot, para que los dos
+    // se posicionen juntos y no se pisen.)
     // Logo — antes un archivo estatico hardcodeado, ahora viene de
     // `company_settings.logo` (backend). `null` = esa fila no existe todavia: cae al logo
     // estatico de siempre (ver LOGO_FALLBACK mas abajo), nunca se deja el footer sin logo.
@@ -62,21 +58,6 @@ function resolveSocialIconClass(name: string): string {
     return match ? match[1] : "fas fa-link";
 }
 
-// Posicion en pantalla -> clases de Tailwind. `sectionitem_variant` de ese item guarda uno de
-// estos valores (ver findFloatingWhatsapp.ts); cualquier valor no reconocido (o ausente) cae en
-// "bottom-right", la posicion de siempre.
-const WHATSAPP_POSITION_CLASS: Record<string, string> = {
-    "bottom-right": "bottom-6 right-6",
-    "bottom-left": "bottom-6 left-6",
-    "bottom-center": "bottom-6 left-1/2 -translate-x-1/2",
-    "top-right": "top-24 right-6",
-    "top-left": "top-24 left-6",
-};
-
-function resolveWhatsappPositionClass(position: string | null): string {
-    return (position && WHATSAPP_POSITION_CLASS[position]) || WHATSAPP_POSITION_CLASS["bottom-right"];
-}
-
 // Cuantas columnas realmente van a pintarse (admin las oculto en /footer, o -solo para Accesos-
 // no hay NEXT_PUBLIC_INTRANET_URL) -> clases de grid, en mobile y desktop. Sin esto, ocultar una
 // columna dejaria un hueco en blanco en vez de que las demas se reacomoden.
@@ -87,10 +68,6 @@ const GRID_CLASS_BY_VISIBLE_COUNT: Record<number, string> = {
     1: "sm:grid-cols-1",
     0: "",
 };
-
-// El link wa.me se arma con buildWhatsappHref (shared/services/site_service/lib/whatsappLink.ts),
-// el mismo que usa el botón «Cotizar uno similar» del detalle de un trabajo. Si el item no
-// existe o está desactivado, `whatsappButton` ya llega `null` y no se pinta nada.
 
 // "Contacto" no es parte de la navegacion que devuelve la API (en el
 // header es un boton aparte, no un link mas). Acá el footer SI lo agrega
@@ -112,7 +89,7 @@ const SERVICES_FALLBACK_LINKS: FooterServiceLink[] = [
     { href: "/#servicios", label: "Restauración" },
 ];
 
-export default function Footer({ initialNavigations, whatsappButton, company, socialNetworks, serviceLinks, footerSettings: initialFooterSettings }: FooterProps) {
+export default function Footer({ initialNavigations, company, socialNetworks, serviceLinks, footerSettings: initialFooterSettings }: FooterProps) {
     // Mismo criterio que Navbar.tsx: preferir el store de Zustand sobre la prop del servidor.
     // Para un visitante normal es EXACTAMENTE el mismo dato (AppProviders hidrata el store con
     // este mismo site antes del primer pintado de hijos) — esto solo importa en /preview,
@@ -309,19 +286,6 @@ export default function Footer({ initialNavigations, whatsappButton, company, so
                     </div>
                 </Container>
             </footer>
-
-            {/* Botón WhatsApp flotante — administrable desde el intranet (ver whatsappButton
-                arriba); si el admin lo desactivó, `whatsappButton` es `null` y no se pinta nada. */}
-            {whatsappButton && (
-                <a
-                    href={buildWhatsappHref(whatsappButton.phone)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`fixed ${resolveWhatsappPositionClass(whatsappButton.position)} bg-green-500 hover:bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-50 animate-bounce`}
-                >
-                    <i className="fab fa-whatsapp text-3xl" />
-                </a>
-            )}
         </>
     );
 }

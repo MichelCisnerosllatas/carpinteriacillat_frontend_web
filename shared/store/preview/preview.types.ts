@@ -28,7 +28,11 @@ export type PreviewEntity =
   | "testimony"
   // Singleton, como "navigation" pero sin id — siempre existe una sola fila de
   // footer_settings, no hay "cuál" que resolver.
-  | "footer";
+  | "footer"
+  // Singleton como "footer": la única fila de chatbot_setting. `fields` = Partial de
+  // SiteChatbotSettingsDto (mismos nombres). La web los mezcla sobre site.chatbot.settings y
+  // ABRE el panel del chatbot para que se vea el cambio.
+  | "chatbot";
 
 export type PreviewPayload = {
   entity: PreviewEntity;
@@ -36,7 +40,7 @@ export type PreviewPayload = {
   id: number | null;
   // Cada formulario manda SOLO la clave que ya tiene a mano en su propio estado — nunca
   // tiene que ir a buscar ninguna otra (ver landing-preview.routes.ts del lado intranet):
-  //   - entity "navigation"/"footer": ninguna
+  //   - entity "navigation"/"footer"/"chatbot": ninguna
   //   - entity "section":                  id_navigation
   //   - entity "section_button"/"section_image"/"section_item"/"testimony": id_section
   //   - entity "section_item_detail":      id_section_item

@@ -180,6 +180,14 @@ export function usePreviewBridge() {
         return;
       }
 
+      if (resolution.kind === "chatbot") {
+        // El chatbot es flotante (position: fixed): no hay a dónde hacer scroll ni cambia de
+        // página. overrideChatbotSettings además sube `chatbotPreviewTick`, y el chatbot abre
+        // su panel al verlo (ver features/chatbot/ui/ChatBot.tsx).
+        useSiteStore.getState().overrideChatbotSettings(resolution.chatbotSettings);
+        return;
+      }
+
       useSiteStore.getState().overrideNavigationSections(resolution.idNavigation, resolution.sections);
       const target = site.navigations.find((n) => n.id_navigation === resolution.idNavigation)?.navigation_url;
 

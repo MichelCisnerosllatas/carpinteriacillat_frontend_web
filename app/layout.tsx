@@ -15,7 +15,6 @@ import NextTopLoader from "nextjs-toploader";
 import AppProviders from "./providers";
 import { getSite } from "@/shared/services/site_service/lib/getSite";
 import { normalizeNavigations } from "@/shared/services/site_service/lib/normalizeNavigations";
-import { findFloatingWhatsapp, type FloatingWhatsappButton } from "@/shared/services/site_service/lib/findFloatingWhatsapp";
 import { findFooterServiceLinks, type FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
 import type { SiteCompanyDto, SiteDataDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
 
@@ -34,6 +33,7 @@ const DEFAULT_FOOTER_SETTINGS: SiteFooterSettingsDto = {
   show_access: true,
 };
 import { GoogleOneTap } from "@/features/google-auth/ui/google-one-tap/GoogleOneTap";
+import FloatingActions from "@/widget/floating-actions/FloatingActions";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -94,7 +94,6 @@ export const metadata: Metadata = {
 async function getLayoutData(): Promise<{
   site: SiteDataDto | null;
   navigations: SiteNavigationDto[] | null;
-  whatsappButton: FloatingWhatsappButton | null;
   company: SiteCompanyDto | null;
   socialNetworks: SiteSocialNetworkDto[];
   serviceLinks: FooterServiceLink[];
@@ -108,7 +107,6 @@ async function getLayoutData(): Promise<{
     return {
       site: null, 
       navigations: null, 
-      whatsappButton: null, 
       company: null, 
       socialNetworks: [], 
       serviceLinks: [],
@@ -119,7 +117,6 @@ async function getLayoutData(): Promise<{
   return {
     site,
     navigations: normalizeNavigations(site.navigations),
-    whatsappButton: findFloatingWhatsapp(site),
     company: site.company,
     socialNetworks: site.social_networks,
     serviceLinks: findFooterServiceLinks(site),
@@ -135,7 +132,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { site, navigations: initialNavigations, whatsappButton, company, socialNetworks, serviceLinks, footerSettings } = await getLayoutData();
+  const { site, navigations: initialNavigations, company, socialNetworks, serviceLinks, footerSettings } = await getLayoutData();
 
   // suppressHydrationWarning solo evita el aviso de mismatch causado por
   // extensiones de navegador (ej. Dark Reader) que inyectan atributos en
@@ -167,12 +164,15 @@ export default async function RootLayout({
               `footerSettings` (la prop) y el store arrancan con el mismo valor. */}
           <Footer
             initialNavigations={initialNavigations}
-            whatsappButton={whatsappButton}
             company={company}
             socialNetworks={socialNetworks}
             serviceLinks={serviceLinks}
             footerSettings={footerSettings}
           />
+          {/* Botones flotantes (chatbot + WhatsApp): leen useSiteStore (no reciben props) para
+              que /preview los pueda cambiar en caliente. Se posicionan JUNTOS ahí adentro para
+              que, si comparten esquina, queden apilados y alineados. */}
+          <FloatingActions />
         </AppProviders>
       </body>
     </html>

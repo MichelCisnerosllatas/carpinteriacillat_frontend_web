@@ -287,3 +287,58 @@ body {
     box-shadow: 0 0 0 0 rgba(255, 195, 0, 0);
   }
 }
+
+/* ─── Animaciones de los botones flotantes (chatbot y WhatsApp) ───────────────────────────
+   Administrables desde el intranet (ver shared/lib/floatingAnimation.ts). Valores:
+   none | pulse | bounce | wiggle | float. Se pausan al pasar el mouse / con foco de teclado y
+   se apagan si el usuario pidió "reducir movimiento" en su sistema. */
+.fab-anim {
+  position: relative;
+  isolation: isolate;
+}
+.fab-anim-bounce { animation: fab-bounce 2.4s ease-in-out infinite; }
+.fab-anim-float { animation: fab-float 3s ease-in-out infinite; }
+.fab-anim-wiggle { animation: fab-wiggle 4s ease-in-out infinite; }
+/* pulse: un anillo del mismo color del botón que se expande y se desvanece */
+.fab-anim-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: inherit;
+  pointer-events: none;
+  animation: fab-pulse 2s ease-out infinite;
+}
+.fab-anim:hover,
+.fab-anim:hover::after,
+.fab-anim:focus-visible,
+.fab-anim:focus-visible::after {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab-anim,
+  .fab-anim::after {
+    animation: none !important;
+  }
+}
+@keyframes fab-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-8px); }
+  40% { transform: translateY(-3px); }
+}
+@keyframes fab-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes fab-wiggle {
+  0%, 78%, 100% { transform: rotate(0deg); }
+  82% { transform: rotate(-12deg); }
+  86% { transform: rotate(10deg); }
+  90% { transform: rotate(-8deg); }
+  94% { transform: rotate(4deg); }
+}
+@keyframes fab-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.6); opacity: 0; }
+}

@@ -38,6 +38,10 @@ export type SiteDataDto = {
   // ordenadas. Opcional porque un backend viejo puede no mandarlo. Las pinta
   // features/site-alerts/ui/SiteAlerts.tsx.
   alerts?: SiteAlertDto[];
+  // ChatBot flotante (chatbot_setting singleton + chatbot_option) — se administra desde el
+  // intranet en Sitio Web → ChatBot. Opcional porque un backend viejo puede no mandarlo: quien
+  // lo lea debe caer a DEFAULT_CHATBOT_SETTINGS (ver lib/chatbotDefaults.ts).
+  chatbot?: SiteChatbotDto;
 };
 
 // Un trabajo del portafolio web (tabla web_works en el backend, con su tipo en type_works).
@@ -129,6 +133,52 @@ export type SiteFooterSettingsDto = {
   show_quick_links: boolean;
   show_services: boolean;
   show_access: boolean;
+};
+
+// De `chatbot_setting` (backend, singleton) — diseño, comportamiento, visibilidad y posición
+// del chatbot. Todo se edita en el intranet: Sitio Web → ChatBot → Configuración.
+export type SiteChatbotSettingsDto = {
+  // false = el chatbot no se pinta en ninguna página (en /preview sí, con una marca).
+  chatbot_state: boolean;
+  show_on_mobile: boolean;
+  position: "bottom-right" | "bottom-left";
+  // Distancia en px al borde lateral (offset_x) y al borde inferior (offset_y).
+  offset_x: number;
+  offset_y: number;
+  primary_color: string;
+  header_title: string;
+  header_subtitle: string | null;
+  // Clase de Font Awesome (ej. "fa-solid fa-comments").
+  launcher_icon: string;
+  // Animación del botón flotante: "none" | "pulse" | "bounce" | "wiggle" | "float"
+  // (ver shared/lib/floatingAnimation.ts). Opcional por si el backend aún no la manda.
+  launcher_animation?: string;
+  welcome_message: string;
+  input_placeholder: string;
+  allow_voice: boolean;
+  // null = nunca se abre solo; N = se abre solo a los N segundos (una vez por sesión).
+  auto_open_seconds: number | null;
+  // true = antes de chatear se pide nombre + teléfono (ver features/chatbot/ui/ChatContactForm.tsx).
+  require_contact_data: boolean;
+};
+
+// De `chatbot_option` — cada ListTile de la pantalla inicial del chatbot. Ya vienen solo las
+// activas y ordenadas por el backend.
+export type SiteChatbotOptionDto = {
+  id: number;
+  key: string;
+  title: string;
+  subtitle: string | null;
+  icon: string;
+  // "chat" abre la conversación; "whatsapp" abre wa.me con `value` (número); "url" abre `value`.
+  action: "chat" | "whatsapp" | "url";
+  value: string | null;
+  order: number;
+};
+
+export type SiteChatbotDto = {
+  settings: SiteChatbotSettingsDto;
+  options: SiteChatbotOptionDto[];
 };
 
 // De `company_settings`/`company_social_networks` (backend) — hasta ahora solo usadas en el

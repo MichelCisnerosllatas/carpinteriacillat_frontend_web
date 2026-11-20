@@ -14,11 +14,18 @@
 // contenido central de la página), acá NO hay fallback: "no encontrado" = no se pinta el
 // botón, es justamente lo que permite ocultarlo desde el intranet.
 
+//
+// ANIMACIÓN: mismo criterio que la posición — `sectionitem_suffix` (sin uso en este item) guarda
+// la animación del botón ('none' | 'pulse' | 'bounce' | 'wiggle' | 'float', ver
+// shared/lib/floatingAnimation.ts). Vacío o desconocido → 'bounce' (la de siempre).
+
+import { resolveFloatingAnimation, type FloatingAnimation } from "@/shared/lib/floatingAnimation";
 import type { SiteDataDto } from "../model/siteget.dto";
 
 export type FloatingWhatsappButton = {
   phone: string;
   position: string | null;
+  animation: FloatingAnimation;
 };
 
 export function findFloatingWhatsapp(site: SiteDataDto | null): FloatingWhatsappButton | null {
@@ -28,7 +35,11 @@ export function findFloatingWhatsapp(site: SiteDataDto | null): FloatingWhatsapp
     for (const section of navigation.sections) {
       const item = section.items.find((i) => i.item_type === "whatsapp" && i.state && i.value);
       if (item) {
-        return { phone: item.value as string, position: item.variant };
+        return {
+          phone: item.value as string,
+          position: item.variant,
+          animation: resolveFloatingAnimation(item.suffix, "bounce"),
+        };
       }
     }
   }
