@@ -7,66 +7,75 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {useNavbarStore} from "@/shared/store/navbar/useNavbarStore";
-import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
-import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/navigation_service/lib/navigation.fallback";
-import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
+import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/site_service/lib/site.fallback";
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 import { usePathname } from "next/navigation";
 import Container from "@/shared/ui/container/Container";
 
 type NavbarProps = {
     navbarSolid?: boolean;
-    // Navegacion ya resuelta por el servidor (ver app/layout.tsx), pasada
-    // desde Header.tsx. La usamos para el primer render en vez de esperar
-    // el fetch del navegador (ver "resolvedNavigations" mas abajo).
-    initialNavigations: NavigationApiItem[] | null;
+    // Navegacion ya resuelta por el servidor (ver app/layout.tsx -> getSite()),
+    // pasada desde Header.tsx. Es la UNICA fuente de los links: ya no hay un
+    // segundo fetch desde el navegador (antes existia useNavigationStore como
+    // "respaldo en segundo plano" — se elimino a proposito, porque una sola
+    // peticion Next -> Laravel ya resuelve el primer render sin dejar huecos).
+    initialNavigations: SiteNavigationDto[] | null;
 };
 
-function toNavLinks(items: NavigationApiItem[]): NavLink[] {
+function toNavLinks(items: SiteNavigationDto[]): NavLink[] {
     return items.map((item) => ({ href: item.navigation_url, label: item.navigation_name }));
 }
+
+// El link queda marcado en su ruta y en todas sus subrutas (ej. "Galería" sigue
+// marcado en /gallery/123). "/" (Inicio) solo coincide exacto, si no estaría
+// marcado en todas las páginas. Se ignoran "#ancla" y "?query" del href.
+function isActiveRoute(pathname: string, href: string): boolean {
+    // Normaliza "gallery", "/gallery/" y "/gallery" al mismo valor (el href viene del
+    // navigation_url que se escribe a mano en el intranet).
+    const normalize = (p: string) => `/${p.trim().replace(/^\/+|\/+$/g, "")}`;
+    const path = normalize(href.split(/[?#]/)[0]);
+    const current = normalize(pathname);
+    if (path === "/") return current === "/";
+    return current === path || current.startsWith(`${path}/`);
+}
+
+// Mismo estándar en todas las paletas: hover amarillo, al presionar amarillo más fuerte.
+const LINK_PRESSED = "active:text-brand-gold-dark";
+const LINK_ACTIVE = "text-brand-gold underline underline-offset-8";
 
 export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps) {
     const pathname = usePathname();
     const [openMobile, setOpenMobile] = useState(false);
     const { style } = useNavbarStore();
-    const { navigations, fetchNavigations, isLoading, hasLoaded } = useNavigationStore();
-
 
     const linkClass = navbarSolid ? style.linkSolid : style.linkTransparent;
     const linkHoverClass = navbarSolid ? style.linkSolidHover : style.linkTransparentHover;
 
     // o mejor usando tus nuevas variables:
     const mobileBtnClass = openMobile ? style.mobileMenuBtnOpen : (navbarSolid ? style.linkSolid : style.linkTransparent);
-    const mobileIconColor = openMobile ? style.mobileMenuBtnOpen : style.mobileMenuBtn;
 
 
     const toggleMobile = () => setOpenMobile((prev) => !prev);
     const closeMobile = () => setOpenMobile(false);
 
     // De donde salen los links, en orden de prioridad:
-    //   1) "navigations" del store: se llena cuando el fetch del NAVEGADOR
-    //      (mas abajo, fetchNavigations) termina bien.
-    //   2) "initialNavigations": lo que ya trajo el SERVIDOR antes de
-    //      mandar el HTML (ver app/layout.tsx). Como ya viene con el HTML
-    //      inicial, esto es lo que hace que el usuario NUNCA vea un hueco
-    //      vacio ni un skeleton en la carga normal — ya esta resuelto
-    //      antes de que la pagina se pinte.
-    //   3) Si ninguno de los dos tiene datos Y ya se termino de intentar
-    //      (hasLoaded === true), recien ahi usamos el fallback fijo.
-    //   4) Si nada de lo anterior aplica todavia (poco probable, solo
-    //      pasaria si el servidor tambien fallo y el fetch del navegador
-    //      sigue en camino), no se muestra nada y aparece el skeleton.
-    const resolvedNavigations = navigations.length > 0 ? navigations : (initialNavigations ?? []);
-    const showSkeleton = resolvedNavigations.length === 0 && isLoading;
+    //   1) "useSiteStore": el mismo JSON de "initialNavigations" pero leído del store de
+    //      Zustand en vez de la prop. En un visitante normal es EXACTAMENTE el mismo dato
+    //      (AppProviders hidrata el store con este site en el cuerpo del componente, antes
+    //      del primer pintado de hijos — ver app/providers.tsx), así que esto no cambia nada
+    //      para nadie. Solo importa en /preview (ver shared/store/preview/preview.bridge.ts),
+    //      donde el store SÍ puede traer una navegación sobreescrita en caliente por el
+    //      intranet — si siguiéramos leyendo la prop, ese cambio nunca se reflejaría acá.
+    //   2) "initialNavigations": lo que trajo el SERVIDOR (getSite()), por si el store
+    //      todavía no se hidrató (no debería pasar, pero es la red de seguridad original).
+    //   3) Si todo vino null/vacío (la petición en el servidor falló), recién ahí se usa el
+    //      fallback fijo — siempre hay algo que mostrar.
+    const storeNavigations = useSiteStore((s) => s.site?.navigations);
+    const resolvedNavigations = storeNavigations ?? initialNavigations ?? [];
     const links: NavLink[] = resolvedNavigations.length > 0
         ? toNavLinks(resolvedNavigations)
-        : hasLoaded ? NAVIGATION_FALLBACK_LINKS : [];
-
-    useEffect(() => {
-        // Este fetch queda como respaldo/actualizacion en segundo plano:
-        // el primer render ya no depende de el (ver resolvedNavigations).
-        fetchNavigations();
-    }, [fetchNavigations]);
+        : NAVIGATION_FALLBACK_LINKS;
 
     useEffect(() => {
         if (!openMobile) return;
@@ -140,27 +149,22 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                         {/*        {item.label}*/}
                         {/*    </Link>*/}
                         {/*))}*/}
-                        {showSkeleton && [0, 1, 2, 3].map((i) => (
-                            <span
-                                key={i}
-                                className={clsx(linkClass, "h-4 w-16 rounded-full bg-current opacity-20 animate-pulse")}
-                                aria-hidden="true"
-                            />
-                        ))}
                         {links.map((item) => {
+                            // isSameRoute: exactamente la página del link (clic = volver arriba).
+                            // isActive: la página del link o una de sus subrutas (queda marcado).
                             const isSameRoute = pathname === item.href;
+                            const isActive = isActiveRoute(pathname, item.href);
 
-                            const base = "font-medium transition-colors";
-                            const active = "text-[#f5c400] underline underline-offset-8";
+                            const base = clsx("font-medium transition-colors", LINK_PRESSED);
                             const normal = clsx(linkClass, linkHoverClass);
-                            const className = clsx(base, isSameRoute ? active : normal);
+                            const className = clsx(base, isActive ? LINK_ACTIVE : normal);
 
                             return (
                                 <Link
                                     key={item.href}
                                     href={item.href}
                                     className={className}
-                                    aria-current={isSameRoute ? "page" : undefined}
+                                    aria-current={isActive ? "page" : undefined}
                                     onClick={(e) => {
                                         if (isSameRoute) {
                                             // ✅ evita navegación Next => NO loader
@@ -188,7 +192,10 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                         id="menuBtn"
                         className={clsx(
                             "md:hidden text-2xl z-[10000] relative transition-colors",
-                            mobileIconColor,
+                            // mobileBtnClass sigue el scroll (igual que los links): en la paleta
+                            // "claro" el ☰ es negro arriba y blanco sobre el rojo. En las demás
+                            // paletas da el mismo color que antes.
+                            mobileBtnClass,
                             style.mobileMenuBtnHover
                         )}
                         onClick={toggleMobile}
@@ -241,10 +248,13 @@ export default function Navbar({ navbarSolid, initialNavigations }: NavbarProps)
                                             href={item.href}
                                             className={clsx(
                                                 "block text-xl font-semibold py-2 border-b transition-colors",
-                                                style.mobileLink,
-                                                style.mobileLinkHover,
+                                                LINK_PRESSED,
+                                                isActiveRoute(pathname, item.href)
+                                                    ? "text-brand-gold"
+                                                    : clsx(style.mobileLink, style.mobileLinkHover),
                                                 style.mobileLinkBorder
                                             )}
+                                            aria-current={isActiveRoute(pathname, item.href) ? "page" : undefined}
                                             onClick={closeMobile}
                                         >
                                             {item.label}

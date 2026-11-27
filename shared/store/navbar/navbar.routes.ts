@@ -23,13 +23,16 @@ export const NAVBAR_ROUTES: Record<string, NavbarRouteConfig> = {
         title: "CILLAT | Inicio",
         style: "base",
     },
+    // Servicios y Galería (rediseño) empiezan con fondo BLANCO, no con una foto oscura.
+    // Usan "claro": arriba links negros (para que se vean sobre el blanco) y al hacer
+    // scroll se ponen ROJOS igual que Inicio y Nosotros ("base").
     "/services": {
         title: "CILLAT | Servicios",
-        style: "base",
+        style: "claro",
     },
     "/gallery": {
         title: "CILLAT | Galería",
-        style: "base",
+        style: "claro",
     },
     // Detalle de una foto especifica (ej. /gallery/123). Esta entrada casi
     // nunca matchea "exacto" (nadie visita literalmente la URL

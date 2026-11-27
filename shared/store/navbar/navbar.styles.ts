@@ -75,6 +75,34 @@ export const NAVBAR_STYLES = {
         mobileMenuBtnHover: "hover:text-brand-gold",
     },
 
+    // "claro": paginas principales cuyo inicio es BLANCO (Servicios y Galería
+    // del rediseño). Es igual a "base" (rojo con scroll), solo cambia el
+    // estado de arriba: links negros, porque blancos sobre blanco no se ven.
+    claro: {
+        bgTransparent: "bg-transparent",
+        bgSolid: "bg-brand-red backdrop-blur-md",
+
+        linkTransparent: "text-black",
+        linkTransparentHover: "hover:text-brand-gold",
+        linkSolid: "text-white",
+        linkSolidHover: "hover:text-brand-gold",
+
+        buttonBg: "bg-brand-gold hover:bg-brand-gold-dark",
+        buttonText: "text-black",
+
+        ring: "ring-1 ring-black/10",
+        mobileBg: "bg-gray-900",
+        mobileLink: "text-white",
+        mobileLinkHover: "hover:text-brand-gold",
+        mobileLinkBorder: "border-gray-800",
+        mobileCtaBg: "bg-brand-gold hover:bg-brand-gold-dark",
+        mobileCtaText: "text-black",
+
+        mobileMenuBtn: "text-black",
+        mobileMenuBtnOpen: "text-brand-gold",
+        mobileMenuBtnHover: "hover:text-brand-gold",
+    },
+
     // "detalle": paginas internas con fondo claro desde el inicio (ej. el
     // detalle de una foto de galeria). Texto negro porque va sobre fondo
     // claro incluso antes de hacer scroll.

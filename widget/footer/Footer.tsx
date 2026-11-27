@@ -1,18 +1,72 @@
 // widget/footer/Footer.tsx
 "use client";
 
-import { useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { useNavigationStore } from "@/shared/services/navigation_service/store/useNavigationStore";
-import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/navigation_service/lib/navigation.fallback";
-import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
+import { NAVIGATION_FALLBACK_LINKS, type NavLink } from "@/shared/services/site_service/lib/site.fallback";
+import type { FooterServiceLink } from "@/shared/services/site_service/lib/findFooterServiceLinks";
+import type { SiteCompanyDto, SiteFooterSettingsDto, SiteNavigationDto, SiteSocialNetworkDto } from "@/shared/services/site_service/model/siteget.dto";
 import Container from "@/shared/ui/container/Container";
+import { useSiteStore } from "@/shared/store/site/useSiteStore";
 
 type FooterProps = {
-    // Navegacion ya resuelta por el servidor (ver app/layout.tsx), pasada
-    // desde app/layout.tsx. Mismo mecanismo que usa Header/Navbar.
-    initialNavigations: NavigationApiItem[] | null;
+    // Navegacion ya resuelta por el servidor (ver app/layout.tsx -> getSite()),
+    // pasada desde app/layout.tsx. Mismo mecanismo que usa Header/Navbar: es
+    // la UNICA fuente de los links, ya no hay un segundo fetch desde el
+    // navegador (antes existia useNavigationStore como "respaldo en segundo
+    // plano" — se elimino a proposito).
+    initialNavigations: SiteNavigationDto[] | null;
+    // (El boton flotante de WhatsApp ya NO vive aca: se movio a
+    // widget/floating-actions/FloatingActions.tsx junto con el del chatbot, para que los dos
+    // se posicionen juntos y no se pisen.)
+    // Logo — antes un archivo estatico hardcodeado, ahora viene de
+    // `company_settings.logo` (backend). `null` = esa fila no existe todavia: cae al logo
+    // estatico de siempre (ver LOGO_FALLBACK mas abajo), nunca se deja el footer sin logo.
+    company: SiteCompanyDto | null;
+    // Iconos de redes — de `company_social_networks`, ya filtrados a `show_on_website=true` y
+    // `status=1` desde el backend. Array vacio = no se pinta ningun icono (antes eran 3 fijos
+    // con href="#", ni siquiera apuntaban a las redes reales).
+    socialNetworks: SiteSocialNetworkDto[];
+    // Columna "Servicios" — reutiliza los section_items reales de la seccion "home-services"
+    // (ver findFooterServiceLinks.ts) en vez de una lista escrita a mano que había que mantener
+    // sincronizada a ojo con esa sección.
+    serviceLinks: FooterServiceLink[];
+    // Visibilidad administrable desde /footer (intranet) — `footer_state` ya se resuelve en
+    // layout.tsx (ni siquiera se monta este componente si es false); acá solo importan los 4
+    // flags por columna.
+    footerSettings: SiteFooterSettingsDto;
+};
+
+const LOGO_FALLBACK = "/img/logocillat_sinfondoblanco.png";
+
+// Nombre guardado en `company_social_networks.name` (texto libre, lo escribe el admin) -> icono
+// de Font Awesome. Coincidencia por substring, sin distinguir mayusculas — "Sitio Web"/cualquier
+// nombre no reconocido cae en el icono generico de enlace.
+const SOCIAL_ICON_BY_NAME: [string, string][] = [
+    ["facebook", "fab fa-facebook-f"],
+    ["instagram", "fab fa-instagram"],
+    ["whatsapp", "fab fa-whatsapp"],
+    ["tiktok", "fab fa-tiktok"],
+    ["youtube", "fab fa-youtube"],
+    ["linkedin", "fab fa-linkedin-in"],
+    ["twitter", "fab fa-x-twitter"],
+    ["x", "fab fa-x-twitter"],
+];
+
+function resolveSocialIconClass(name: string): string {
+    const lower = name.toLowerCase();
+    const match = SOCIAL_ICON_BY_NAME.find(([key]) => lower.includes(key));
+    return match ? match[1] : "fas fa-link";
+}
+
+// Cuantas columnas realmente van a pintarse (admin las oculto en /footer, o -solo para Accesos-
+// no hay NEXT_PUBLIC_INTRANET_URL) -> clases de grid, en mobile y desktop. Sin esto, ocultar una
+// columna dejaria un hueco en blanco en vez de que las demas se reacomoden.
+const GRID_CLASS_BY_VISIBLE_COUNT: Record<number, string> = {
+    4: "sm:grid-cols-2 lg:grid-cols-4",
+    3: "sm:grid-cols-3",
+    2: "sm:grid-cols-2",
+    1: "sm:grid-cols-1",
+    0: "",
 };
 
 // "Contacto" no es parte de la navegacion que devuelve la API (en el
@@ -25,41 +79,100 @@ type FooterProps = {
 // el link no hace nada si no estas ya en el inicio.
 const FOOTER_CONTACT_LINK: NavLink = { href: "/#contacto", label: "Contacto" };
 
-export default function Footer({ initialNavigations }: FooterProps) {
-    const { navigations, fetchNavigations, hasLoaded } = useNavigationStore();
+// Respaldo si la sección "home-services" no devolvió items (desactivada, sin items activos, o
+// falló la petición al backend) — los mismos 5 que antes estaban hardcodeados a fuego.
+const SERVICES_FALLBACK_LINKS: FooterServiceLink[] = [
+    { href: "/#servicios", label: "Cocinas Integrales" },
+    { href: "/#servicios", label: "Closets & Dormitorios" },
+    { href: "/#servicios", label: "Muebles de Oficina" },
+    { href: "/#servicios", label: "Puertas & Ventanas" },
+    { href: "/#servicios", label: "Restauración" },
+];
 
-    // Misma logica de prioridad que usa Navbar.tsx: primero el store (fetch
-    // del navegador), despues lo que ya trajo el servidor, y recien al
-    // final el fallback fijo — y solo una vez que ya se termino de intentar
-    // (hasLoaded). Antes el footer mostraba el fallback de entrada, sin
-    // esperar nada, por eso se notaba distinto al header.
-    const resolvedNavigations = navigations.length > 0 ? navigations : (initialNavigations ?? []);
+export default function Footer({ initialNavigations, company, socialNetworks, serviceLinks, footerSettings: initialFooterSettings }: FooterProps) {
+    // Mismo criterio que Navbar.tsx: preferir el store de Zustand sobre la prop del servidor.
+    // Para un visitante normal es EXACTAMENTE el mismo dato (AppProviders hidrata el store con
+    // este mismo site antes del primer pintado de hijos) — esto solo importa en /preview,
+    // donde el store SÍ puede traer footer_settings sobreescrito en caliente por el intranet
+    // (ver shared/store/preview/preview.bridge.ts). Si seguimos leyendo la prop, ese cambio
+    // nunca se reflejaría acá.
+    const footerSettings = useSiteStore((s) => s.site?.footer_settings) ?? initialFooterSettings;
+
+    // Antes esto se decidía en app/layout.tsx (Server Component) ANTES de montar este
+    // componente — nunca se re-evaluaba en el cliente, así que apagar/prender "Mostrar footer"
+    // desde /footer (intranet) jamás se reflejaba en el preview en vivo. Ahora layout.tsx
+    // siempre monta <Footer/>, y es ESTE componente (cliente, ya lee el store) el que decide.
+    if (!footerSettings.footer_state) return null;
+
+    // Misma logica de prioridad que usa Navbar.tsx: lo que trajo el
+    // servidor (getSite()) y, si vino null/vacio, el fallback fijo.
+    const resolvedNavigations = initialNavigations ?? [];
     const quickLinks: NavLink[] = resolvedNavigations.length > 0
         ? [...resolvedNavigations.map((item) => ({ href: item.navigation_url, label: item.navigation_name })), FOOTER_CONTACT_LINK]
-        : hasLoaded ? [...NAVIGATION_FALLBACK_LINKS, FOOTER_CONTACT_LINK] : [];
+        : [...NAVIGATION_FALLBACK_LINKS, FOOTER_CONTACT_LINK];
+    // Antes era una URL de dev hardcodeada acá mismo — ahora vive en .env (ver .env.example),
+    // porque es la URL de OTRA app y cambia por entorno. Vacía/no seteada = no se pinta el link
+    // (a propósito, en vez de caer a una URL de dev en producción).
+    const intranetUrl = process.env.NEXT_PUBLIC_INTRANET_URL;
+    const currentYear = new Date().getFullYear();
 
-    useEffect(() => {
-        // Respaldo/actualizacion en segundo plano (ver comentario igual en
-        // Navbar.tsx) — el primer render ya no depende de esto.
-        fetchNavigations();
-    }, [fetchNavigations]);
+    // Cada columna se oculta por 2 motivos posibles, combinados acá: el admin la apagó desde
+    // /footer (intranet), o -solo para Accesos- no hay contenido real (sin
+    // NEXT_PUBLIC_INTRANET_URL). Marca/Enlaces Rápidos/Servicios siempre tienen contenido
+    // garantizado (logo fijo, fallback de nav, SERVICES_FALLBACK_LINKS), así que ahí solo pesa
+    // el flag del admin.
+    const showBrandColumn = footerSettings.show_brand;
+    const showQuickLinksColumn = footerSettings.show_quick_links;
+    const showServicesColumn = footerSettings.show_services;
+    const showAccessColumn = footerSettings.show_access && Boolean(intranetUrl);
+
+    const visibleColumnCount = [showBrandColumn, showQuickLinksColumn, showServicesColumn, showAccessColumn]
+        .filter(Boolean).length;
+    const footerGridClass = `grid grid-cols-1 gap-8 mb-8 ${GRID_CLASS_BY_VISIBLE_COUNT[visibleColumnCount]}`;
 
     return (
         <>
-            <footer className="bg-gray-900 text-white py-12">
+            {/* id ancla para /preview (ver shared/store/preview/preview.bridge.ts): permite
+                hacer scrollIntoView() hasta acá cuando se está editando el footer. */}
+            <footer id="site-footer" className="bg-gray-900 text-white py-12" style={{ scrollMarginTop: "var(--app-header-height, 0px)" }}>
                 <Container>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                        {/* Col 1 - Marca + redes */}
+                    <div className={footerGridClass}>
+                        {/* Col 1 - Marca + redes — apagable desde /footer (intranet) */}
+                        {showBrandColumn && (
                         <div className="space-y-4">
-                            {/* Logo clickeable al home (#inicio) */}
+                            {/* Logo clickeable al home (#inicio) — `<img>` normal (no next/image):
+                                `footerSettings.logo_url` es una URL absoluta ya resuelta por el
+                                backend (prioriza el logo PROPIO del footer y cae al de
+                                `company` si no se subió uno — ver WebSiteResource::toArray()),
+                                igual criterio que TestimonialCard con las fotos de testimonios. */}
                             <Link href="/" className="block w-fit">
-                                <Image
-                                    src="/img/logocillat_sinfondoblanco.png"
-                                    alt="CILLAT - Fabricación de Muebles"
-                                    width={190}         // ajusta si quieres más grande
-                                    height={190}         // relación aproximada horizontal
-                                    className="h-auto w-auto"
-                                    priority
+                                {/* Tamaño y object-fit configurables desde /footer (intranet) —
+                                    `logo_width` viene `null` cuando debe calcularse automático
+                                    según la proporción real de la imagen (no forzarse), por eso
+                                    va por `style` (inline) y no por clases fijas de Tailwind.
+                                    Con ancho automático, `logo_height` es un MÁXIMO (maxHeight) y
+                                    la imagen escala proporcional al ancho de la columna: antes
+                                    era un alto fijo + tope de 220px de ancho, y con
+                                    object-fit "contain" la caja quedaba más alta que el dibujo
+                                    (espacio vacío arriba y abajo del logo). */}
+                                <img
+                                    src={footerSettings.logo_url ?? LOGO_FALLBACK}
+                                    alt={company?.name ?? "CILLAT - Fabricación de Muebles"}
+                                    style={
+                                        footerSettings.logo_width
+                                            ? {
+                                                height: footerSettings.logo_height,
+                                                width: footerSettings.logo_width,
+                                                maxWidth: "100%",
+                                                objectFit: footerSettings.logo_object_fit,
+                                            }
+                                            : {
+                                                height: "auto",
+                                                width: "auto",
+                                                maxHeight: footerSettings.logo_height,
+                                                maxWidth: "100%",
+                                            }
+                                    }
                                 />
                             </Link>
 
@@ -67,31 +180,29 @@ export default function Footer({ initialNavigations }: FooterProps) {
                                 Servicios Generales y Fabricación de Muebles de Alta Calidad
                             </p>
 
-                            <div className="flex gap-3">
-                                <a
-                                    href="#"
-                                    className="bg-gray-800 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                >
-                                    <i className="fab fa-facebook-f" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="bg-gray-800 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                >
-                                    <i className="fab fa-instagram" />
-                                </a>
-                                <a
-                                    href="#"
-                                    className="bg-gray-800 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                >
-                                    <i className="fab fa-whatsapp" />
-                                </a>
-                            </div>
+                            {socialNetworks.length > 0 && (
+                                <div className="flex gap-3">
+                                    {socialNetworks.map((network) => (
+                                        <a
+                                            key={network.name}
+                                            href={network.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title={network.name}
+                                            className="bg-gray-800 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                                        >
+                                            <i className={resolveSocialIconClass(network.name)} />
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
                         </div>
+                        )}
 
 
 
-                        {/* Col 2 - Enlaces rápidos */}
+                        {/* Col 2 - Enlaces rápidos — apagable desde /footer (intranet) */}
+                        {showQuickLinksColumn && (
                         <div>
                             <h4 className="text-lg font-bold mb-4">Enlaces Rápidos</h4>
                             <ul className="space-y-2">
@@ -107,60 +218,40 @@ export default function Footer({ initialNavigations }: FooterProps) {
                                 ))}
                             </ul>
                         </div>
+                        )}
 
-                        {/* Col 3 - Servicios */}
+                        {/* Col 3 - Servicios — reutiliza los items reales de la sección
+                            "home-services" (ver findFooterServiceLinks.ts); si viene vacío
+                            (sección desactivada, sin items activos), cae al fallback fijo para
+                            no dejar la columna en blanco. Apagable desde /footer (intranet). */}
+                        {showServicesColumn && (
                         <div>
                             <h4 className="text-lg font-bold mb-4">Servicios</h4>
                             <ul className="space-y-2">
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Cocinas Integrales
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Closets &amp; Dormitorios
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Muebles de Oficina
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Puertas &amp; Ventanas
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#servicios"
-                                        className="text-gray-400 hover:text-amber-400 transition-colors"
-                                    >
-                                        Restauración
-                                    </a>
-                                </li>
+                                {(serviceLinks.length > 0 ? serviceLinks : SERVICES_FALLBACK_LINKS).map((service) => (
+                                    <li key={service.label}>
+                                        <a
+                                            href={service.href}
+                                            className="text-gray-400 hover:text-amber-400 transition-colors"
+                                        >
+                                            {service.label}
+                                        </a>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
+                        )}
 
-                        {/* Col 4 - Newsletter */}
+                        {/* Col 4 - Accesos — columna entera condicionada (no solo el <li>): sin
+                            intranetUrl, o si el admin la apagó desde /footer, no se renderiza
+                            nada acá, así el grid recalcula cuántas columnas mostrar (ver
+                            footerGridClass) en vez de dejar esta celda en blanco. */}
+                        {showAccessColumn && (
                         <div>
                             <h4 className="text-lg font-bold mb-4">Accesos</h4>
                             <ul className="space-y-2">
                                 <li>
-                                    <a href="#servicios" className="text-gray-400 hover:text-amber-400 transition-colors">
+                                    <a href={intranetUrl} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-amber-400 transition-colors">
                                         Intranet
                                     </a>
                                 </li>
@@ -183,27 +274,18 @@ export default function Footer({ initialNavigations }: FooterProps) {
                             {/*    </button>*/}
                             {/*</div>*/}
                         </div>
+                        )}
                     </div>
 
                     {/* Línea final */}
                     <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
                         <p>
-                            &copy; 2024 CILLAT - Todos los derechos reservados | Diseñado con{" "}
+                            &copy; {currentYear} CILLAT - Todos los derechos reservados | Diseñado con{" "}
                             <i className="fas fa-heart text-red-600" /> en Perú
                         </p>
                     </div>
                 </Container>
             </footer>
-
-            {/* Botón WhatsApp flotante */}
-            <a
-                href="https://wa.me/51999999999"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-50 animate-bounce"
-            >
-                <i className="fab fa-whatsapp text-3xl" />
-            </a>
         </>
     );
 }
