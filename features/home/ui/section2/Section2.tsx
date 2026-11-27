@@ -1,34 +1,72 @@
 // home/ui/section2/Section2.tsx
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
 import Container from "@/shared/ui/container/Container";
-import ServiceCarouselCard from "@/widget/servicecarousel/ui/ServiceCarouselCard";
-import { defaultServiceCarouselItems } from "@/widget/servicecarousel/model/mock";
+import ServiceCarouselCard from "@/features/home/ui/section2/ServiceCarouselCard";
+import { defaultServiceCarouselItems } from "@/features/home/ui/section2/section2.mock";
+import { normalizeItems } from "@/shared/services/site_service/lib/normalizeSectionContent";
+import SectionHeading from "@/shared/components/section_heading/SectionHeading";
+import type { SiteSectionDto } from "@/shared/services/site_service/model/siteget.dto";
+import { previewAnchorId, PREVIEW_ANCHOR_STYLE } from "@/shared/lib/previewAnchor";
 
-export default function Section2() {
+type Props = {
+    // section_type === "service_carousel". Se usa tanto en Home
+    // ("Nuestros Servicios") como en Services ("Carpintería Comercial") —
+    // en ambos casos son items sueltos (item_type "service") con
+    // description, exactamente la misma forma de dato y la misma UI
+    // (carrusel swiper). El grid de categorias con sub-lista
+    // ("Carpintería para el Hogar") tiene su PROPIO section_type
+    // ("category_grid", ver ServiceCategoryGrid) — ya no vive aca.
+    section: SiteSectionDto;
+};
+
+export default function Section2({ section }: Props) {
     const prevRef = useRef<HTMLButtonElement>(null);
     const nextRef = useRef<HTMLButtonElement>(null);
+    // Se necesita un estado (no solo un ref) para forzar un re-render cuando
+    // el swiper ya está montado: recién ahí prevRef/nextRef.current existen
+    // de verdad, y podemos re-enganchar el modulo Navigation a esos botones
+    // (onBeforeInit dispara ANTES de que React confirme esos refs, por eso
+    // fallaba antes: el modulo se inicializaba con prevEl/nextEl en null).
+    const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(null);
+
+    useEffect(() => {
+        if (!swiperInstance || !prevRef.current || !nextRef.current) return;
+
+        const navigation = swiperInstance.params.navigation;
+        if (!navigation || typeof navigation === "boolean") return;
+
+        navigation.prevEl = prevRef.current;
+        navigation.nextEl = nextRef.current;
+        swiperInstance.navigation.destroy();
+        swiperInstance.navigation.init();
+        swiperInstance.navigation.update();
+    }, [swiperInstance]);
+
+    const apiItems = normalizeItems(section.items).map((item) => ({
+        id: item.id_section_item as number | undefined,
+        iconClass: item.icon ?? "",
+        titulo: item.title ?? "",
+        descripcion: item.description ?? "",
+        tag: item.label ?? "",
+    }));
+
+    // Fallback temporal (ver FRONTEND_NEXTJS_SITE_V3.md #41).
+    const servicios = apiItems.length > 0 ? apiItems : defaultServiceCarouselItems.map((item) => ({ ...item, id: undefined }));
 
     return (
         <section id="servicios" className="relative py-16 bg-gray-200">
             <Container>
-                {/* Título */}
-                <div className="text-center mb-10">
-                    <p className="text-sm uppercase tracking-[0.2em] text-red-600 font-semibold">
-                        Nuestros Servicios
-                    </p>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">
-                        Soluciones en Muebles a Tu Medida
-                    </h2>
-                    <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-                        Diseñamos, fabricamos e instalamos muebles personalizados para
-                        hogares, oficinas y proyectos comerciales.
-                    </p>
-                </div>
+                <SectionHeading
+                    subtitle={section.section_subtitle}
+                    title={section.section_title}
+                    description={section.section_description}
+                    className="mb-10"
+                />
 
                 {/* Carrusel */}
                 <div className="relative px-1 sm:px-2 lg:px-4">
@@ -37,12 +75,7 @@ export default function Section2() {
                         spaceBetween={24}
                         slidesPerView={1}
                         navigation={{ prevEl: null, nextEl: null }}
-                        onBeforeInit={(swiper: SwiperClass) => {
-                            if (typeof swiper.params.navigation !== "boolean" && swiper.params.navigation) {
-                                swiper.params.navigation.prevEl = prevRef.current;
-                                swiper.params.navigation.nextEl = nextRef.current;
-                            }
-                        }}
+                        onSwiper={setSwiperInstance}
                         pagination={{ clickable: true }}
                         autoplay={{ delay: 4500, disableOnInteraction: false }}
                         breakpoints={{
@@ -52,8 +85,12 @@ export default function Section2() {
                         }}
                         className="pb-10"
                     >
-                        {defaultServiceCarouselItems.map((servicio) => (
-                            <SwiperSlide key={servicio.titulo}>
+                        {servicios.map((servicio, index) => (
+                            <SwiperSlide
+                                key={servicio.titulo || index}
+                                id={previewAnchorId("section-item", servicio.id)}
+                                style={PREVIEW_ANCHOR_STYLE}
+                            >
                                 <ServiceCarouselCard item={servicio} />
                             </SwiperSlide>
                         ))}

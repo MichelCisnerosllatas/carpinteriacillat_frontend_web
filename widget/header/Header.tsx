@@ -3,16 +3,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import Alert1 from "@/widget/header/Alert1";
-import Alert2 from "@/widget/header/Alert2";
 import Navbar from "@/widget/header/Navbar";
+import SiteAlerts from "@/features/site-alerts/ui/SiteAlerts";
 import { useNavbarStore } from "@/shared/store/navbar/useNavbarStore";
-import type { NavigationApiItem } from "@/shared/services/navigation_service/model/navigationget.dto";
+import type { SiteNavigationDto } from "@/shared/services/site_service/model/siteget.dto";
 
 type HeaderProps = {
-    // Lo que app/layout.tsx (Server Component) ya trajo del backend antes
-    // de renderizar. null = la peticion en el servidor fallo.
-    initialNavigations: NavigationApiItem[] | null;
+    // Lo que app/layout.tsx (Server Component) ya trajo de GET /v1/public/site
+    // antes de renderizar. null = la peticion en el servidor fallo.
+    initialNavigations: SiteNavigationDto[] | null;
 };
 
 export default function Header({ initialNavigations }: HeaderProps) {
@@ -21,12 +20,11 @@ export default function Header({ initialNavigations }: HeaderProps) {
     const headerRef = useRef<HTMLElement>(null);
 
     const [scrollY, setScrollY] = useState(0);
-    const [tempClosedByUser, setTempClosedByUser] = useState(false);
 
     // El header es "fixed", así que las secciones de cada página necesitan
     // un padding-top que lo compense. Antes ese padding era un número fijo
     // adivinado (pt-24, pt-40...), pero el alto real del header cambia: en
-    // mobile los banners (Alert1/Alert2) parten su texto en 2-3 líneas y el
+    // mobile las alertas del sitio (SiteAlerts) parten su texto en 2-3 líneas y el
     // header termina midiendo bastante más de lo que esos valores asumían,
     // tapando el contenido. Medimos el alto real y lo publicamos como
     // variable CSS para que cualquier página lo use en vez de adivinar.
@@ -63,13 +61,15 @@ export default function Header({ initialNavigations }: HeaderProps) {
     }, []);
 
     const navbarSolid = scrollY > 50;
-    const showFixedAlert = scrollY <= 100;
-    const showTemporaryAlert = !tempClosedByUser && scrollY <= 50;
 
     return (
         <header ref={headerRef} className="fixed top-0 inset-x-0 z-50 nav-transition bg-transparent">
-            {showFixedAlert && <Alert1 />}
-            {showTemporaryAlert && <Alert2 onClose={() => setTempClosedByUser(true)} />}
+            {/* Alertas administradas desde la intranet (/web-alerts). Las "hide" se
+                ocultan con scrollY > 50; las "sticky" siguen visibles al bajar. Al
+                aparecer o desaparecer cambia el alto del header y el ResizeObserver
+                de arriba actualiza --app-header-height solo. */}
+            <SiteAlerts scrollY={scrollY} />
+
             <Navbar navbarSolid={navbarSolid} initialNavigations={initialNavigations} />
         </header>
     );

@@ -4,6 +4,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Sin esto, si el SO/navegador esta en modo oscuro, el navegador pinta los
+     controles nativos (popup del <select>, autofill, etc.) con su tema
+     oscuro por defecto aunque el CSS del sitio diga fondo blanco -- se ve
+     como un input "desactivado" en gris oscuro. El sitio es siempre claro. */
+  color-scheme: light;
   /* Alto del header fijo (Alert1 + Alert2 + Navbar). Se recalcula en JS
      (widget/header/Header.tsx) con ResizeObserver apenas monta, porque en
      mobile el texto de los banners puede partirse en varias líneas y el
@@ -19,10 +24,93 @@
   --color-brand-red-dark: #b91c1c;
   --color-brand-gold: #f5c400;
   --color-brand-gold-dark: #e7b700;
+
+  /* Tokens del design system "Innova Loreto" (rediseño de Servicios/Galería). Generan
+     utilidades como bg-il-amarillo-500 / text-il-neutro-600 / border-il-neutro-200, y
+     también quedan como variables CSS (var(--color-il-amarillo-500)) para estilos inline. */
+  --color-il-amarillo-100: #FFF3CC;
+  --color-il-amarillo-500: #FFC300;
+  --color-il-amarillo-600: #E0AC00;
+  --color-il-neutro-050: #F8F9FB;
+  --color-il-neutro-100: #F1F3F7;
+  --color-il-neutro-200: #E3E7ED;
+  --color-il-neutro-300: #C6CCD6;
+  --color-il-neutro-400: #8B93A1;
+  --color-il-neutro-600: #5B5B5B;
+  --color-il-neutro-700: #3A4150;
+  --color-il-neutro-900: #14181F;
+
+  /* Curvas de animación del diseño: "ease-il" (entrada suave) y "ease-il-page" (pasar página). */
+  --ease-il: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-il-page: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Cinta de palabras de Servicios y barra de progreso de las pestañas del hero (6 s =
+     lo mismo que tarda la rotación automática, ver ServiceShowcase.tsx). */
+  --animate-il-marquee: il-marquee 40s linear infinite;
+  --animate-il-progress: il-progress 6s linear forwards;
+
+  @keyframes il-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes il-progress {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
 }
 
+/* --font-poppins la crea next/font en app/layout.tsx (antes Poppins se nombraba acá pero
+   nunca se cargaba, y el navegador caía a otra fuente). 'Poppins' queda de respaldo. */
 * {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+/* Secciones del rediseño (Servicios, Galería, Detalle): llevan la clase "il-scope" en su
+   contenedor. Adentro el texto corrido usa Figtree y los títulos usan Poppins con la clase
+   "il-display". Hace falta ".il-scope *" (y no solo ".il-scope") porque la regla "*" de
+   arriba se aplica a CADA elemento y le ganaría a la herencia. */
+.il-scope {
+  color: var(--color-il-neutro-900);
+}
+
+/* OJO: se excluyen los íconos de Font Awesome (<i class="fa-...">). Estas reglas se cargan
+   DESPUÉS del CSS de Font Awesome, así que sin el :not() le quitaban su fuente de íconos y
+   el ícono salía vacío (pasó con el botón de "ver foto en grande"). */
+.il-scope,
+.il-scope *:not([class*="fa-"]) {
+  font-family: var(--font-figtree), 'Figtree', system-ui, sans-serif;
+}
+
+.il-scope .il-display,
+.il-scope .il-display *:not([class*="fa-"]) {
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+/* Si la persona pidió "reducir movimiento" en su sistema, se apagan las animaciones y
+   transiciones del rediseño (el JS además frena la rotación automática y el barrido). */
+@media (prefers-reduced-motion: reduce) {
+  .il-scope *,
+  .il-scope *::before,
+  .il-scope *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Oculta la barra de scroll de la fila de categorías de la galería (se sigue pudiendo
+   deslizar con el dedo o la rueda). */
+.il-no-scrollbar {
+  scrollbar-width: none;
+}
+
+.il-no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Carrusel del hero */
@@ -171,5 +259,86 @@ html {
 html,
 body {
   overflow-x: hidden;
+  /* "clip" recorta igual que "hidden" pero NO convierte a <body> en un contenedor de scroll.
+     Con "hidden", position: sticky deja de funcionar en toda la página (ej. la ficha del
+     detalle de un trabajo). Los navegadores que no conocen "clip" se quedan con "hidden". */
+  overflow-x: clip;
   max-width: 100%;
+}
+
+/* Vista previa del intranet (/preview): resaltado del elemento que el admin está mirando en
+   la pestaña "Apariencia" (mensaje "highlight", ver shared/store/preview/preview.bridge.ts).
+   Contorno amarillo con un pulso suave; el bridge quita la clase a los ~1,6 s. !important:
+   le gana al outline propio del componente resaltado (ej. el comparador). */
+.preview-highlight {
+  outline: 3px solid var(--color-il-amarillo-500) !important;
+  outline-offset: 4px !important;
+  animation: preview-highlight-pulse 1.6s var(--ease-il) 1;
+}
+
+@keyframes preview-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 195, 0, 0.55);
+  }
+  60% {
+    box-shadow: 0 0 0 12px rgba(255, 195, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 195, 0, 0);
+  }
+}
+
+/* ─── Animaciones de los botones flotantes (chatbot y WhatsApp) ───────────────────────────
+   Administrables desde el intranet (ver shared/lib/floatingAnimation.ts). Valores:
+   none | pulse | bounce | wiggle | float. Se pausan al pasar el mouse / con foco de teclado y
+   se apagan si el usuario pidió "reducir movimiento" en su sistema. */
+.fab-anim {
+  position: relative;
+  isolation: isolate;
+}
+.fab-anim-bounce { animation: fab-bounce 2.4s ease-in-out infinite; }
+.fab-anim-float { animation: fab-float 3s ease-in-out infinite; }
+.fab-anim-wiggle { animation: fab-wiggle 4s ease-in-out infinite; }
+/* pulse: un anillo del mismo color del botón que se expande y se desvanece */
+.fab-anim-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: inherit;
+  pointer-events: none;
+  animation: fab-pulse 2s ease-out infinite;
+}
+.fab-anim:hover,
+.fab-anim:hover::after,
+.fab-anim:focus-visible,
+.fab-anim:focus-visible::after {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab-anim,
+  .fab-anim::after {
+    animation: none !important;
+  }
+}
+@keyframes fab-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-8px); }
+  40% { transform: translateY(-3px); }
+}
+@keyframes fab-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes fab-wiggle {
+  0%, 78%, 100% { transform: rotate(0deg); }
+  82% { transform: rotate(-12deg); }
+  86% { transform: rotate(10deg); }
+  90% { transform: rotate(-8deg); }
+  94% { transform: rotate(4deg); }
+}
+@keyframes fab-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
